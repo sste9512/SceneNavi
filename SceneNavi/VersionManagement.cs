@@ -18,7 +18,7 @@ namespace SceneNavi
         internal static string CreateVersionString(Version ver)
         {
             /* Build basic version string */
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendFormat("v{0}.{1}", ver.Major, ver.Minor);
 
             /* Check build type */
@@ -54,7 +54,7 @@ namespace SceneNavi
         internal static bool RemoteFileExists(string url)
         {
             /* Get ready to check if file exists at URL */
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(url);
 
             /* Trying to prevent huge delay on first WebRequest; see also App.config */
             /* http://social.msdn.microsoft.com/Forums/en-US/ncl/thread/14844bfe-ad5b-4e5a-b6ef-4ff9a1a770f8/
@@ -68,17 +68,17 @@ namespace SceneNavi
             try
             {
                 /* Get and check response */
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
                     return (response.StatusCode == HttpStatusCode.OK);
                 }
             }
-            catch (WebException wex)
+            catch (WebException webException)
             {
                 /* Request failed */
-                HttpWebResponse httpresp = (HttpWebResponse)wex.Response;
-                if (httpresp.StatusCode == HttpStatusCode.NotFound) return false;
-                else throw wex;
+                var httpResponse = (HttpWebResponse)webException.Response;
+                if (httpResponse.StatusCode == HttpStatusCode.NotFound) return false;
+                else throw webException;
             }
         }
 
@@ -86,12 +86,12 @@ namespace SceneNavi
         {
             string[] downloaded = null;
 
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 client.Proxy = null;
-                using (Stream stream = client.OpenRead(url))
+                using (var stream = client.OpenRead(url))
                 {
-                    StreamReader reader = new StreamReader(stream, Encoding.Default);
+                    var reader = new StreamReader(stream, Encoding.Default);
                     downloaded = reader.ReadToEnd().Split('\n');
                     reader.Close();
                 }
@@ -102,14 +102,14 @@ namespace SceneNavi
 
         internal static void DownloadRtfFile(string url, RichTextBox rtb)
         {
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 client.Proxy = null;
-                using (Stream stream = client.OpenRead(url))
+                using (var stream = client.OpenRead(url))
                 {
-                    using (MemoryStream mStream = new MemoryStream())
+                    using (var mStream = new MemoryStream())
                     {
-                        stream.CopyTo(mStream);
+                        stream?.CopyTo(mStream);
                         mStream.Position = 0;
                         rtb.LoadFile(mStream, RichTextBoxStreamType.RichText);
                     }

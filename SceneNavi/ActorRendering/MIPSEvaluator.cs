@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SceneNavi.ActorRendering
 {
-    public class MIPSEvaluator
+    public class MipsEvaluator
     {
         public class OvlSections
         {
@@ -22,10 +22,10 @@ namespace SceneNavi.ActorRendering
             public uint rodataVA { get; private set; }
             public uint bssVA { get; private set; }
 
-            public OvlSections(ROMHandler.ROMHandler rom, ROMHandler.DMATableEntry dma, uint vstart)
+            public OvlSections(ROMHandler.BaseRomHandler baseRom, ROMHandler.DmaTableEntry dma, uint vstart)
             {
-                byte[] ovl = new byte[dma.PEnd - dma.PStart];
-                Buffer.BlockCopy(rom.Data, (int)dma.PStart, ovl, 0, ovl.Length);
+                var ovl = new byte[dma.PEnd - dma.PStart];
+                Buffer.BlockCopy(baseRom.Data, (int)dma.PStart, ovl, 0, ovl.Length);
 
                 int indent, secaddr;
                 indent = (int)Endian.SwapUInt32(BitConverter.ToUInt32(ovl, ovl.Length - 4));
@@ -110,7 +110,7 @@ namespace SceneNavi.ActorRendering
         public delegate void RegisterHookDelegate(uint[] regs);
         private RegisterHookDelegate RegisterHook;
 
-        public MIPSEvaluator(ROMHandler.ROMHandler rom, ROMHandler.DMATableEntry dma, uint ramadr, RegisterHookDelegate reghook = null, ushort var = 0)
+        public MipsEvaluator(ROMHandler.BaseRomHandler baseRom, ROMHandler.DmaTableEntry dma, uint ramadr, RegisterHookDelegate reghook = null, ushort var = 0)
         {
             BaseAddress = ramadr;
 
@@ -118,7 +118,7 @@ namespace SceneNavi.ActorRendering
             Stack = new uint[256 * MIPS.SafetyVal];
             StackPos = (int)(128 * MIPS.SafetyVal);
 
-            Sections = new OvlSections(rom, dma, 0);
+            Sections = new OvlSections(baseRom, dma, 0);
 
             MemoryMap = new List<MemoryRegion>();
             MemoryMap.Add(new MemoryRegion(Sections.text, ramadr + Sections.textVA));
@@ -139,7 +139,7 @@ namespace SceneNavi.ActorRendering
         {
             Results = new List<Result>();
 
-            for (int i = 0; i < Sections.text.Length; i += 4)
+            for (var i = 0; i < Sections.text.Length; i += 4)
             {
                 Evaluate(Sections.text, i);
                 Registers[0] = 0;
@@ -148,10 +148,10 @@ namespace SceneNavi.ActorRendering
 
         private void Evaluate(byte[] words, int pos)
         {
-            uint word = Endian.SwapUInt32(BitConverter.ToUInt32(words, pos));
+            var word = Endian.SwapUInt32(BitConverter.ToUInt32(words, pos));
             uint imm = 0, calcadr = 0, target = 0;
 
-            foreach (SpecialOp sop in SpecialOps)
+            foreach (var sop in SpecialOps)
             {
                 if ((word & sop.Mask) == sop.Opcode)
                 {
@@ -174,7 +174,7 @@ namespace SceneNavi.ActorRendering
 
                     Registers[(int)MIPS.Register.RA] = (BaseAddress & 0xFFFFFF) + (uint)(pos + 4);
 
-                    foreach (MemoryRegion mem in MemoryMap)
+                    foreach (var mem in MemoryMap)
                     {
                         if (target > (mem.Address & 0xFFFFFF) && mem.Data.Length + (mem.Address & 0xFFFFFF) > target)
                         {
@@ -242,7 +242,7 @@ namespace SceneNavi.ActorRendering
                         break;
                     }
 
-                    foreach (MemoryRegion mem in MemoryMap)
+                    foreach (var mem in MemoryMap)
                     {
                         if (calcadr > mem.Address && mem.Data.Length + mem.Address > calcadr)
                         {
@@ -317,15 +317,15 @@ namespace SceneNavi.ActorRendering
                     break;
             }
 
-            if (RegisterHook != null) RegisterHook(Registers);
+            RegisterHook?.Invoke(Registers);
         }
 
         private void ReportResult(uint target, int pos)
         {
             if (Watches.Count != 0 && Watches.Find(x => (x & 0x0FFFFFFF) == (target & 0x0FFFFFFF)) == 0) return;
 
-            uint[] args = new uint[4];
-            for (int i = 0; i < args.Length; i++) args[i] = Registers[(int)MIPS.Register.A0 + i];
+            var args = new uint[4];
+            for (var i = 0; i < args.Length; i++) args[i] = Registers[(int)MIPS.Register.A0 + i];
 
             Results.Add(new Result((uint)pos, (target & 0x0FFFFFFF), args));
         }

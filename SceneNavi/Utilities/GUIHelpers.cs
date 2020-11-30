@@ -18,12 +18,9 @@ namespace SceneNavi
         /// <returns>Path to selected file</returns>
         public static string ShowSaveFileDialog(string filter, int filteridx = -1)
         {
-            string sfile = string.Empty;
+            var sfile = string.Empty;
 
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = filter;
-            sfd.FilterIndex = filteridx;
-            sfd.CheckPathExists = true;
+            var sfd = new SaveFileDialog {Filter = filter, FilterIndex = filteridx, CheckPathExists = true};
 
             if (sfd.ShowDialog() == DialogResult.OK) sfile = sfd.FileName;
 
@@ -32,11 +29,11 @@ namespace SceneNavi
 
         public static string LoadLocalizedString(string libraryName, uint ident, string defaultText)
         {
-            IntPtr libraryHandle = LoadLibrary(libraryName);
+            var libraryHandle = LoadLibrary(libraryName);
             if (libraryHandle != IntPtr.Zero)
             {
-                StringBuilder sb = new StringBuilder(1024);
-                int size = LoadString(libraryHandle, ident, sb, 1024);
+                var sb = new StringBuilder(1024);
+                var size = LoadString(libraryHandle, ident, sb, 1024);
                 if (size > 0) return sb.ToString();
             }
             FreeLibrary(libraryHandle);

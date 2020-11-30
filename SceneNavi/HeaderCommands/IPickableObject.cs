@@ -19,6 +19,6 @@ namespace SceneNavi.HeaderCommands
         Color PickColor { get; }
         bool IsMoveable { get; }
         OpenTK.Vector3d Position { get; set; }
-        void Render(PickableObjectRenderType rendertype);
+        void Render(PickableObjectRenderType renderType);
     }
 }

@@ -21,6 +21,16 @@ using SceneNavi.SimpleF3DEX2;
 
 namespace SceneNavi.ActorRendering
 {
+    public enum GameActorByteCodes
+    {
+          FunctionDisplayList1 = 0x80035260,
+          FunctionDisplayList2 = 0x80093D18,
+          FunctionDisplayList3 = 0x800D0984,
+          FunctionObjectNumber = 0x8009812C,
+          FunctionHierarchyAnim1 = 0x800A457C,
+          FunctionHierarchyAnim2 = 0x800A46F8
+    }
+    
     public class GameActor
     {
         public const uint FunctionDisplayList1 = 0x80035260;

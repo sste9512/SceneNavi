@@ -11,13 +11,13 @@ namespace SceneNavi
 {
     public partial class TableEditorForm : Form
     {
-        ROMHandler.ROMHandler ROM;
+        ROMHandler.BaseRomHandler _baseRom;
 
-        public TableEditorForm(ROMHandler.ROMHandler rom)
+        public TableEditorForm(ROMHandler.BaseRomHandler baseRom)
         {
             InitializeComponent();
 
-            ROM = rom;
+            _baseRom = baseRom;
 
             InitializeDataGridViews();
             dgvEntranceTable.Select();
@@ -30,7 +30,7 @@ namespace SceneNavi
             dgvSceneTable.DoubleBuffered(true);
 
             /* Bind data & configure entrance table */
-            dgvEntranceTable.DataSource = new BindingSource() { DataSource = ROM.Entrances };
+            dgvEntranceTable.DataSource = new BindingSource() { DataSource = _baseRom.Entrances };
             dgvEntranceTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvEntranceTable.Columns["Number"].DefaultCellStyle.Format = "X4";
             dgvEntranceTable.Columns["Number"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
@@ -50,9 +50,9 @@ namespace SceneNavi
             foreach (DataGridViewColumn dcc in dgvEntranceTable.Columns) if (dcc.ReadOnly) dcc.DefaultCellStyle.ForeColor = SystemColors.GrayText;
 
             /* Bind data & configure scene table */
-            if (!ROM.IsMajora)
+            if (!_baseRom.IsMajora)
             {
-                dgvSceneTable.DataSource = new BindingSource() { DataSource = ROM.Scenes.ConvertAll(x => (ROMHandler.SceneTableEntryOcarina)x) };
+                dgvSceneTable.DataSource = new BindingSource() { DataSource = _baseRom.Scenes.ConvertAll(x => (ROMHandler.SceneTableEntryOcarina)x) };
                 dgvSceneTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
                 dgvSceneTable.Columns["Number"].DefaultCellStyle.Format = "X4";
                 dgvSceneTable.Columns["Number"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
@@ -79,7 +79,7 @@ namespace SceneNavi
             }
             else
             {
-                dgvSceneTable.DataSource = new BindingSource() { DataSource = ROM.Scenes.ConvertAll(x => (ROMHandler.SceneTableEntryMajora)x) };
+                dgvSceneTable.DataSource = new BindingSource() { DataSource = _baseRom.Scenes.ConvertAll(x => (ROMHandler.SceneTableEntryMajora)x) };
                 dgvSceneTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
                 dgvSceneTable.Columns["Number"].DefaultCellStyle.Format = "X4";
                 dgvSceneTable.Columns["Number"].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
@@ -160,7 +160,7 @@ namespace SceneNavi
             {
                 TextBox tb = e.Control as TextBox;
                 tb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                tb.AutoCompleteCustomSource = ROM.SceneNameACStrings;
+                tb.AutoCompleteCustomSource = _baseRom.SceneNameAcStrings;
                 tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
             }
         }

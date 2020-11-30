@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
-
+using System.Drawing;
+using System.Linq;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-
-using SceneNavi.OpenGLHelpers;
+using SceneNavi.Models;
 using SceneNavi.ROMHandler;
+using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -17,19 +16,19 @@ namespace SceneNavi.HeaderCommands
     {
         public List<Entry> ActorList { get; set; }
 
-        public Actors(Generic basecmd)
-            : base(basecmd)
+        public Actors(Generic baseCommand)
+            : base(baseCommand)
         {
             ActorList = new List<Entry>();
-            for (int i = 0; i < GetCountGeneric(); i++) ActorList.Add(new Entry(ROM, (uint)(GetAddressGeneric() + i * 16), (i + 1),
-                (Command == HeaderLoader.CommandTypeIDs.Spawns), (Command == HeaderLoader.CommandTypeIDs.Transitions)));
+            for (var i = 0; i < GetCountGeneric(); i++) ActorList.Add(new Entry(BaseRom, (uint)(GetAddressGeneric() + i * 16), (i + 1),
+                (Command == CommandTypeIDs.Spawns), (Command == CommandTypeIDs.Transitions)));
         }
 
-        public void Store(byte[] databuf, int baseadr)
+        public void Store(byte[] dataBuffer, int baseAddress)
         {
-            foreach (HeaderCommands.Actors.Entry ae in this.ActorList)
+            foreach (var actorEntry in ActorList)
             {
-                Buffer.BlockCopy(ae.RawData, 0, databuf, (int)(baseadr + (ae.Address & 0xFFFFFF)), ae.RawData.Length);
+                Buffer.BlockCopy(actorEntry.RawData, 0, dataBuffer, (int)(baseAddress + (actorEntry.Address & 0xFFFFFF)), actorEntry.RawData.Length);
             }
         }
 
@@ -38,21 +37,21 @@ namespace SceneNavi.HeaderCommands
             public uint Address { get; set; }
             public byte[] RawData { get; set; }
 
-            public XMLActorDefinitionReader.Definition Definition { get; private set; }
+            public Definition Definition { get; private set; }
             public string InternalName { get; private set; }
 
             public bool IsSpawnPoint { get; private set; }
             public bool IsTransitionActor { get; private set; }
 
-            int NumberInList;
+            private int _numberInList;
 
-            public ushort GetActorNumber
+            private ushort GetActorNumber
             {
                 get
                 {
                     if (Definition != null)
                     {
-                        object num = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.ActorNumber), this);
+                        var num = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.ActorNumber), this);
                         if (num != null) return Convert.ToUInt16(num);
                     }
                     return ushort.MaxValue;
@@ -63,33 +62,24 @@ namespace SceneNavi.HeaderCommands
             {
                 get
                 {
-                    if (ROM == null) return "(None)";
+                    if (_baseRom == null) return "(None)";
 
-                    string name = (string)ROM.XMLActorNames.Names[GetActorNumber];
-                    return (name != null ? name : "Unknown actor");
+                    var name = (string)_baseRom.XmlActorNames.Names[GetActorNumber];
+                    return name ?? "Unknown actor";
                 }
             }
 
-            public string Description
-            {
-                get
-                {
-                    if (ROM == null)
-                        return "(None)";
-                    else
-                        return string.Format("Actor #{0}; {1}", NumberInList, Name);
-                }
-            }
+            public string Description => _baseRom == null ? "(None)" : $"Actor #{_numberInList}; {Name}";
 
-            public OpenTK.Vector3d Position
+            public Vector3d Position
             {
                 get
                 {
-                    if (Definition == null) return OpenTK.Vector3d.Zero;
-                    OpenTK.Vector3d p = new OpenTK.Vector3d();
-                    object px = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionX), this);
-                    object py = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionY), this);
-                    object pz = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionZ), this);
+                    if (Definition == null) return Vector3d.Zero;
+                    var p = new Vector3d();
+                    var px = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionX), this);
+                    var py = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionY), this);
+                    var pz = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionZ), this);
                     if (px != null) p.X = Convert.ToDouble(px);
                     if (py != null) p.Y = Convert.ToDouble(py);
                     if (pz != null) p.Z = Convert.ToDouble(pz);
@@ -99,22 +89,22 @@ namespace SceneNavi.HeaderCommands
                 set
                 {
                     if (Definition == null) return;
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionX), this, Convert.ToInt16(value.X));
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionY), this, Convert.ToInt16(value.Y));
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.PositionZ), this, Convert.ToInt16(value.Z));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionX), this, Convert.ToInt16(value.X));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionY), this, Convert.ToInt16(value.Y));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionZ), this, Convert.ToInt16(value.Z));
                 }
             }
 
-            public OpenTK.Vector3d Rotation
+            public Vector3d Rotation
             {
                 get
                 {
-                    if (Definition == null) return OpenTK.Vector3d.Zero;
+                    if (Definition == null) return Vector3d.Zero;
 
-                    OpenTK.Vector3d r = new OpenTK.Vector3d();
-                    object rx = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationX), this);
-                    object ry = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationY), this);
-                    object rz = XMLActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationZ), this);
+                    var r = new Vector3d();
+                    var rx = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationX), this);
+                    var ry = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationY), this);
+                    var rz = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationZ), this);
                     if (rx != null) r.X = Convert.ToDouble(rx);
                     if (ry != null) r.Y = Convert.ToDouble(ry);
                     if (rz != null) r.Z = Convert.ToDouble(rz);
@@ -124,35 +114,35 @@ namespace SceneNavi.HeaderCommands
                 set
                 {
                     if (Definition == null) return;
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationX), this, (short)value.X);
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationY), this, (short)value.Y);
-                    XMLActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationZ), this, (short)value.Z);
+                   XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationX), this, (short)value.X);
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationY), this, (short)value.Y);
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationZ), this, (short)value.Z);
                 }
             }
 
             [Browsable(false)]
-            public System.Drawing.Color PickColor { get { return System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24)); } }
+            public Color PickColor => Color.FromArgb(GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
             [Browsable(false)]
-            public bool IsMoveable { get { return true; } }
+            public bool IsMoveable => true;
 
-            ROMHandler.ROMHandler ROM;
+            ROMHandler.BaseRomHandler _baseRom;
 
             public Entry() { }
 
-            public Entry(ROMHandler.ROMHandler rom, uint adr, int no, bool isspawn, bool istrans)
+            public Entry(ROMHandler.BaseRomHandler baseRom, uint address, int no, bool isSpawn, bool isTrans)
             {
-                ROM = rom;
-                Address = adr;
-                NumberInList = no;
-                IsSpawnPoint = isspawn;
-                IsTransitionActor = istrans;
+                _baseRom = baseRom;
+                Address = address;
+                _numberInList = no;
+                IsSpawnPoint = isSpawn;
+                IsTransitionActor = isTrans;
 
                 /* Load raw data */
                 RawData = new byte[16];
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(address >> 24)];
                 if (segdata == null) return;
-                Buffer.BlockCopy(segdata, (int)(adr & 0xFFFFFF), RawData, 0, RawData.Length);
+                Buffer.BlockCopy(segdata, (int)(address & 0xFFFFFF), RawData, 0, RawData.Length);
 
                 /* Find definition, internal name */
                 RefreshVariables();
@@ -160,25 +150,22 @@ namespace SceneNavi.HeaderCommands
 
             public void RefreshVariables()
             {
-                int numofs = (IsTransitionActor ? 4 : 0);
-                ushort actnum = Endian.SwapUInt16(BitConverter.ToUInt16(RawData, numofs));
+                var numofs = (IsTransitionActor ? 4 : 0);
+                var actnum = Endian.SwapUInt16(BitConverter.ToUInt16(RawData, numofs));
 
-                Definition = ROM.XMLActorDefReader.Definitions.Find(x => x.Number == actnum);
+                Definition = _baseRom.XmlActorDefReader.Definitions.Find(x => x.Number == actnum);
                 if (Definition == null)
                 {
-                    XMLActorDefinitionReader.Definition.DefaultTypes flagfind = XMLActorDefinitionReader.Definition.DefaultTypes.RoomActor;
-                    if (IsTransitionActor) flagfind = XMLActorDefinitionReader.Definition.DefaultTypes.TransitionActor;
-                    else if (IsSpawnPoint) flagfind = XMLActorDefinitionReader.Definition.DefaultTypes.SpawnPoint;
-                    Definition = ROM.XMLActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagfind));
+                    var flagFind = DefaultTypes.RoomActor;
+                    if (IsTransitionActor) flagFind = DefaultTypes.TransitionActor;
+                    else if (IsSpawnPoint) flagFind = DefaultTypes.SpawnPoint;
+                    Definition = _baseRom.XmlActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagFind));
                 }
 
-                if (actnum < ROM.Actors.Count)
-                    InternalName = ROM.Actors[actnum].Name;
-                else
-                    InternalName = string.Empty;
+                InternalName = actnum < _baseRom.Actors.Count ? _baseRom.Actors[actnum].Name : string.Empty;
             }
 
-            public void Render(PickableObjectRenderType rendertype)
+            public void Render(PickableObjectRenderType renderType)
             {
                 GL.PushAttrib(AttribMask.AllAttribBits);
 
@@ -191,7 +178,7 @@ namespace SceneNavi.HeaderCommands
                 GL.Scale(12.0, 12.0, 12.0);
 
                 /* Determine render mode */
-                if (rendertype == PickableObjectRenderType.Picking)
+                if (renderType == PickableObjectRenderType.Picking)
                 {
                     /* Picking, so set color to PickColor and render the PickModel */
                     GL.Color3(PickColor);
@@ -205,7 +192,7 @@ namespace SceneNavi.HeaderCommands
                     GL.LineWidth(4.0f);
 
                     /* Now determine outline color */
-                    if (rendertype == PickableObjectRenderType.Normal)
+                    if (renderType == PickableObjectRenderType.Normal)
                     {
                         /* Outline depends on actor type */
                         if (IsSpawnPoint) GL.Color4(Color4.Green);
@@ -223,7 +210,7 @@ namespace SceneNavi.HeaderCommands
                     Definition.PickModel.Render();
 
                     /* When rendering selected actor, make sure to render axis marker too */
-                    if (rendertype == PickableObjectRenderType.Selected)
+                    if (renderType == PickableObjectRenderType.Selected)
                     {
                         /* And if a FrontOffset is given in definition, rotate before rendering the marker */
                         if (Definition.FrontOffset != 0.0) GL.Rotate(Definition.FrontOffset, 0.0, 1.0, 0.0);

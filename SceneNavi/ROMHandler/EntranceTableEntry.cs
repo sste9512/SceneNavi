@@ -8,61 +8,89 @@ namespace SceneNavi.ROMHandler
 {
     public class EntranceTableEntry
     {
+        private byte[] CodeData { get; set; }
+        private byte[] Data { get; set; }
+        
         [ReadOnly(true)]
         public ushort Number { get; set; }
 
-        [Browsable(false)]
-        public int Offset { get; private set; }
-        [Browsable(false)]
-        public bool IsOffsetRelative { get; private set; }
+      
+        [Browsable(false)] private int Offset { get; set; }
 
-        [DisplayName("Scene #"), Description("Scene number to load")]
-        public byte SceneNumber { get; set; }
+        [Browsable(false)] private bool IsOffsetRelative { get; set; }
+        
+       
+        [DisplayName("Scene #"), Description("Scene number to load")] 
+        private byte SceneNumber { get; set; }
+       
+        
         [DisplayName("Entrance #"), Description("Entrance within scene to spawn at")]
-        public byte EntranceNumber { get; set; }
-        [DisplayName("Variable"), Description("Controls certain behaviors when transitioning, ex. stopping music")]
-        public byte Variable { get; set; }
-        [DisplayName("Fade"), Description("Animation used when transitioning")]
-        public byte Fade { get; set; }
+        private byte EntranceNumber { get; set; }
 
+
+        [DisplayName("Variable"), Description("Controls certain behaviors when transitioning, ex. stopping music")] 
+        private byte Variable { get; set; }
+      
+        
+        [DisplayName("Fade"), Description("Animation used when transitioning")] 
+        private byte Fade { get; set; }
+
+        
+        
         [DisplayName("Scene Name")]
         public string SceneName
         {
-            get
-            {
-                return (SceneNumber < ROM.Scenes.Count ? ROM.Scenes[SceneNumber].GetName() : "(invalid?)");
-            }
+            get => (SceneNumber < _baseRom.Scenes.Count ? _baseRom.Scenes[SceneNumber].GetName() : "(invalid?)");
 
             set
             {
-                int scnidx = ROM.Scenes.FindIndex(x => x.GetName().ToLowerInvariant() == value.ToLowerInvariant());
+                var scnidx = _baseRom.Scenes.FindIndex(x => string.Equals(x.GetName(), value, StringComparison.InvariantCultureIgnoreCase));
                 if (scnidx != -1)
                     SceneNumber = (byte)scnidx;
                 else
-                    System.Media.SystemSounds.Hand.Play();
+                    System.Media.SystemSounds.Hand.Play(); // wtf, why is this in the entrance table entry data entity? 
             }
         }
 
-        ROMHandler ROM;
-
-        public EntranceTableEntry(ROMHandler rom, int ofs, bool isrel)
+        // remove this from class
+        readonly BaseRomHandler _baseRom;
+        
+        
+        
+        // This constructor will be obsolete
+        public EntranceTableEntry(BaseRomHandler baseRom, int ofs, bool isRelativeOffset)
         {
-            ROM = rom;
+            _baseRom = baseRom;
             Offset = ofs;
-            IsOffsetRelative = isrel;
+            IsOffsetRelative = isRelativeOffset;
 
-            SceneNumber = (IsOffsetRelative ? rom.CodeData : rom.Data)[ofs];
-            EntranceNumber = (IsOffsetRelative ? rom.CodeData : rom.Data)[ofs + 1];
-            Variable = (IsOffsetRelative ? rom.CodeData : rom.Data)[ofs + 2];
-            Fade = (IsOffsetRelative ? rom.CodeData : rom.Data)[ofs + 3];
+            SceneNumber = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs];
+            EntranceNumber = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 1];
+            Variable = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 2];
+            Fade = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 3];
+        }
+        
+        
+        // This is the new real constructor
+        public EntranceTableEntry(byte[] codeData, byte[] data, int offset, bool isOffsetRelative)
+        {
+            CodeData = codeData;
+            Data = data;
+            Offset = offset;
+            IsOffsetRelative = isOffsetRelative;
+
+            SceneNumber = (IsOffsetRelative ? CodeData : Data)[offset];
+            EntranceNumber = (IsOffsetRelative ? CodeData : Data)[offset + 1];
+            Variable = (IsOffsetRelative ? CodeData : Data)[offset + 2];
+            Fade = (IsOffsetRelative ? CodeData : Data)[offset + 3];
         }
 
         public void SaveTableEntry()
         {
-            (IsOffsetRelative ? ROM.CodeData : ROM.Data)[Offset] = SceneNumber;
-            (IsOffsetRelative ? ROM.CodeData : ROM.Data)[Offset + 1] = EntranceNumber;
-            (IsOffsetRelative ? ROM.CodeData : ROM.Data)[Offset + 2] = Variable;
-            (IsOffsetRelative ? ROM.CodeData : ROM.Data)[Offset + 3] = Fade;
+            (IsOffsetRelative ? CodeData : Data)[Offset] = SceneNumber;
+            (IsOffsetRelative ? CodeData : Data)[Offset + 1] = EntranceNumber;
+            (IsOffsetRelative ? CodeData : Data)[Offset + 2] = Variable;
+            (IsOffsetRelative ? CodeData : Data)[Offset + 3] = Fade;
         }
     }
 }

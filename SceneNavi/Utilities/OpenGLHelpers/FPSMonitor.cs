@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
-namespace SceneNavi.OpenGLHelpers
+namespace SceneNavi.Utilities.OpenGLHelpers
 {
     // Adapted from http://www.daniweb.com/software-development/csharp/code/408351/xna-framework-get-frames-per-second#post1743620
     /// <summary>

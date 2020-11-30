@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-
 using SceneNavi.ROMHandler;
 
 namespace SceneNavi.HeaderCommands
@@ -31,22 +30,22 @@ namespace SceneNavi.HeaderCommands
         //17, 1A, 1D, 1F - high tubed wind + rain
 
         public byte Reverb { get; set; }
-        public byte NightSfxID { get; set; }
-        public byte TrackID { get; set; }
+        public byte NightSfxId { get; set; }
+        private byte TrackId { get; set; }
 
-        public SettingsSoundScene(Generic basecmd)
-            : base(basecmd)
+        public SettingsSoundScene(Generic baseCommand)
+            : base(baseCommand)
         {
-            Reverb = (byte)((this.Data >> 48) & 0xFF);
-            NightSfxID = (byte)((this.Data >> 8) & 0xFF);
-            TrackID = (byte)(this.Data & 0xFF);
+            Reverb = (byte) ((Data >> 48) & 0xFF);
+            NightSfxId = (byte) ((Data >> 8) & 0xFF);
+            TrackId = (byte) (Data & 0xFF);
         }
 
-        public void Store(byte[] databuf, int baseadr)
+        public void Store(byte[] dataBuffer, int baseAddress)
         {
-            databuf[(int)(baseadr + (this.Offset & 0xFFFFFF) + 1)] = Reverb;
-            databuf[(int)(baseadr + (this.Offset & 0xFFFFFF) + 6)] = NightSfxID;
-            databuf[(int)(baseadr + (this.Offset & 0xFFFFFF) + 7)] = TrackID;
+            dataBuffer[baseAddress + (Offset & 0xFFFFFF) + 1] = Reverb;
+            dataBuffer[baseAddress + (Offset & 0xFFFFFF) + 6] = NightSfxId;
+            dataBuffer[baseAddress + (Offset & 0xFFFFFF) + 7] = TrackId;
         }
     }
 }

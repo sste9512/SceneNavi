@@ -9,22 +9,22 @@ using OpenTK.Graphics.OpenGL;
 
 namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 {
-    internal class GLSLShaders
+    internal class GlslShaders
     {
-        const string shaderPrefix =
+        private const string ShaderPrefix =
             "/*\n" +
             " * {0} - {1} Shader\n" +
             " * Combiner Raw: 0x{2:X8} 0x{3:X8}\n" +
             " * Lighting: {4}\n" +
             " */\n\n";
 
-        const string shaderVersion = "#version 120\n";
+        private const string ShaderVersion = "#version 120\n";
 
-        const string vertexShaderVariables =
+        private const string VertexShaderVariables =
             "varying vec3 N;\n" +
             "varying vec3 v;\n";
 
-        const string fragmentShaderVariables = "varying vec3 N;\n" +
+        private const string FragmentShaderVariables = "varying vec3 N;\n" +
             "varying vec3 v;\n" +
             "uniform sampler2D tex0;\n" +
             "uniform sampler2D tex1;\n" +
@@ -35,21 +35,21 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
             "vec4 outColor;\n" +
             "vec4 outAlpha;\n";
 
-        const string shaderMainPrefix = "void main() {";
-        const string shaderMainSuffix = "}";
+        private const string ShaderMainPrefix = "void main() {";
+        private const string ShaderMainSuffix = "}";
 
-        const string fragmentShaderCommon =
+        private const string FragmentShaderCommon =
             "vec4 tex0color = texture2D(tex0, gl_TexCoord[0].st);\n" +
             "vec4 tex1color = texture2D(tex1, gl_TexCoord[1].st);";
 
-        const string vertexShaderCommon =
+        private const string VertexShaderCommon =
             "v = vec3(gl_ModelViewMatrix * gl_Vertex);\n" +
             "N = normalize(gl_NormalMatrix * gl_Normal);\n" +
             "gl_TexCoord[0] = gl_MultiTexCoord0;\n" +
             "gl_TexCoord[1] = gl_MultiTexCoord1;\n" +
             "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;";
 
-        const string fragmentShaderLighting =
+        private const string FragmentShaderLighting =
             "vec3 L = normalize(gl_LightSource[0].position.xyz - v);\n" +
             "vec3 E = normalize(-v);\n" +
             "vec3 R = normalize(-reflect(L, N));\n" +
@@ -65,15 +65,15 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 
         public int VertexObject { get; private set; }
         public int FragmentObject { get; private set; }
-        public int ProgramID { get; private set; }
+        public int ProgramId { get; private set; }
 
         public bool Textured { get; private set; }
 
-        F3DEX2Interpreter F3DEX2;
+        private F3DEX2Interpreter _f3Dex2;
 
-        public GLSLShaders(uint m0, uint m1, F3DEX2Interpreter f3dex2, bool tex)
+        public GlslShaders(uint m0, uint m1, F3DEX2Interpreter f3dex2, bool tex)
         {
-            F3DEX2 = f3dex2;
+            _f3Dex2 = f3dex2;
 
             Mux0 = m0;
             Mux1 = m1;
@@ -84,21 +84,21 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
             Textured = tex;
 
             StringBuilder vs = new StringBuilder(), fs = new StringBuilder();
-            vs.AppendFormat(shaderPrefix, Program.AppNameVer, "Vertex", m0, m1, HasLightingEnabled);
-            vs.AppendLine(shaderVersion);
-            vs.AppendLine(vertexShaderVariables);
-            vs.AppendLine(shaderMainPrefix);
-            vs.AppendLine(vertexShaderCommon);
+            vs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Vertex", m0, m1, HasLightingEnabled);
+            vs.AppendLine(ShaderVersion);
+            vs.AppendLine(VertexShaderVariables);
+            vs.AppendLine(ShaderMainPrefix);
+            vs.AppendLine(VertexShaderCommon);
 
-            fs.AppendFormat(shaderPrefix, Program.AppNameVer, "Fragment", m0, m1, HasLightingEnabled);
-            fs.AppendLine(shaderVersion);
-            fs.AppendLine(fragmentShaderVariables);
-            fs.AppendLine(shaderMainPrefix);
+            fs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Fragment", m0, m1, HasLightingEnabled);
+            fs.AppendLine(ShaderVersion);
+            fs.AppendLine(FragmentShaderVariables);
+            fs.AppendLine(ShaderMainPrefix);
 
             // TODO  can this be made nicer? texturing and lighting?
-            if (Textured) fs.AppendLine(fragmentShaderCommon);
+            if (Textured) fs.AppendLine(FragmentShaderCommon);
 
-            fs.AppendLine(fragmentShaderLighting);
+            fs.AppendLine(FragmentShaderLighting);
 
             if (!HasLightingEnabled)
             {
@@ -111,9 +111,9 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
             if (!Textured) fs.AppendLine("vec4 tex0color = lightColor;\nvec4 tex1color = lightColor;");
             fs.AppendLine();
 
-            for (int i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
-                StringBuilder calc = new StringBuilder();
+                var calc = new StringBuilder();
                 calc.AppendFormat("{0} = vec4((", (i == 0 ? "combColor" : "outColor"));
 
                 switch (Unpacked.cA[i])
@@ -439,8 +439,8 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
                 //fs.AppendLine("gl_FragColor = lightColor;");
             }
 
-            vs.AppendLine(shaderMainSuffix);
-            fs.AppendLine(shaderMainSuffix);
+            vs.AppendLine(ShaderMainSuffix);
+            fs.AppendLine(ShaderMainSuffix);
 
             /*System.IO.StreamWriter sw = new System.IO.StreamWriter(string.Format(@"C:\Temp\{0:X8}_{1:X8}_{2}.txt", m0, m1, HasLightingEnabled ? "light" : "nolight"));
             sw.Write(vs.ToString());
@@ -452,7 +452,7 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 
             VertexObject = vo;
             FragmentObject = fo;
-            ProgramID = p;
+            ProgramId = p;
         }
 
         // Modified from OpenTK examples \Source\Examples\OpenGL\2.x\SimpleGLSL.cs

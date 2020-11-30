@@ -30,16 +30,16 @@ namespace SceneNavi.HeaderCommands
 
         public ushort SelectedSpecialObjects { get; set; }
 
-        public SpecialObjects(Generic basecmd)
-            : base(basecmd)
+        public SpecialObjects(Generic baseCommand)
+            : base(baseCommand)
         {
             SelectedSpecialObjects = (ushort)(GetAddressGeneric() & 0xFFFF);
         }
 
-        public void Store(byte[] databuf, int baseadr)
+        public void Store(byte[] dataBuffer, int baseAddress)
         {
-            byte[] objbytes = BitConverter.GetBytes(Endian.SwapUInt16(this.SelectedSpecialObjects));
-            Buffer.BlockCopy(objbytes, 0, databuf, (int)(baseadr + (this.Offset & 0xFFFFFF) + 6), objbytes.Length);
+            var objbytes = BitConverter.GetBytes(Endian.SwapUInt16(this.SelectedSpecialObjects));
+            Buffer.BlockCopy(objbytes, 0, dataBuffer, (int)(baseAddress + (this.Offset & 0xFFFFFF) + 6), objbytes.Length);
         }
     }
 }

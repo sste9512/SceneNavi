@@ -1,41 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
-
+using System.Linq;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace SceneNavi.OpenGLHelpers
+namespace SceneNavi.Utilities.OpenGLHelpers
 {
     static class Initialization
     {
         public enum ProjectionTypes { Perspective, Orthographic };
 
-        public static string RendererString
-        {
-            get { return GL.GetString(StringName.Renderer) ?? "[null]"; }
-        }
+        public static string RendererString => GL.GetString(StringName.Renderer) ?? "[null]";
 
-        public static string VendorString
-        {
-            get { return GL.GetString(StringName.Vendor) ?? "[null]"; }
-        }
+        public static string VendorString => GL.GetString(StringName.Vendor) ?? "[null]";
 
-        public static string VersionString
-        {
-            get { return GL.GetString(StringName.Version) ?? "[null]"; }
-        }
+        public static string VersionString => GL.GetString(StringName.Version) ?? "[null]";
 
         public static string ShadingLanguageVersionString
         {
             get
             {
-                string str = GL.GetString(StringName.ShadingLanguageVersion);
-                if (str == null || str == string.Empty) return "[unsupported]";
-                else return str;
+                var str = GL.GetString(StringName.ShadingLanguageVersion);
+                return string.IsNullOrEmpty(str) ? "[unsupported]" : str;
             }
         }
 
@@ -44,14 +32,11 @@ namespace SceneNavi.OpenGLHelpers
             get { return GL.GetString(StringName.Extensions).Split(new char[] { ' ' }) ?? new string[] { "[null]" }; }
         }
 
-        public static bool VendorIsIntel
-        {
-            get { return VendorString.Contains("Intel"); }
-        }
+        public static bool VendorIsIntel => VendorString.Contains("Intel");
 
         public static bool SupportsFunction(string function)
         {
-            return ((GraphicsContext.CurrentContext as IGraphicsContextInternal).GetAddress(function) != IntPtr.Zero);
+            return (((IGraphicsContextInternal) GraphicsContext.CurrentContext).GetAddress(function) != IntPtr.Zero);
         }
 
         public static void ActiveTextureChecked(TextureUnit unit)
@@ -76,16 +61,16 @@ namespace SceneNavi.OpenGLHelpers
 
         public static int MaxTextureUnits { get { int outval; GL.GetInteger(GetPName.MaxTextureUnits, out outval); return outval; } }
 
-        public static List<string> CheckForExtensions(string[] NeededExts)
+        public static List<string> CheckForExtensions(string[] neededExts)
         {
-            List<string> missing = new List<string>();
-            if (NeededExts != null) missing.AddRange(NeededExts.Where(x => !CheckForExtension(x)));
+            var missing = new List<string>();
+            if (neededExts != null) missing.AddRange(neededExts.Where(x => !CheckForExtension(x)));
             return missing;
         }
 
-        public static bool CheckForExtension(string NeededExt)
+        public static bool CheckForExtension(string neededExt)
         {
-            return SupportedExtensions.Contains(NeededExt);
+            return SupportedExtensions.Contains(neededExt);
         }
 
         public static void SetDefaults()
@@ -127,12 +112,12 @@ namespace SceneNavi.OpenGLHelpers
 
             GL.Viewport(0, 0, clientRectangle.Width, clientRectangle.Height);
 
-            Matrix4 projectionMatrix = Matrix4.Identity;
+            var projectionMatrix = Matrix4.Identity;
 
             switch (projectionType)
             {
                 case ProjectionTypes.Perspective:
-                    double aspect = clientRectangle.Width / (double)clientRectangle.Height;
+                    var aspect = clientRectangle.Width / (double)clientRectangle.Height;
                     projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)aspect, near, far);
                     break;
 

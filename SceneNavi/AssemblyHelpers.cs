@@ -9,10 +9,10 @@ namespace SceneNavi
     {
         public static DateTime RetrieveLinkerTimestamp()
         {
-            string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
-            const int c_PeHeaderOffset = 60;
-            const int c_LinkerTimestampOffset = 8;
-            byte[] b = new byte[2048];
+            var filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
+            const int cPeHeaderOffset = 60;
+            const int cLinkerTimestampOffset = 8;
+            var b = new byte[2048];
             System.IO.Stream s = null;
 
             try
@@ -22,18 +22,15 @@ namespace SceneNavi
             }
             finally
             {
-                if (s != null)
-                {
-                    s.Close();
-                }
+                s?.Close();
             }
 
-            int i = System.BitConverter.ToInt32(b, c_PeHeaderOffset);
-            int secondsSince1970 = System.BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
-            DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0);
-            dt = dt.AddSeconds(secondsSince1970);
-            dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);
-            return dt;
+            var i = System.BitConverter.ToInt32(b, cPeHeaderOffset);
+            var secondsSince1970 = System.BitConverter.ToInt32(b, i + cLinkerTimestampOffset);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0);
+            dateTime = dateTime.AddSeconds(secondsSince1970);
+            dateTime = dateTime.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dateTime).Hours);
+            return dateTime;
         }
     }
 }

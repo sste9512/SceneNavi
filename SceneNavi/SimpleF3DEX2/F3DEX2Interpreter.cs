@@ -9,6 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 using SceneNavi.ROMHandler;
 using SceneNavi.SimpleF3DEX2.CombinerEmulation;
+using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.SimpleF3DEX2
 {
@@ -55,15 +56,15 @@ namespace SceneNavi.SimpleF3DEX2
         public float[] ScaleT { get; private set; }
 
         ArbCombineManager arbCombiner;
-        GLSLCombineManager glslCombiner;
+        GlslCombineManager glslCombiner;
 
-        ROMHandler.ROMHandler ROM;
-        Stack<OpenGLHelpers.DisplayListEx> ActiveGLDL;
+        ROMHandler.BaseRomHandler _baseRom;
+        Stack<DisplayListEx> ActiveGLDL;
 
-        public F3DEX2Interpreter(ROMHandler.ROMHandler rom)
+        public F3DEX2Interpreter(ROMHandler.BaseRomHandler baseRom)
         {
-            ROM = rom;
-            ActiveGLDL = new Stack<OpenGLHelpers.DisplayListEx>();
+            _baseRom = baseRom;
+            ActiveGLDL = new Stack<DisplayListEx>();
 
             InitializeParser();
             InitializeMacros();
@@ -99,7 +100,7 @@ namespace SceneNavi.SimpleF3DEX2
             else if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner == null)
             {
                 Program.Status.Message = "Initializing GLSL combiner...";
-                glslCombiner = new GLSLCombineManager(this);
+                glslCombiner = new GlslCombineManager(this);
             }
         }
 
@@ -116,7 +117,7 @@ namespace SceneNavi.SimpleF3DEX2
         {
             if (texcache != null)
             {
-                foreach (TextureCache tc in texcache) if (GL.IsTexture(tc.GLID)) GL.DeleteTexture(tc.GLID);
+                foreach (var tc in texcache) if (GL.IsTexture(tc.GLID)) GL.DeleteTexture(tc.GLID);
                 texcache.Clear();
             }
         }
@@ -124,7 +125,7 @@ namespace SceneNavi.SimpleF3DEX2
         private void InitializeParser()
         {
             ucodecmds = new UcodeCommandDelegate[256];
-            for (int i = 0; i < ucodecmds.Length; i++) ucodecmds[i] = new UcodeCommandDelegate((w0, w1) => { });
+            for (var i = 0; i < ucodecmds.Length; i++) ucodecmds[i] = new UcodeCommandDelegate((w0, w1) => { });
             ucodecmds[(byte)General.UcodeCmds.VTX] = CommandVtx;
             ucodecmds[(byte)General.UcodeCmds.TRI1] = CommandTri1;
             ucodecmds[(byte)General.UcodeCmds.TRI2] = CommandTri2;
@@ -157,7 +158,7 @@ namespace SceneNavi.SimpleF3DEX2
             }));
         }
 
-        public void Render(uint adr, bool call = false, OpenGLHelpers.DisplayListEx gldl = null)
+        public void Render(uint adr, bool call = false, DisplayListEx gldl = null)
         {
             try
             {
@@ -167,8 +168,8 @@ namespace SceneNavi.SimpleF3DEX2
                 if (!call)
                 {
                     GL.DepthMask(true);
-                    if (OpenGLHelpers.Initialization.SupportsFunction("glGenProgramsARB")) GL.Disable((EnableCap)All.FragmentProgram);
-                    if (OpenGLHelpers.Initialization.SupportsFunction("glCreateShader")) GL.UseProgram(0);
+                    if (Initialization.SupportsFunction("glGenProgramsARB")) GL.Disable((EnableCap)All.FragmentProgram);
+                    if (Initialization.SupportsFunction("glCreateShader")) GL.UseProgram(0);
 
                     PrimColor = EnvColor = new Color4(0.5f, 0.5f, 0.5f, 0.5f);
 
@@ -181,22 +182,22 @@ namespace SceneNavi.SimpleF3DEX2
                     }
 
                     /* Clear out texture units */
-                    for (int i = 0; i < (OpenGLHelpers.Initialization.SupportsFunction("glActiveTextureARB") ? 2 : 1); i++)
+                    for (var i = 0; i < (Initialization.SupportsFunction("glActiveTextureARB") ? 2 : 1); i++)
                     {
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0 + i);
-                        GL.BindTexture(TextureTarget.Texture2D, OpenGLHelpers.MiscDrawingHelpers.DummyTextureID);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0 + i);
+                        GL.BindTexture(TextureTarget.Texture2D, MiscDrawingHelpers.DummyTextureID);
                     }
                 }
 
                 /* Ucode interpreter starts here */
-                byte seg = (byte)(adr >> 24);
+                var seg = (byte)(adr >> 24);
                 adr &= 0xFFFFFF;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[seg];
+                var segdata = (byte[])_baseRom.SegmentMapping[seg];
 
                 while (adr < segdata.Length)
                 {
-                    byte cmd = segdata[adr];
+                    var cmd = segdata[adr];
 
                     /* EndDL */
                     if (cmd == (byte)General.UcodeCmds.ENDDL) break;
@@ -205,15 +206,15 @@ namespace SceneNavi.SimpleF3DEX2
                     inmacro = false;
                     if (macros != null)
                     {
-                        foreach (Macro m in macros)
+                        foreach (var m in macros)
                         {
                             if (adr + ((m.Commands.Length + 3) * 8) > segdata.Length) break;
 
-                            General.UcodeCmds[] nextcmd = new General.UcodeCmds[m.Commands.Length];
-                            uint[] nextw0 = new uint[nextcmd.Length + 2];
-                            uint[] nextw1 = new uint[nextcmd.Length + 2];
+                            var nextcmd = new General.UcodeCmds[m.Commands.Length];
+                            var nextw0 = new uint[nextcmd.Length + 2];
+                            var nextw1 = new uint[nextcmd.Length + 2];
 
-                            for (int i = 0; i < nextw0.Length; i++)
+                            for (var i = 0; i < nextw0.Length; i++)
                             {
                                 nextw0[i] = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + (i * 8)));
                                 nextw1[i] = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + (i * 8) + 4));
@@ -272,18 +273,18 @@ namespace SceneNavi.SimpleF3DEX2
         {
             if (!Configuration.RenderTextures) return;
 
-            uint adr = w1[0];
-            byte seg = (byte)(adr >> 24);
+            var adr = w1[0];
+            var seg = (byte)(adr >> 24);
             adr &= 0xFFFFFF;
 
-            uint psize = ((w1[4] & 0x00FFF000) >> 14) + 1;
+            var psize = ((w1[4] & 0x00FFF000) >> 14) + 1;
 
-            byte[] segdata = (byte[])ROM.SegmentMapping[seg];
+            var segdata = (byte[])_baseRom.SegmentMapping[seg];
             if (segdata == null) return;
 
-            for (int i = 0; i < psize; i++)
+            for (var i = 0; i < psize; i++)
             {
-                ushort r = (ushort)((segdata[adr] << 8) | segdata[adr + 1]);
+                var r = (ushort)((segdata[adr] << 8) | segdata[adr + 1]);
 
                 palette[i].R = (byte)((r & 0xF800) >> 8);
                 palette[i].G = (byte)(((r & 0x07C0) << 5) >> 8);
@@ -300,22 +301,22 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandVtx(uint w0, uint w1)
         {
             /* Vtx */
-            byte N = (byte)((w0 >> 12) & 0xFF);
-            byte V0 = (byte)(((w0 >> 1) & 0x7F) - N);
+            var N = (byte)((w0 >> 12) & 0xFF);
+            var V0 = (byte)(((w0 >> 1) & 0x7F) - N);
             if (N > VertexBuffer.Length || V0 > VertexBuffer.Length) return;
 
-            for (int i = 0; i < N; i++) VertexBuffer[V0 + i] = new Vertex(ROM, (byte[])ROM.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), mtxstack.Peek());
+            for (var i = 0; i < N; i++) VertexBuffer[V0 + i] = new Vertex(_baseRom, (byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), mtxstack.Peek());
         }
 
         private void CommandTri1(uint w0, uint w1)
         {
             /* Tri1 */
-            int[] idxs = new int[] { (int)((w0 & 0x00FF0000) >> 16) >> 1, (int)((w0 & 0x0000FF00) >> 8) >> 1, (int)(w0 & 0x000000FF) >> 1 };
+            var idxs = new int[] { (int)((w0 & 0x00FF0000) >> 16) >> 1, (int)((w0 & 0x0000FF00) >> 8) >> 1, (int)(w0 & 0x000000FF) >> 1 };
 
-            foreach (int idx in idxs) if (idx >= VertexBuffer.Length) return;
+            foreach (var idx in idxs) if (idx >= VertexBuffer.Length) return;
             General.RenderTriangles(this, idxs);
 
-            if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new OpenGLHelpers.DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
+            if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
 
             LastTriList.Add(new SimpleTriangle(VertexBuffer[idxs[0]].Position, VertexBuffer[idxs[1]].Position, VertexBuffer[idxs[2]].Position));
         }
@@ -323,19 +324,19 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandTri2(uint w0, uint w1)
         {
             /* Tri2 */
-            int[] idxs = new int[]
+            var idxs = new int[]
             {
                 (int)((w0 & 0x00FF0000) >> 16) >> 1, (int)((w0 & 0x0000FF00) >> 8) >> 1, (int)(w0 & 0x000000FF) >> 1,
                 (int)((w1 & 0x00FF0000) >> 16) >> 1, (int)((w1 & 0x0000FF00) >> 8) >> 1, (int)(w1 & 0x000000FF) >> 1
             };
 
-            foreach (int idx in idxs) if (idx >= VertexBuffer.Length) return;
+            foreach (var idx in idxs) if (idx >= VertexBuffer.Length) return;
             General.RenderTriangles(this, idxs);
 
             if (ActiveGLDL != null)
             {
-                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new OpenGLHelpers.DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
-                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new OpenGLHelpers.DisplayListEx.Triangle(VertexBuffer[idxs[3]], VertexBuffer[idxs[4]], VertexBuffer[idxs[5]]));
+                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
+                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[3]], VertexBuffer[idxs[4]], VertexBuffer[idxs[5]]));
             }
 
             LastTriList.Add(new SimpleTriangle(VertexBuffer[idxs[0]].Position, VertexBuffer[idxs[1]].Position, VertexBuffer[idxs[2]].Position));
@@ -345,7 +346,7 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandDL(uint w0, uint w1)
         {
             /* DL */
-            if ((byte[])ROM.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, ActiveGLDL.Peek());
+            if ((byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, ActiveGLDL.Peek());
         }
 
         private void CommandRDPHalf1(uint w0, uint w1)
@@ -357,13 +358,13 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandBranchZ(uint w0, uint w1)
         {
             /* Branch_Z */
-            if ((byte[])ROM.SegmentMapping[(byte)(rdphalf1 >> 24)] != null) Render(rdphalf1, true, ActiveGLDL.Peek());
+            if ((byte[])_baseRom.SegmentMapping[(byte)(rdphalf1 >> 24)] != null) Render(rdphalf1, true, ActiveGLDL.Peek());
         }
 
         private void CommandGeometryMode(uint w0, uint w1)
         {
             /* GeometryMode */
-            uint clr = ~(w0 & 0xFFFFFF);
+            var clr = ~(w0 & 0xFFFFFF);
             GeometryMode = (GeometryMode & ~clr) | w1;
             General.PerformModeChanges(this);
 
@@ -373,19 +374,19 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandMtx(uint w0, uint w1)
         {
             /* Mtx */
-            byte mseg = (byte)(w1 >> 24);
-            uint madr = (w1 & 0xFFFFFF);
-            byte[] msegdata = (byte[])ROM.SegmentMapping[mseg];
+            var mseg = (byte)(w1 >> 24);
+            var madr = (w1 & 0xFFFFFF);
+            var msegdata = (byte[])_baseRom.SegmentMapping[mseg];
 
             if (mseg == 0x80) mtxstack.Pop();
             if (msegdata == null) return;
 
             ushort mt1, mt2;
-            double[] matrix = new double[16];
+            var matrix = new double[16];
 
-            for (int x = 0; x < 4; x++)
+            for (var x = 0; x < 4; x++)
             {
-                for (int y = 0; y < 4; y++)
+                for (var y = 0; y < 4; y++)
                 {
                     mt1 = Endian.SwapUInt16(BitConverter.ToUInt16(msegdata, (int)madr));
                     mt2 = Endian.SwapUInt16(BitConverter.ToUInt16(msegdata, (int)madr + 32));
@@ -394,7 +395,7 @@ namespace SceneNavi.SimpleF3DEX2
                 }
             }
 
-            Matrix4d glmatrix = new Matrix4d(
+            var glmatrix = new Matrix4d(
                 matrix[0], matrix[1], matrix[2], matrix[3],
                 matrix[4], matrix[5], matrix[6], matrix[7],
                 matrix[8], matrix[9], matrix[10], matrix[11],
@@ -416,12 +417,12 @@ namespace SceneNavi.SimpleF3DEX2
             switch ((General.OtherModeHShifts)(32 - General.ShiftR(w0, 8, 8) - (General.ShiftR(w0, 0, 8) + 1)))
             {
                 case General.OtherModeHShifts.TEXTLUT:
-                    uint tlutmode = (w1 >> (int)General.OtherModeHShifts.TEXTLUT);
+                    var tlutmode = (w1 >> (int)General.OtherModeHShifts.TEXTLUT);
                     break;
                 default:
-                    uint length = (uint)(General.ShiftR(w0, 0, 8) + 1);
-                    uint shift = (uint)(32 - General.ShiftR(w0, 8, 8) - length);
-                    uint mask = (uint)(((1 << (int)length) - 1) << (int)shift);
+                    var length = (uint)(General.ShiftR(w0, 0, 8) + 1);
+                    var shift = (uint)(32 - General.ShiftR(w0, 8, 8) - length);
+                    var mask = (uint)(((1 << (int)length) - 1) << (int)shift);
 
                     OtherModeH &= ~mask;
                     OtherModeH |= w1 & mask;
@@ -438,7 +439,7 @@ namespace SceneNavi.SimpleF3DEX2
             /* SetOtherMode_L */
             if ((32 - ((w0 & 0x00FFFFFF) << 4 >> 4) - 1) == 3)
             {
-                uint data = OtherModeL.Data;
+                var data = OtherModeL.Data;
                 data &= 0x00000007;
                 data |= (w1 & 0xCCCCFFFF | w1 & 0x3333FFFF);
                 OtherModeL = new SimpleF3DEX2.OtherModeL(data);
@@ -457,8 +458,8 @@ namespace SceneNavi.SimpleF3DEX2
             Textures[0] = new Texture();
             Textures[1] = new Texture();
 
-            int s = General.ShiftR(w1, 16, 16);
-            int t = General.ShiftR(w1, 0, 16);
+            var s = General.ShiftR(w1, 16, 16);
+            var t = General.ShiftR(w1, 0, 16);
 
             ScaleS[0] = ScaleS[1] = ((float)(s + 1) / 65536.0f);
             ScaleT[0] = ScaleT[1] = ((float)(t + 1) / 65536.0f);
@@ -493,10 +494,10 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandSetTileSize(uint w0, uint w1)
         {
             /* SetTileSize */
-            uint ULS = (uint)General.ShiftR(w0, 12, 12);
-            uint ULT = (uint)General.ShiftR(w0, 0, 12);
-            uint LRS = (uint)General.ShiftR(w1, 12, 12);
-            uint LRT = (uint)General.ShiftR(w1, 0, 12);
+            var ULS = (uint)General.ShiftR(w0, 12, 12);
+            var ULT = (uint)General.ShiftR(w0, 0, 12);
+            var LRS = (uint)General.ShiftR(w1, 12, 12);
+            var LRT = (uint)General.ShiftR(w1, 0, 12);
 
             Textures[activetex].Tile = General.ShiftR(w1, 24, 3);
             Textures[activetex].ULS = General.ShiftR(ULS, 2, 10);
@@ -538,8 +539,8 @@ namespace SceneNavi.SimpleF3DEX2
 
             if (Configuration.CombinerType == CombinerTypes.ArbCombiner)
             {
-                float m = (float)General.ShiftL(w0, 8, 8);
-                float l = (float)General.ShiftL(w0, 0, 8) * 0.0039215689f;
+                var m = (float)General.ShiftL(w0, 8, 8);
+                var l = (float)General.ShiftL(w0, 0, 8) * 0.0039215689f;
 
                 GL.Arb.ProgramEnvParameter4(AssemblyProgramTargetArb.FragmentProgram, 0, PrimColor.R, PrimColor.G, PrimColor.B, PrimColor.A);
                 GL.Arb.ProgramEnvParameter4(AssemblyProgramTargetArb.FragmentProgram, 2, l, l, l, l);
@@ -584,7 +585,7 @@ namespace SceneNavi.SimpleF3DEX2
                 case CombinerTypes.None:
                     {
                         CalculateTextureSize(0);
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0);
                         GL.Enable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
                     }
@@ -593,11 +594,11 @@ namespace SceneNavi.SimpleF3DEX2
                 case CombinerTypes.GLSLCombiner:
                     {
                         CalculateTextureSize(0);
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0);
                         GL.Enable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
 
-                        if (OpenGLHelpers.Initialization.SupportsFunction("glActiveTextureARB"))
+                        if (Initialization.SupportsFunction("glActiveTextureARB"))
                         {
                             CalculateTextureSize(1);
                             GL.ActiveTexture(TextureUnit.Texture1);
@@ -611,22 +612,22 @@ namespace SceneNavi.SimpleF3DEX2
 
                 case CombinerTypes.ArbCombiner:
                     {
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0);
                         GL.Disable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, 0);
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture1);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture1);
                         GL.Disable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, 0);
 
                         CalculateTextureSize(0);
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0);
                         GL.Enable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
 
                         if (multitex)
                         {
                             CalculateTextureSize(1);
-                            OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture1);
+                            Initialization.ActiveTextureChecked(TextureUnit.Texture1);
                             GL.Enable(EnableCap.Texture2D);
                             GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(1));
 
@@ -634,11 +635,11 @@ namespace SceneNavi.SimpleF3DEX2
                         }
                         else
                         {
-                            OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture1);
+                            Initialization.ActiveTextureChecked(TextureUnit.Texture1);
                             GL.Disable(EnableCap.Texture2D);
                         }
 
-                        OpenGLHelpers.Initialization.ActiveTextureChecked(TextureUnit.Texture0);
+                        Initialization.ActiveTextureChecked(TextureUnit.Texture0);
                         GL.Disable(EnableCap.Texture2D);
                     }
                     break;
@@ -647,28 +648,28 @@ namespace SceneNavi.SimpleF3DEX2
 
         private int CheckTextureCache(int tx)
         {
-            object tag = ROM.SegmentMapping[(byte)(Textures[tx].Address >> 24)];
+            var tag = _baseRom.SegmentMapping[(byte)(Textures[tx].Address >> 24)];
 
-            foreach (TextureCache cached in texcache)
+            foreach (var cached in texcache)
             {
                 if (cached.Tag == tag && cached.Format == Textures[tx].Format && cached.Address == Textures[tx].Address &&
                     cached.RealHeight == Textures[tx].RealHeight && cached.RealWidth == Textures[tx].RealWidth)
                     return cached.GLID;
             }
 
-            TextureCache newcached = new TextureCache(tag, Textures[tx], LoadTexture(tx));
+            var newcached = new TextureCache(tag, Textures[tx], LoadTexture(tx));
             texcache.Add(newcached);
             return newcached.GLID;
         }
 
         private int LoadTexture(int tx)
         {
-            uint adr = Textures[tx].Address;
-            byte seg = (byte)(adr >> 24);
+            var adr = Textures[tx].Address;
+            var seg = (byte)(adr >> 24);
             adr &= 0xFFFFFF;
 
-            byte[] texbuf = new byte[Textures[tx].RealWidth * Textures[tx].RealHeight * 4];
-            byte[] segdata = (byte[])ROM.SegmentMapping[seg];
+            var texbuf = new byte[Textures[tx].RealWidth * Textures[tx].RealHeight * 4];
+            var segdata = (byte[])_baseRom.SegmentMapping[seg];
 
             if (segdata == null)
                 texbuf.Fill(new byte[] { 0xFF, 0xFF, 0x00, 0xFF });
@@ -684,7 +685,7 @@ namespace SceneNavi.SimpleF3DEX2
                     (int)Textures[tx].Palette,
                     palette);
 
-            int glid = GL.GenTexture();
+            var glid = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, glid);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)Textures[tx].RealWidth, (int)Textures[tx].RealHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texbuf);
 
@@ -787,15 +788,15 @@ namespace SceneNavi.SimpleF3DEX2
                     return;
             }
 
-            int Line_Width = ((int)Textures[tx].LineSize << LineShift);
+            var Line_Width = ((int)Textures[tx].LineSize << LineShift);
 
-            int Tile_Width = ((int)Textures[tx].LRS - (int)Textures[tx].ULS) + 1;
-            int Tile_Height = ((int)Textures[tx].LRT - (int)Textures[tx].ULT) + 1;
+            var Tile_Width = ((int)Textures[tx].LRS - (int)Textures[tx].ULS) + 1;
+            var Tile_Height = ((int)Textures[tx].LRT - (int)Textures[tx].ULT) + 1;
 
-            int Mask_Width = 1 << (int)Textures[tx].MaskS;
-            int Mask_Height = 1 << (int)Textures[tx].MaskT;
+            var Mask_Width = 1 << (int)Textures[tx].MaskS;
+            var Mask_Height = 1 << (int)Textures[tx].MaskT;
 
-            int Line_Height = 0;
+            var Line_Height = 0;
             if (Line_Width > 0)
                 Line_Height = Math.Min(MaxTexel / Line_Width, Tile_Height);
 
@@ -813,8 +814,8 @@ namespace SceneNavi.SimpleF3DEX2
             else
                 Textures[tx].Height = Line_Height;
 
-            int Clamp_Width = 0;
-            int Clamp_Height = 0;
+            var Clamp_Width = 0;
+            var Clamp_Height = 0;
 
             if (Textures[tx].CMS == 1)
                 Clamp_Width = Tile_Width;

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -18,7 +19,7 @@ namespace SceneNavi.HeaderCommands
         public uint OtherDataPointer { get; private set; }
 
         public List<uint> DLAddresses { get; private set; }
-        public List<OpenGLHelpers.DisplayListEx> DLs { get; private set; }
+        public List<DisplayListEx> DLs { get; private set; }
         public List<SimpleF3DEX2.SimpleTriangle> TriangleList { get; private set; }
 
         public bool CachedWithTextures { get; private set; }
@@ -37,56 +38,56 @@ namespace SceneNavi.HeaderCommands
         [Browsable(false)]
         public OpenTK.Vector3d Position { get { return Vector3d.Zero; } set { return; } }
 
-        public MeshHeader(Generic basecmd)
-            : base(basecmd)
+        public MeshHeader(Generic baseCommand)
+            : base(baseCommand)
         {
-            byte seg = (byte)(GetAddressGeneric() >> 24);
-            uint adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
+            var seg = (byte)(GetAddressGeneric() >> 24);
+            var adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
 
-            Type = ((byte[])ROM.SegmentMapping[seg])[adr];
-            Count = ((byte[])ROM.SegmentMapping[seg])[adr + 1];
-            DLTablePointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[seg]), (int)(adr + 4)));
-            OtherDataPointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[seg]), (int)(adr + 8)));
+            Type = ((byte[])BaseRom.SegmentMapping[seg])[adr];
+            Count = ((byte[])BaseRom.SegmentMapping[seg])[adr + 1];
+            DLTablePointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[seg]), (int)(adr + 4)));
+            OtherDataPointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[seg]), (int)(adr + 8)));
 
             DLAddresses = new List<uint>();
 
             MaxClipBounds = new List<Vector3d>();
             MinClipBounds = new List<Vector3d>();
 
-            List<uint> opaqueDLs = new List<uint>();
-            List<uint> transparentDLs = new List<uint>();
+            var opaqueDLs = new List<uint>();
+            var transparentDLs = new List<uint>();
 
             switch (Type)
             {
                 case 0x00:
                     {
-                        for (int i = 0; i < Count; i++)
+                        for (var i = 0; i < Count; i++)
                         {
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8)))));
-                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8) + 4))));
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8)))));
+                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8) + 4))));
                         }
                         break;
                     }
                 case 0x01:
                     {
-                        for (int i = 0; i < Count; i++)
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 4)))));
+                        for (var i = 0; i < Count; i++)
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 4)))));
                         break;
                     }
                 case 0x02:
                     {
-                        for (int i = 0; i < Count; i++)
+                        for (var i = 0; i < Count; i++)
                         {
-                            short s1 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16))));
-                            short s2 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 2)));
-                            short s3 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 4)));
-                            short s4 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 6)));
+                            var s1 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16))));
+                            var s2 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 2)));
+                            var s3 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 4)));
+                            var s4 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 6)));
 
                             MaxClipBounds.Add(new Vector3d(s1, 0.0, s2));
                             MinClipBounds.Add(new Vector3d(s3, 0.0, s4));
 
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 8))));
-                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])ROM.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 12))));
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 8))));
+                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 12))));
                         }
                         break;
                     }
@@ -101,39 +102,39 @@ namespace SceneNavi.HeaderCommands
 
         public void CreateDisplayLists(bool texenabled, CombinerTypes combinertype)
         {
-            Program.Status.Message = string.Format("Rendering room '{0}'...", (this.Parent as HeaderCommands.Rooms.RoomInfoClass).Description);
+            Program.Status.Message = string.Format("Rendering room '{0}'...", (this.Parent as RoomInfoClass).Description);
 
             CachedWithTextures = texenabled;
             CachedWithCombinerType = combinertype;
 
             /* Execute DLs once before creating GL lists, to cache textures & fragment programs beforehand */
-            foreach (uint dl in DLAddresses) this.ROM.Renderer.Render(dl);
+            foreach (var dl in DLAddresses) this.BaseRom.Renderer.Render(dl);
 
             /* Copy most recently rendered triangles - this mesh header's DL's - to triangle list */
             TriangleList = new List<SimpleF3DEX2.SimpleTriangle>();
-            foreach (SimpleF3DEX2.SimpleTriangle st in this.ROM.Renderer.LastTriList) TriangleList.Add(st);
+            foreach (var st in this.BaseRom.Renderer.LastTriList) TriangleList.Add(st);
 
             /* Now execute DLs again, with stuff already cached, which speeds everything up! */
-            DLs = new List<OpenGLHelpers.DisplayListEx>();
-            foreach (uint dl in DLAddresses)
+            DLs = new List<DisplayListEx>();
+            foreach (var dl in DLAddresses)
             {
-                OpenGLHelpers.DisplayListEx newdlex = new OpenGLHelpers.DisplayListEx(ListMode.Compile);
-                this.ROM.Renderer.Render(dl, gldl: newdlex);
+                var newdlex = new DisplayListEx(ListMode.Compile);
+                this.BaseRom.Renderer.Render(dl, gldl: newdlex);
                 newdlex.End();
                 DLs.Add(newdlex);
             }
 
             /* Clear the renderer's triangle list */
-            this.ROM.Renderer.LastTriList.Clear();
+            this.BaseRom.Renderer.LastTriList.Clear();
 
             /* Finally, from the triangle list compiled before, create a simple display list for picking purposes */
             PickGLID = GL.GenLists(1);
             GL.NewList(PickGLID, ListMode.Compile);
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Texture2D);
-            if (OpenGLHelpers.Initialization.SupportsFunction("glGenProgramsARB")) GL.Disable((EnableCap)All.FragmentProgram);
+            if (Initialization.SupportsFunction("glGenProgramsARB")) GL.Disable((EnableCap)All.FragmentProgram);
             GL.Begin(PrimitiveType.Triangles);
-            foreach (SimpleF3DEX2.SimpleTriangle st in TriangleList)
+            foreach (var st in TriangleList)
             {
                 GL.Vertex3(st.Vertices[0]);
                 GL.Vertex3(st.Vertices[1]);
@@ -147,14 +148,14 @@ namespace SceneNavi.HeaderCommands
         {
             if (DLs == null) return;
 
-            foreach (OpenGLHelpers.DisplayListEx gldl in DLs) gldl.Dispose();
+            foreach (var gldl in DLs) gldl.Dispose();
             DLs = null;
         }
 
-        public void Render(PickableObjectRenderType rendertype)
+        public void Render(PickableObjectRenderType renderType)
         {
             GL.PushAttrib(AttribMask.AllAttribBits);
-            if (rendertype == PickableObjectRenderType.Picking)
+            if (renderType == PickableObjectRenderType.Picking)
             {
                 GL.Color3(PickColor);
                 GL.CallList(PickGLID);

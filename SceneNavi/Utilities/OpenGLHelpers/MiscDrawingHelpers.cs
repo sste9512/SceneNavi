@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace SceneNavi.OpenGLHelpers
+namespace SceneNavi.Utilities.OpenGLHelpers
 {
     class MiscDrawingHelpers
     {
@@ -15,7 +11,7 @@ namespace SceneNavi.OpenGLHelpers
 
         static MiscDrawingHelpers()
         {
-            byte[] texbuf = new byte[16];
+            var texbuf = new byte[16];
             texbuf.Fill(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
 
             DummyTextureID = GL.GenTexture();
@@ -37,9 +33,9 @@ namespace SceneNavi.OpenGLHelpers
 
         public static void RenderCube(Vector3d dimensions, Vector3d offset, bool color = false)
         {
-            Vector2d xvec = new Vector2d(dimensions.X + offset.X, -dimensions.X + offset.X);
-            Vector2d yvec = new Vector2d(dimensions.Y + offset.Y, -dimensions.Y + offset.Y);
-            Vector2d zvec = new Vector2d(dimensions.Z + offset.Z, -dimensions.Z + offset.Z);
+            var xvec = new Vector2d(dimensions.X + offset.X, -dimensions.X + offset.X);
+            var yvec = new Vector2d(dimensions.Y + offset.Y, -dimensions.Y + offset.Y);
+            var zvec = new Vector2d(dimensions.Z + offset.Z, -dimensions.Z + offset.Z);
 
             GL.Begin(PrimitiveType.Quads);
             // Top
@@ -84,16 +80,16 @@ namespace SceneNavi.OpenGLHelpers
         // Based on http://slabode.exofire.net/circle_draw.shtml
         public static void RenderNotchCircle(double r, int segments)
         {
-            double theta = (double)(2 * Math.PI / (double)segments);
-            double c = Math.Cos(theta);
-            double s = Math.Sin(theta);
+            var theta = (double)(2 * Math.PI / (double)segments);
+            var c = Math.Cos(theta);
+            var s = Math.Sin(theta);
             double t;
 
-            double x = r;
+            var x = r;
             double y = 0;
 
             GL.Begin(PrimitiveType.LineLoop);
-            for (int ii = 0; ii < segments; ii++)
+            for (var ii = 0; ii < segments; ii++)
             {
                 if (ii == segments / 4)
                     GL.Vertex2(x, (y + 1.5));
@@ -158,7 +154,7 @@ namespace SceneNavi.OpenGLHelpers
 
         public static void DrawBox(Vector3d mvMin, Vector3d mvMax)
         {
-            Vector3d[] v = new Vector3d[8];
+            var v = new Vector3d[8];
             v[0] = new Vector3d(mvMin.X, mvMin.Y, mvMin.Z);
             v[1] = new Vector3d(mvMax.X, mvMin.Y, mvMin.Z);
             v[2] = new Vector3d(mvMax.X, mvMax.Y, mvMin.Z);
@@ -190,8 +186,8 @@ namespace SceneNavi.OpenGLHelpers
 
         public static void DrawBox(Vector3d Min, Vector3d Max, Color4 Color, bool Outline = false)
         {
-            Vector3d Distance = Max - Min;
-            Vector3d[] Verts = new Vector3d[8];
+            var Distance = Max - Min;
+            var Verts = new Vector3d[8];
 
             Verts[0] = Min;
             Verts[1] = Min + new Vector3d(Distance.X, 0, 0);
@@ -203,22 +199,22 @@ namespace SceneNavi.OpenGLHelpers
             Verts[6] = Min + new Vector3d(Distance.X, Distance.Y, Distance.Z);
             Verts[7] = Min + new Vector3d(0, Distance.Y, Distance.Z);
 
-            for (int it = 0; it < 2; it++)
+            for (var it = 0; it < 2; it++)
             {
                 // TODO  fix loop thingy; some quads don't render!
-                PrimitiveType loop = (it == 1 ? PrimitiveType.LineLoop : PrimitiveType.Quads);
-                PrimitiveType norm = (it == 1 ? PrimitiveType.Lines : PrimitiveType.QuadStrip);
-                Color4 col = (it == 1 ? Color4.Black : Color);
+                var loop = (it == 1 ? PrimitiveType.LineLoop : PrimitiveType.Quads);
+                var norm = (it == 1 ? PrimitiveType.Lines : PrimitiveType.QuadStrip);
+                var col = (it == 1 ? Color4.Black : Color);
 
                 GL.Color4(col);
 
                 GL.Begin(loop);
-                for (int i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                     GL.Vertex3(Verts[i]);
                 GL.End();
 
                 GL.Begin(norm);
-                for (int i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     GL.Vertex3(Verts[i]);
                     GL.Vertex3(Verts[i + 4]);
@@ -226,7 +222,7 @@ namespace SceneNavi.OpenGLHelpers
                 GL.End();
 
                 GL.Begin(loop);
-                for (int i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                     GL.Vertex3(Verts[i + 4]);
                 GL.End();
             }

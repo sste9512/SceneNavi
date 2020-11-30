@@ -41,14 +41,14 @@ namespace SceneNavi
             (sender as System.Timers.Timer).Stop();
 
             Cursor.Current = Cursors.WaitCursor;
-            this.UIThread(() => lblStatus.Text = "Checking for version information...");
+            this.UiThread(() => lblStatus.Text = "Checking for version information...");
 
             string finalStatusMsg = string.Empty;
             try
             {
                 if (VersionManagement.RemoteFileExists(Configuration.UpdateServer))
                 {
-                    this.UIThread(() => lblStatus.Text = "Version information found; downloading...");
+                    this.UiThread(() => lblStatus.Text = "Version information found; downloading...");
 
                     string[] updateInformation = VersionManagement.DownloadTextFile(Configuration.UpdateServer);
 
@@ -56,11 +56,11 @@ namespace SceneNavi
                     updatePageUrl = updateInformation[(int)updateTxtLines.UpdatePageUrl];
                     if (updateInformation.Length >= 2) releaseNotesUrl = updateInformation[(int)updateTxtLines.ReleaseNotesUrl];
 
-                    this.UIThread(() => VersionManagement.DownloadRtfFile(releaseNotesUrl, rlblChangelog));
+                    this.UiThread(() => VersionManagement.DownloadRtfFile(releaseNotesUrl, rlblChangelog));
 
                     if (IsRemoteVersionNewer)
                     {
-                        this.UIThread(() => btnDownload.Enabled = true);
+                        this.UiThread(() => btnDownload.Enabled = true);
                         finalStatusMsg = string.Format("New version {0} is available!", VersionManagement.CreateVersionString(remoteVersion));
                     }
                     else
@@ -87,9 +87,9 @@ namespace SceneNavi
                 MessageBox.Show(ex.ToString(), "General Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
-            this.UIThread(() => lblStatus.Text = finalStatusMsg);
+            this.UiThread(() => lblStatus.Text = finalStatusMsg);
             Cursor.Current = DefaultCursor;
-            this.UIThread(() => btnClose.Enabled = true);
+            this.UiThread(() => btnClose.Enabled = true);
         }
 
         private void btnDownload_Click(object sender, EventArgs e)

@@ -26,8 +26,8 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 
             Textured = tex;
 
-            int gl = 0;
-            string pstring =
+            var gl = 0;
+            var pstring =
                 "!!ARBfp1.0\n" +
                 "\n" +
                 "TEMP Tex0; TEMP Tex1;\n" +
@@ -46,7 +46,7 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
                 "TEX Tex1, fragment.texcoord[1], texture[1], 2D;\n" +
                 "\n";
 
-            for (int i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 switch (Unpacked.cA[i])
                 {
@@ -464,7 +464,7 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
                 "MOV Out, Comb;\n" +
                 "END\n";
 
-            byte[] bytes = Encoding.ASCII.GetBytes(pstring);
+            var bytes = Encoding.ASCII.GetBytes(pstring);
 
             GL.Arb.GenProgram(1, out gl);
             GL.Arb.BindProgram(AssemblyProgramTargetArb.FragmentProgram, gl);

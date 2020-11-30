@@ -2,79 +2,73 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using SceneNavi.ROMHandler;
+using SceneNavi.ROMHandler.Interfaces;
 
 namespace SceneNavi.HeaderCommands
 {
     public class Generic
     {
-        public HeaderLoader.CommandTypeIDs Command { get; private set; }
-        public int Offset { get; private set; }
-        public ulong Data { get; private set; }
+        public CommandTypeIDs Command { get; private set; }
+        protected int Offset { get; private set; }
+        protected ulong Data { get; private set; }
         public IHeaderParent Parent { get; private set; }
 
-        public string Description
-        {
-            get { return (string)HeaderLoader.CommandHumanNames[Command]; }
-        }
+        public string Description => (string) HeaderLoader.CommandHumanNames[Command];
 
-        public string ByteString
-        {
-            get { return string.Format("0x{0:X8} 0x{1:X8}", (Data >> 32), (Data & 0xFFFFFFFF)); }
-        }
+        public string ByteString => $"0x{(Data >> 32):X8} 0x{(Data & 0xFFFFFFFF):X8}";
 
-        public ROMHandler.ROMHandler ROM { get; private set; }
-        public bool InROM { get; private set; }
+        protected ROMHandler.BaseRomHandler BaseRom { get; private set; }
+        private bool InRom { get; set; }
 
-        public Generic(ROMHandler.ROMHandler rom, IHeaderParent parent, HeaderLoader.CommandTypeIDs cmdid)
+        protected Generic(ROMHandler.BaseRomHandler baseRom, IHeaderParent parent, CommandTypeIDs commandTypeIds)
         {
-            ROM = rom;
-            InROM = false;
-            Command = cmdid;
+            BaseRom = baseRom;
+            InRom = false;
+            Command = commandTypeIds;
             Offset = -1;
             Data = ulong.MaxValue;
             Parent = parent;
         }
 
-        public Generic(Generic basecmd)
+        protected Generic(Generic baseCommand)
         {
-            ROM = basecmd.ROM;
-            InROM = basecmd.InROM;
-            Command = basecmd.Command;
-            Offset = basecmd.Offset;
-            Data = basecmd.Data;
-            Parent = basecmd.Parent;
+            BaseRom = baseCommand.BaseRom;
+            InRom = baseCommand.InRom;
+            Command = baseCommand.Command;
+            Offset = baseCommand.Offset;
+            Data = baseCommand.Data;
+            Parent = baseCommand.Parent;
         }
 
-        public Generic(ROMHandler.ROMHandler rom, IHeaderParent parent, byte seg, ref int ofs)
+        public Generic(ROMHandler.BaseRomHandler baseRom, IHeaderParent parent, byte seg, ref int ofs)
         {
-            ROM = rom;
-            Command = (HeaderLoader.CommandTypeIDs)((byte[])rom.SegmentMapping[seg])[ofs];
+            BaseRom = baseRom;
+            Command = (CommandTypeIDs) ((byte[]) baseRom.SegmentMapping[seg])[ofs];
             Offset = ofs;
-            Data = Endian.SwapUInt64(BitConverter.ToUInt64(((byte[])rom.SegmentMapping[seg]), ofs));
+            Data = Endian.SwapUInt64(BitConverter.ToUInt64(((byte[]) baseRom.SegmentMapping[seg]), ofs));
             Parent = parent;
             ofs += 8;
 
-            if (parent is HeaderCommands.Rooms.RoomInfoClass && (parent as HeaderCommands.Rooms.RoomInfoClass).Parent is SceneTableEntryOcarina)
+            if ((parent as RoomInfoClass)?.Parent is SceneTableEntryOcarina)
             {
-                ISceneTableEntry ste = ((parent as HeaderCommands.Rooms.RoomInfoClass).Parent as ISceneTableEntry);
-                InROM = ste.IsInROM();
+                var ste = ((parent as RoomInfoClass).Parent as ISceneTableEntry);
+                InRom = ste.IsInROM();
             }
             else if (parent is ISceneTableEntry)
             {
-                InROM = (parent as ISceneTableEntry).IsInROM();
+                InRom = (parent as ISceneTableEntry).IsInROM();
             }
         }
 
-        public int GetCountGeneric()
+        protected int GetCountGeneric()
         {
-            return (int)((Data >> 48) & 0xFF);
+            return (int) ((Data >> 48) & 0xFF);
         }
 
-        public int GetAddressGeneric()
+        protected int GetAddressGeneric()
         {
-            return (int)(Data & 0xFFFFFFFF);
+            return (int) (Data & 0xFFFFFFFF);
         }
     }
 }

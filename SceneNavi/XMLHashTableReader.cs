@@ -19,7 +19,7 @@ namespace SceneNavi
         {
             Names = new Hashtable();
 
-            string path = Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), defdir);
+            string path = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? throw new FileNotFoundException(), defdir);
             if (!Directory.Exists(path)) return;
 
             string file = Path.Combine(path, fn);

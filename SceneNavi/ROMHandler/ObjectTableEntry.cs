@@ -17,22 +17,22 @@ namespace SceneNavi.ROMHandler
         public bool IsEmpty { get; private set; }
 
         public string Name { get; private set; }
-        public DMATableEntry DMA { get; private set; }
+        public DmaTableEntry DMA { get; private set; }
 
-        ROMHandler ROM;
+        BaseRomHandler _baseRom;
 
-        public ObjectTableEntry(ROMHandler rom, int ofs, bool isrel, ushort number = 0)
+        public ObjectTableEntry(BaseRomHandler baseRom, int ofs, bool isrel, ushort number = 0)
         {
-            ROM = rom;
+            _baseRom = baseRom;
             Offset = ofs;
             IsOffsetRelative = isrel;
 
-            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? rom.CodeData : rom.Data, ofs));
-            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? rom.CodeData : rom.Data, ofs + 4));
+            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, ofs));
+            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, ofs + 4));
 
             IsValid =
-                ((StartAddress > rom.Code.VStart) &&
-                (StartAddress < rom.Size) && (EndAddress < rom.Size) &&
+                ((StartAddress > baseRom.Code.VStart) &&
+                (StartAddress < baseRom.Size) && (EndAddress < baseRom.Size) &&
                 ((StartAddress & 0xF) == 0) && ((EndAddress & 0xF) == 0) &&
                 (EndAddress > StartAddress));
 
@@ -42,13 +42,13 @@ namespace SceneNavi.ROMHandler
 
             if (IsValid == true && IsEmpty == false)
             {
-                if ((Name = (ROM.XMLObjectNames.Names[number] as string)) == null)
+                if ((Name = (_baseRom.XmlObjectNames.Names[number] as string)) == null)
                 {
-                    DMA = rom.Files.Find(x => x.PStart == StartAddress);
+                    DMA = baseRom.Files.Find(x => x.PStart == StartAddress);
                     if (DMA != null)
                         Name = DMA.Name;
                     else
-                        Name = string.Format("S{0:X}_E{1:X}", StartAddress, EndAddress);
+                        Name = $"S{StartAddress:X}_E{EndAddress:X}";
                 }
             }
         }

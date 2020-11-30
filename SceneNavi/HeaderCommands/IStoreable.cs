@@ -7,6 +7,6 @@ namespace SceneNavi.HeaderCommands
 {
     interface IStoreable
     {
-        void Store(byte[] databuf, int baseadr);
+        void Store(byte[] dataBuffer, int baseAddress);
     }
 }

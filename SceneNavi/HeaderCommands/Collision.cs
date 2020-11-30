@@ -12,55 +12,55 @@ namespace SceneNavi.HeaderCommands
 {
     public class Collision : Generic, IStoreable
     {
-        public Vector3d AbsoluteMinimum { get; private set; }
-        public Vector3d AbsoluteMaximum { get; private set; }
-        public ushort VertexCount { get; private set; }
-        public uint VertexArrayOffset { get; private set; }
-        public ushort PolygonCount { get; private set; }
-        public uint PolygonArrayOffset { get; private set; }
-        public uint PolygonTypeOffset { get; private set; }
-        public uint CameraDataOffset { get; private set; }
-        public ushort WaterboxCount { get; private set; }
-        public uint WaterboxOffset { get; private set; }
+        private Vector3d AbsoluteMinimum { get; set; }
+        private Vector3d AbsoluteMaximum { get; set; }
+        private ushort VertexCount { get; set; }
+        private uint VertexArrayOffset { get; set; }
+        private ushort PolygonCount { get; set; }
+        private uint PolygonArrayOffset { get; set; }
+        private uint PolygonTypeOffset { get; set; }
+        private uint CameraDataOffset { get; set; }
+        private ushort WaterboxCount { get; set; }
+        private uint WaterboxOffset { get; set; }
 
-        public List<Vector3d> Vertices { get; private set; }
+        private List<Vector3d> Vertices { get; set; }
         public List<Polygon> Polygons { get; private set; }
         public List<PolygonType> PolygonTypes { get; private set; }
         public List<Waterbox> Waterboxes { get; private set; }
 
-        public Collision(Generic basecmd)
-            : base(basecmd)
+        public Collision(Generic baseCommand)
+            : base(baseCommand)
         {
-            uint adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
+            var adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
 
-            byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(GetAddressGeneric() >> 24)];
-            if (segdata == null) return;
+            var segmentData = (byte[])BaseRom.SegmentMapping[(byte)(GetAddressGeneric() >> 24)];
+            if (segmentData == null) return;
 
             /* Read header */
             AbsoluteMinimum = new Vector3d(
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr)),
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr + 0x2)),
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr + 0x4)));
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr)),
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr + 0x2)),
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr + 0x4)));
             AbsoluteMaximum = new Vector3d(
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr + 0x6)),
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr + 0x8)),
-                Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)adr + 0xA)));
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr + 0x6)),
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr + 0x8)),
+                Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)adr + 0xA)));
 
-            VertexCount = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)adr + 0xC));
-            VertexArrayOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 0x10));
-            PolygonCount = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)adr + 0x14));
-            PolygonArrayOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 0x18));
-            PolygonTypeOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 0x1C));
-            CameraDataOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 0x20));
-            WaterboxCount = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)adr + 0x24));
-            WaterboxOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 0x28));
+            VertexCount = Endian.SwapUInt16(BitConverter.ToUInt16(segmentData, (int)adr + 0xC));
+            VertexArrayOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x10));
+            PolygonCount = Endian.SwapUInt16(BitConverter.ToUInt16(segmentData, (int)adr + 0x14));
+            PolygonArrayOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x18));
+            PolygonTypeOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x1C));
+            CameraDataOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x20));
+            WaterboxCount = Endian.SwapUInt16(BitConverter.ToUInt16(segmentData, (int)adr + 0x24));
+            WaterboxOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x28));
 
             /* Read vertices */
-            byte[] vertsegdata = (byte[])ROM.SegmentMapping[(byte)(VertexArrayOffset >> 24)];
+            var vertsegdata = (byte[])BaseRom.SegmentMapping[(byte)(VertexArrayOffset >> 24)];
             if (vertsegdata != null)
             {
                 Vertices = new List<Vector3d>();
-                for (int i = 0; i < VertexCount; i++)
+                for (var i = 0; i < VertexCount; i++)
                 {
                     Vertices.Add(new Vector3d(
                         Endian.SwapInt16(BitConverter.ToInt16(vertsegdata, (int)(VertexArrayOffset & 0xFFFFFF) + (i * 6))),
@@ -71,14 +71,14 @@ namespace SceneNavi.HeaderCommands
 
             /* Read polygons */
             Polygons = new List<Polygon>();
-            for (int i = 0; i < PolygonCount; i++)
+            for (var i = 0; i < PolygonCount; i++)
             {
-                Polygons.Add(new Polygon(ROM, (uint)(PolygonArrayOffset + (i * 0x10)), i, this));
+                Polygons.Add(new Polygon(BaseRom, (uint)(PolygonArrayOffset + (i * 0x10)), i, this));
             }
 
             /* Read polygon types */
             PolygonTypes = new List<PolygonType>();
-            int ptlen = (int)(PolygonArrayOffset - PolygonTypeOffset);                      /* Official maps */
+            var ptlen = (int)(PolygonArrayOffset - PolygonTypeOffset);                      /* Official maps */
             if (ptlen <= 0) ptlen = (int)(WaterboxOffset - PolygonTypeOffset);              /* SO imports */
             if (ptlen <= 0) ptlen = (int)(this.GetAddressGeneric() - PolygonTypeOffset);    /* HT imports */
 
@@ -86,7 +86,7 @@ namespace SceneNavi.HeaderCommands
             {
                 for (uint i = PolygonTypeOffset, j = 0; i < (uint)(PolygonTypeOffset + (ptlen & 0xFFFFFF)); i += 8, j++)
                 {
-                    PolygonTypes.Add(new PolygonType(ROM, i, (int)j));
+                    PolygonTypes.Add(new PolygonType(BaseRom, i, (int)j));
                 }
             }
 
@@ -95,59 +95,59 @@ namespace SceneNavi.HeaderCommands
 
             /* Read waterboxes */
             Waterboxes = new List<Waterbox>();
-            for (int i = 0; i < WaterboxCount; i++)
+            for (var i = 0; i < WaterboxCount; i++)
             {
-                Waterboxes.Add(new Waterbox(ROM, (uint)(WaterboxOffset + (i * 0x10)), i, this));
+                Waterboxes.Add(new Waterbox(BaseRom, (uint)(WaterboxOffset + (i * 0x10)), i, this));
             }
         }
 
-        public void Store(byte[] databuf, int baseadr)
+        public void Store(byte[] dataBuffer, int baseAddress)
         {
-            foreach (HeaderCommands.Collision.Polygon poly in this.Polygons)
+            foreach (var poly in this.Polygons)
             {
                 /* Polygon type */
-                byte[] bytes = BitConverter.GetBytes(Endian.SwapUInt16(poly.PolygonType));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (poly.Address & 0xFFFFFF)), bytes.Length);
+                var bytes = BitConverter.GetBytes(Endian.SwapUInt16(poly.PolygonType));
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (poly.Address & 0xFFFFFF)), bytes.Length);
 
                 /* Normal stuff etc. */
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(poly.NormalXDirection));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (poly.Address & 0xFFFFFF) + 0x8), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (poly.Address & 0xFFFFFF) + 0x8), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(poly.NormalYDirection));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (poly.Address & 0xFFFFFF) + 0xA), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (poly.Address & 0xFFFFFF) + 0xA), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(poly.NormalZDirection));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (poly.Address & 0xFFFFFF) + 0xC), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (poly.Address & 0xFFFFFF) + 0xC), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(poly.CollisionPlaneDistFromOrigin));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (poly.Address & 0xFFFFFF) + 0xE), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (poly.Address & 0xFFFFFF) + 0xE), bytes.Length);
 
                 /* TODO vertex IDs???  even allow editing of those?? */
             }
 
-            foreach (HeaderCommands.Collision.PolygonType ptype in this.PolygonTypes)
+            foreach (var ptype in this.PolygonTypes)
             {
                 /* Just get & save raw data; should be enough */
-                byte[] bytes = BitConverter.GetBytes(Endian.SwapUInt64(ptype.Raw));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (ptype.Address & 0xFFFFFF)), bytes.Length);
+                var bytes = BitConverter.GetBytes(Endian.SwapUInt64(ptype.Raw));
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (ptype.Address & 0xFFFFFF)), bytes.Length);
             }
 
-            foreach (HeaderCommands.Collision.Waterbox wb in this.Waterboxes)
+            foreach (var wb in this.Waterboxes)
             {
                 /* Position */
-                byte[] bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.X)));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0x0), bytes.Length);
+                var bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.X)));
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x0), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.Y)));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0x2), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x2), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.Z)));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0x4), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x4), bytes.Length);
 
                 /* Size */
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.SizeXZ.X)));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0x6), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x6), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.SizeXZ.Y)));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0x8), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x8), bytes.Length);
 
                 /* Property thingy (room number, whatever else) */
                 bytes = BitConverter.GetBytes(Endian.SwapUInt32(wb.RoomPropRaw));
-                Buffer.BlockCopy(bytes, 0, databuf, (int)(baseadr + (wb.Address & 0xFFFFFF) + 0xC), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0xC), bytes.Length);
             }
         }
 
@@ -167,7 +167,7 @@ namespace SceneNavi.HeaderCommands
                 }
             }
 
-            public static List<GroundType> GroundTypes = new List<GroundType>()
+            public static readonly List<GroundType> GroundTypes = new List<GroundType>()
             {
                 new GroundType(0, "Dirt", Color4.RosyBrown.ToArgb()),
                 new GroundType(1, "Sand", Color4.SandyBrown.ToArgb()),
@@ -202,63 +202,63 @@ namespace SceneNavi.HeaderCommands
 
             public ulong ExitNumber
             {
-                get { return (ulong)((Raw & 0x00000F0000000000) >> 40); }
-                set { Raw = ((Raw & 0xFFFFF0FFFFFFFFFF) | ((ulong)(value & 0xF) << 40)); }
+                get => (ulong)((Raw & 0x00000F0000000000) >> 40);
+                set => Raw = ((Raw & 0xFFFFF0FFFFFFFFFF) | ((ulong)(value & 0xF) << 40));
             }
 
             public ulong ClimbingCrawlingFlags
             {
-                get { return (ulong)((Raw & 0x00F0000000000000) >> 52); }
-                set { Raw = ((Raw & 0xFF0FFFFFFFFFFFFF) | ((ulong)(value & 0xF) << 52)); }
+                get => (ulong)((Raw & 0x00F0000000000000) >> 52);
+                set => Raw = ((Raw & 0xFF0FFFFFFFFFFFFF) | ((ulong)(value & 0xF) << 52));
             }
 
             public ulong DamageSurfaceFlags
             {
-                get { return (ulong)((Raw & 0x000FF00000000000) >> 44); }
-                set { Raw = ((Raw & 0xFFF00FFFFFFFFFFF) | ((ulong)(value & 0xFF) << 44)); }
+                get => (ulong)((Raw & 0x000FF00000000000) >> 44);
+                set => Raw = ((Raw & 0xFFF00FFFFFFFFFFF) | ((ulong)(value & 0xFF) << 44));
             }
 
             public bool IsHookshotable
             {
-                get { return ((Raw & 0x0000000000020000) != 0); }
+                get => ((Raw & 0x0000000000020000) != 0);
                 set { if (value) { Raw |= 0x20000; } else { Raw &= ~((ulong)0x20000); } }
             }
 
             public uint EchoRange
             {
-                get { return (uint)((Raw & 0x000000000000F000) >> 12); }
-                set { Raw = ((Raw & 0xFFFFFFFFFFFF0FFF) | ((ulong)(value & 0xF) << 12)); }
+                get => (uint)((Raw & 0x000000000000F000) >> 12);
+                set => Raw = ((Raw & 0xFFFFFFFFFFFF0FFF) | ((ulong)(value & 0xF) << 12));
             }
 
             public uint EnvNumber
             {
-                get { return (uint)((Raw & 0x0000000000000F00) >> 8); }
-                set { Raw = ((Raw & 0xFFFFFFFFFFFFF0FF) | ((ulong)(value & 0xF) << 8)); }
+                get => (uint)((Raw & 0x0000000000000F00) >> 8);
+                set => Raw = ((Raw & 0xFFFFFFFFFFFFF0FF) | ((ulong)(value & 0xF) << 8));
             }
 
             public bool IsSteep
             {
-                get { return ((Raw & 0x0000000000000030) == 0x10); }
+                get => ((Raw & 0x0000000000000030) == 0x10);
                 set { if (value) { Raw |= 0x10; } else { Raw &= ~((ulong)0x10); } }
             }
 
             public uint TerrainType
             {
-                get { return (uint)((Raw & 0x00000000000000F0) >> 4); }
-                set { Raw = ((Raw & 0xFFFFFFFFFFFFFF0F) | ((ulong)(value & 0xF) << 4)); }
+                get => (uint)((Raw & 0x00000000000000F0) >> 4);
+                set => Raw = ((Raw & 0xFFFFFFFFFFFFFF0F) | ((ulong)(value & 0xF) << 4));
             }
 
             public uint GroundTypeID
             {
-                get { return (uint)(Raw & 0x000000000000000F); }
-                set { Raw = ((Raw & 0xFFFFFFFFFFFFFFF0) | (ulong)((value & 0xF))); }
+                get => (uint)(Raw & 0x000000000000000F);
+                set => Raw = ((Raw & 0xFFFFFFFFFFFFFFF0) | (ulong)((value & 0xF)));
             }
 
             public System.Drawing.Color RenderColor
             {
                 get
                 {
-                    int rgb = Color4.White.ToArgb();
+                    var rgb = Color4.White.ToArgb();
 
                     switch (GroundTypeID)
                     {
@@ -299,12 +299,12 @@ namespace SceneNavi.HeaderCommands
             {
                 get
                 {
-                    if (ROM == null)
+                    if (_baseRom == null)
                         return "(None)";
                     else
                     {
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendFormat("#{0}: {1}", Number, GroundTypes.FirstOrDefault(x => x.Value == GroundTypeID).Description);
+                        var sb = new StringBuilder();
+                        sb.AppendFormat("#{0}: {1}", Number, GroundTypes.FirstOrDefault(x => x.Value == GroundTypeID)?.Description);
                         if (ExitNumber != 0) sb.AppendFormat(", triggers exit #{0}", ExitNumber);
                         //more?
                         return sb.ToString();
@@ -312,25 +312,25 @@ namespace SceneNavi.HeaderCommands
                 }
             }
 
-            public bool IsDummy { get { return (ROM == null); } }
+            public bool IsDummy => (_baseRom == null);
 
-            ROMHandler.ROMHandler ROM;
+            ROMHandler.BaseRomHandler _baseRom;
 
             public PolygonType()
             {
                 Number = -1;
             }
 
-            public PolygonType(ROMHandler.ROMHandler rom, uint adr, int number)
+            public PolygonType(ROMHandler.BaseRomHandler baseRom, uint adr, int number)
             {
-                ROM = rom;
+                _baseRom = baseRom;
                 Address = adr;
                 Number = number;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
-                if (segdata == null) return;
+                var segmentData = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                if (segmentData == null) return;
 
-                Raw = Endian.SwapUInt64(BitConverter.ToUInt64(segdata, (int)(adr & 0xFFFFFF)));
+                Raw = Endian.SwapUInt64(BitConverter.ToUInt64(segmentData, (int)(adr & 0xFFFFFF)));
             }
         }
 
@@ -348,40 +348,32 @@ namespace SceneNavi.HeaderCommands
             public short CollisionPlaneDistFromOrigin { get; set; }
 
             [Browsable(false)]
-            public Vector3d Position { get { return Vector3d.Zero; } set { } }
+            public Vector3d Position { get => Vector3d.Zero;
+                set { } }
 
             [Browsable(false)]
-            public System.Drawing.Color PickColor { get { return System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24)); } }
+            public System.Drawing.Color PickColor => System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
             [Browsable(false)]
-            public bool IsMoveable { get { return false; } }
+            public bool IsMoveable => false;
 
-            public string Description
-            {
-                get
-                {
-                    if (ROM == null)
-                        return "(None)";
-                    else
-                        return string.Format("#{0}: Vertices {1} / {2} / {3}, type #{4}", Number, VertexIDs[0], VertexIDs[1], VertexIDs[2], PolygonType);
-                }
-            }
+            public string Description => _baseRom == null ? "(None)" : string.Format("#{0}: Vertices {1} / {2} / {3}, type #{4}", Number, VertexIDs[0], VertexIDs[1], VertexIDs[2], PolygonType);
 
-            public bool IsDummy { get { return (ROM == null); } }
+            public bool IsDummy => (_baseRom == null);
 
-            ROMHandler.ROMHandler ROM;
-            Collision ParentCollisionHeader;
+            readonly ROMHandler.BaseRomHandler _baseRom;
+            readonly Collision _parentCollisionHeader;
 
             public Polygon() { }
 
-            public Polygon(ROMHandler.ROMHandler rom, uint adr, int number, Collision colheader)
+            public Polygon(ROMHandler.BaseRomHandler baseRom, uint adr, int number, Collision colheader)
             {
-                ROM = rom;
+                _baseRom = baseRom;
                 Address = adr;
                 Number = number;
-                ParentCollisionHeader = colheader;
+                _parentCollisionHeader = colheader;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
                 if (segdata == null) return;
 
                 PolygonType = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF)));
@@ -393,29 +385,29 @@ namespace SceneNavi.HeaderCommands
                 /* Read vertex IDs & fetch vertices */
                 VertexIDs = new ushort[3];
                 Vertices = new Vector3d[3];
-                for (int i = 0; i < 3; i++)
+                for (var i = 0; i < 3; i++)
                 {
-                    ushort vidx = (ushort)(Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF) + 0x2 + (i * 2))) & 0xFFF);
+                    var vidx = (ushort)(Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF) + 0x2 + (i * 2))) & 0xFFF);
                     VertexIDs[i] = vidx;
-                    Vertices[i] = ParentCollisionHeader.Vertices[vidx];
+                    Vertices[i] = _parentCollisionHeader.Vertices[vidx];
                 }
             }
 
-            public void Render(PickableObjectRenderType rendertype)
+            public void Render(PickableObjectRenderType renderType)
             {
-                if (rendertype == PickableObjectRenderType.Picking)
+                if (renderType == PickableObjectRenderType.Picking)
                 {
                     GL.Color3(PickColor);
                     GL.Begin(PrimitiveType.Triangles);
-                    foreach (Vector3d v in Vertices) GL.Vertex3(v);
+                    foreach (var v in Vertices) GL.Vertex3(v);
                     GL.End();
                 }
                 else
                 {
-                    if (rendertype != PickableObjectRenderType.NoColor)
-                        GL.Color4(ParentCollisionHeader.PolygonTypes[PolygonType].RenderColor);
+                    if (renderType != PickableObjectRenderType.NoColor)
+                        GL.Color4(_parentCollisionHeader.PolygonTypes[PolygonType].RenderColor);
 
-                    foreach (Vector3d v in Vertices) GL.Vertex3(v);
+                    foreach (var v in Vertices) GL.Vertex3(v);
                 }
             }
         }
@@ -432,77 +424,56 @@ namespace SceneNavi.HeaderCommands
 
             public ushort RoomNumber
             {
-                get
-                {
-                    return (ushort)(RoomPropRaw >> 13);
-                }
-                set
-                {
-                    RoomPropRaw = (uint)(Properties | (value << 13));
-                }
+                get => (ushort)(RoomPropRaw >> 13);
+                set => RoomPropRaw = (uint)(Properties | (value << 13));
             }
 
             public ushort Properties
             {
-                get
-                {
-                    return (ushort)(RoomPropRaw & 0x1FFF);
-                }
-                set
-                {
-                    RoomPropRaw = (uint)((RoomNumber << 13) | value);
-                }
+                get => (ushort)(RoomPropRaw & 0x1FFF);
+                set => RoomPropRaw = (uint)((RoomNumber << 13) | value);
             }
 
             [Browsable(false)]
-            public System.Drawing.Color PickColor { get { return System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24)); } }
+            public System.Drawing.Color PickColor => System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
             [Browsable(false)]
-            public bool IsMoveable { get { return true; } }
+            public bool IsMoveable => true;
 
-            public string Description
-            {
-                get
-                {
-                    if (ROM == null)
-                        return "(None)";
-                    else
-                        return string.Format("Waterbox #{0}: X: {1}, Y: {2}, Z: {3}", (Number + 1), Position.X, Position.Y, Position.Z);
-                }
-            }
+            public string Description => _baseRom == null ? "(None)" : $"Waterbox #{(Number + 1)}: X: {Position.X}, Y: {Position.Y}, Z: {Position.Z}";
 
-            public bool IsDummy { get { return (ROM == null); } }
+            public bool IsDummy => (_baseRom == null);
 
-            ROMHandler.ROMHandler ROM;
-            Collision ParentCollisionHeader;
+            readonly ROMHandler.BaseRomHandler _baseRom;
+            private Collision _parentCollisionHeader;
 
             public Waterbox() { }
 
-            public Waterbox(ROMHandler.ROMHandler rom, uint adr, int number, Collision colheader)
+            public Waterbox(ROMHandler.BaseRomHandler baseRom, uint adr, int number, Collision colheader)
             {
-                ROM = rom;
+                _baseRom = baseRom;
                 Address = adr;
                 Number = number;
-                ParentCollisionHeader = colheader;
+                _parentCollisionHeader = colheader;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
-                if (segdata == null) return;
+                var segmentData = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                if (segmentData == null) return;
 
                 Position = new Vector3d(
-                    (double)Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)(adr & 0xFFFFFF))),
-                    (double)Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)((adr & 0xFFFFFF) + 2))),
-                    (double)Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)((adr & 0xFFFFFF) + 4))));
+                    (double)Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)(adr & 0xFFFFFF))),
+                    (double)Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)((adr & 0xFFFFFF) + 2))),
+                    (double)Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)((adr & 0xFFFFFF) + 4))));
 
                 SizeXZ = new Vector2d(
-                    (double)Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)((adr & 0xFFFFFF) + 6))),
-                    (double)Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)((adr & 0xFFFFFF) + 8))));
+                    (double)Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)((adr & 0xFFFFFF) + 6))),
+                    (double)Endian.SwapInt16(BitConverter.ToInt16(segmentData, (int)((adr & 0xFFFFFF) + 8))));
 
-                RoomPropRaw = (Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)((adr & 0xFFFFFF) + 12))) & 0xFFFFFF);
+                RoomPropRaw = (Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)((adr & 0xFFFFFF) + 12))) & 0xFFFFFF);
             }
 
-            public void Render(PickableObjectRenderType rendertype)
+            public void Render(PickableObjectRenderType renderType)
             {
-                if (rendertype == PickableObjectRenderType.Picking)
+                if (renderType == PickableObjectRenderType.Picking)
                 {
                     GL.Color3(PickColor);
                     GL.Begin(PrimitiveType.Quads);

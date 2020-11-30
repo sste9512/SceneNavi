@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace SceneNavi.OpenGLHelpers
+namespace SceneNavi.Utilities.OpenGLHelpers
 {
     public class DisplayListEx : DisplayList
     {
@@ -32,16 +28,16 @@ namespace SceneNavi.OpenGLHelpers
                 Vertices.AddRange(verts);
             }
 
-            public void Render(HeaderCommands.PickableObjectRenderType rendertype)
+            public void Render(HeaderCommands.PickableObjectRenderType renderType)
             {
-                if (rendertype == HeaderCommands.PickableObjectRenderType.Picking)
+                if (renderType == HeaderCommands.PickableObjectRenderType.Picking)
                 {
                     GL.Color3(PickColor);
                     GL.Begin(PrimitiveType.Triangles);
                     foreach (SimpleF3DEX2.Vertex v in Vertices) GL.Vertex3(v.Position);
                     GL.End();
                 }
-                else if (rendertype == HeaderCommands.PickableObjectRenderType.Normal)
+                else if (renderType == HeaderCommands.PickableObjectRenderType.Normal)
                 {
                     GL.PushAttrib(AttribMask.AllAttribBits);
                     GL.Disable(EnableCap.Texture2D);

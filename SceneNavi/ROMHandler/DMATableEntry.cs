@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SceneNavi.ROMHandler
 {
-    public class DMATableEntry
+    public class DmaTableEntry
     {
         public enum FileTypes { Undefined, General, Empty, Scene, Room, Overlay, Object, Invalid };
 
@@ -15,49 +15,47 @@ namespace SceneNavi.ROMHandler
         public uint VEnd { get; private set; }
         public uint PStart { get; private set; }
         public uint PEnd { get; private set; }
-
         public string Name { get; set; }
-
         public bool IsValid { get; private set; }
         public bool IsCompressed { get; private set; }
 
         public FileTypes FileType { get; private set; }
         public byte AssumedSegment { get; private set; }
 
-        public DMATableEntry(ROMHandler rom, int idx)
+        public DmaTableEntry(BaseRomHandler baseRom, int idx)
         {
-            int readofs = (rom.DMATableAddress + (idx * 0x10));
+            var readOffset = (baseRom.DmaTableAddress + (idx * 0x10));
 
-            VStart = Endian.SwapUInt32(BitConverter.ToUInt32(rom.Data, readofs));
-            VEnd = Endian.SwapUInt32(BitConverter.ToUInt32(rom.Data, readofs + 4));
-            PStart = Endian.SwapUInt32(BitConverter.ToUInt32(rom.Data, readofs + 8));
-            PEnd = Endian.SwapUInt32(BitConverter.ToUInt32(rom.Data, readofs + 12));
+            VStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset));
+            VEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 4));
+            PStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 8));
+            PEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 12));
 
             if (PStart == 0xFFFFFFFF || PEnd == 0xFFFFFFFF)
                 IsValid = false;
             else
             {
                 IsValid = true;
-                if (PEnd != 0 && Encoding.ASCII.GetString(rom.Data, (int)PStart, 4) == "Yaz0") IsCompressed = true;
+                if (PEnd != 0 && Encoding.ASCII.GetString(baseRom.Data, (int)PStart, 4) == "Yaz0") IsCompressed = true;
                 else IsCompressed = false;
             }
 
-            Name = string.Format("File #{0}", idx);
+            Name = $"File #{idx}";
 
             FileType = FileTypes.Undefined;
             AssumedSegment = 0x00;
         }
 
-        public void Identify(ROMHandler rom)
+        public void Identify(BaseRomHandler baseRom)
         {
-            FileTypes fnassumed = FileTypes.General;
+            var fileNameAssumed = FileTypes.General;
 
-            if (rom.FileNameTableAddress != -1)
+            if (baseRom.FileNameTableAddress != -1)
             {
-                if (Name.EndsWith("_scene") == true) fnassumed = FileTypes.Scene;
-                else if (Name.Contains("_room_") == true) fnassumed = FileTypes.Room;
-                else if (Name.StartsWith("ovl_") == true) fnassumed = FileTypes.Overlay;
-                else if (Name.StartsWith("object_") == true) fnassumed = FileTypes.Object;
+                if (Name.EndsWith("_scene") == true) fileNameAssumed = FileTypes.Scene;
+                else if (Name.Contains("_room_") == true) fileNameAssumed = FileTypes.Room;
+                else if (Name.StartsWith("ovl_") == true) fileNameAssumed = FileTypes.Overlay;
+                else if (Name.StartsWith("object_") == true) fileNameAssumed = FileTypes.Object;
             }
 
             /* Invalid file? */
@@ -69,14 +67,14 @@ namespace SceneNavi.ROMHandler
 
             if (!IsCompressed)
             {
-                byte[] data = new byte[VEnd - VStart];
-                Buffer.BlockCopy(rom.Data, (int)PStart, data, 0, data.Length);
+                var data = new byte[VEnd - VStart];
+                Buffer.BlockCopy(baseRom.Data, (int)PStart, data, 0, data.Length);
 
                 /* Room file? */
                 if (BitConverter.ToUInt32(data, (int)0) == 0x16 || ((BitConverter.ToUInt32(data, (int)0) == 0x18) && data[4] == 0x03 && BitConverter.ToUInt32(data, (int)8) == 0x16))
                 {
-                    for (int i = 8; i < HeaderScanThreshold; i += 8)
-                        if (BitConverter.ToUInt32(data, i) == 0x14 && (fnassumed == FileTypes.General || fnassumed == FileTypes.Room))
+                    for (var i = 8; i < HeaderScanThreshold; i += 8)
+                        if (BitConverter.ToUInt32(data, i) == 0x14 && (fileNameAssumed == FileTypes.General || fileNameAssumed == FileTypes.Room))
                         {
                             AssumedSegment = 0x03;
                             FileType = FileTypes.Room;
@@ -87,8 +85,8 @@ namespace SceneNavi.ROMHandler
                 /* Scene file? */
                 if ((BitConverter.ToUInt32(data, (int)0) & 0xFFFF00FF) == 0x15 || ((BitConverter.ToUInt32(data, (int)0) == 0x18) && data[4] == 0x02 && (BitConverter.ToUInt32(data, (int)8) & 0xFFFF00FF) == 0x15))
                 {
-                    for (int i = 8; i < HeaderScanThreshold; i += 8)
-                        if (BitConverter.ToUInt32(data, i) == 0x14 && (fnassumed == FileTypes.General || fnassumed == FileTypes.Scene))
+                    for (var i = 8; i < HeaderScanThreshold; i += 8)
+                        if (BitConverter.ToUInt32(data, i) == 0x14 && (fileNameAssumed == FileTypes.General || fileNameAssumed == FileTypes.Scene))
                         {
                             AssumedSegment = 0x02;
                             FileType = FileTypes.Scene;
@@ -97,15 +95,15 @@ namespace SceneNavi.ROMHandler
                 }
 
                 /* Overlay file? */
-                uint ovlheader = ((uint)data.Length - Endian.SwapUInt32(BitConverter.ToUInt32(data, (data.Length - 4))));
+                var ovlheader = ((uint)data.Length - Endian.SwapUInt32(BitConverter.ToUInt32(data, (data.Length - 4))));
                 if ((ovlheader + 16) < data.Length)
                 {
-                    uint btext = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader));
-                    uint bdata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 4));
-                    uint brodata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 8));
-                    uint bssdata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 12));
+                    var btext = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader));
+                    var bdata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 4));
+                    var brodata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 8));
+                    var bssdata = Endian.SwapUInt32(BitConverter.ToUInt32(data, (int)ovlheader + 12));
 
-                    if ((btext + bdata + brodata == data.Length || btext + bdata + brodata == ovlheader) && (fnassumed == FileTypes.General || fnassumed == FileTypes.Overlay))
+                    if ((btext + bdata + brodata == data.Length || btext + bdata + brodata == ovlheader) && (fileNameAssumed == FileTypes.General || fileNameAssumed == FileTypes.Overlay))
                     {
                         FileType = FileTypes.Overlay;
                         return;
@@ -114,9 +112,9 @@ namespace SceneNavi.ROMHandler
 
                 /* Object file? */
                 bool indl, hassync, hasvtx, hasdlend;
-                int[] segcount = new int[16];
+                var segmentCount = new int[16];
                 indl = hassync = hasvtx = hasdlend = false;
-                for (int i = 0; i < data.Length; i += 8)
+                for (var i = 0; i < data.Length; i += 8)
                 {
                     if (BitConverter.ToUInt32(data, i) == 0xE7 && BitConverter.ToUInt32(data, i + 4) == 0x0)
                     {
@@ -126,7 +124,7 @@ namespace SceneNavi.ROMHandler
                     else if (indl && data[i] == 0x01 && data[i + 4] <= 0x0F)
                     {
                         hasvtx = true;
-                        segcount[data[i + 4]]++;
+                        segmentCount[data[i + 4]]++;
                     }
                     else if (BitConverter.ToUInt32(data, i) == 0xDF && BitConverter.ToUInt32(data, i + 4) == 0x0)
                     {
@@ -134,9 +132,9 @@ namespace SceneNavi.ROMHandler
                         indl = false;
                     }
                 }
-                if (hassync && hasvtx && hasdlend && (fnassumed == FileTypes.General || fnassumed == FileTypes.Object))
+                if (hassync && hasvtx && hasdlend && (fileNameAssumed == FileTypes.General || fileNameAssumed == FileTypes.Object))
                 {
-                    AssumedSegment = (byte)segcount.ToList().IndexOf(segcount.Max());
+                    AssumedSegment = (byte)segmentCount.ToList().IndexOf(segmentCount.Max());
                     FileType = FileTypes.Object;
                     return;
                 }
@@ -144,7 +142,7 @@ namespace SceneNavi.ROMHandler
                 /* Empty file? */
                 if (data.Length < 0x100)
                 {
-                    int isempty = data.Count(x => x != 0);
+                    var isempty = data.Count(x => x != 0);
                     if (isempty == 0)
                     {
                         FileType = FileTypes.Empty;
@@ -154,7 +152,7 @@ namespace SceneNavi.ROMHandler
             }
 
             /* Use assumption */
-            FileType = fnassumed;
+            FileType = fileNameAssumed;
         }
     }
 }

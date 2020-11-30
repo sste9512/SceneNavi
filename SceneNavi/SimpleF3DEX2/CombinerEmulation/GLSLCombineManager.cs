@@ -9,17 +9,17 @@ using OpenTK.Graphics.OpenGL;
 
 namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 {
-    internal class GLSLCombineManager
+    internal class GlslCombineManager
     {
-        bool supported;
-        F3DEX2Interpreter F3DEX2;
-        List<GLSLShaders> shaderCache;
+        bool _supported;
+        F3DEX2Interpreter _f3Dex2;
+        List<GlslShaders> _shaderCache;
 
-        public GLSLCombineManager(F3DEX2Interpreter f3dex2)
+        public GlslCombineManager(F3DEX2Interpreter f3dex2)
         {
-            supported = ((GraphicsContext.CurrentContext as IGraphicsContextInternal).GetAddress("glCreateShader") != IntPtr.Zero);
-            F3DEX2 = f3dex2;
-            shaderCache = new List<GLSLShaders>();
+            _supported = ((GraphicsContext.CurrentContext as IGraphicsContextInternal).GetAddress("glCreateShader") != IntPtr.Zero);
+            _f3Dex2 = f3dex2;
+            _shaderCache = new List<GlslShaders>();
 
             /*foreach (uint[] knownMux in KnownCombinerMuxes.Muxes)
             {
@@ -30,26 +30,26 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 
         public void BindCombiner(uint m0, uint m1, bool tex)
         {
-            if (!supported) return;
+            if (!_supported) return;
 
             if (m0 == 0 && m1 == 0) return;
 
-            GLSLShaders shader = shaderCache.FirstOrDefault(x => x.Mux0 == m0 && x.Mux1 == m1 &&
-                x.HasLightingEnabled == Convert.ToBoolean(F3DEX2.GeometryMode & (uint)General.GeometryMode.LIGHTING) &&
+            var shader = _shaderCache.FirstOrDefault(x => x.Mux0 == m0 && x.Mux1 == m1 &&
+                x.HasLightingEnabled == Convert.ToBoolean(_f3Dex2.GeometryMode & (uint)General.GeometryMode.LIGHTING) &&
                 x.Textured == tex);
 
             if (shader != null)
-                GL.UseProgram(shader.ProgramID);
+                GL.UseProgram(shader.ProgramId);
             else
             {
-                shader = new GLSLShaders(m0, m1, F3DEX2, tex);
-                shaderCache.Add(shader);
+                shader = new GlslShaders(m0, m1, _f3Dex2, tex);
+                _shaderCache.Add(shader);
             }
 
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramID, "tex0"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramID, "tex1"), 1);
-            GL.Uniform4(GL.GetUniformLocation(shader.ProgramID, "primColor"), F3DEX2.PrimColor);
-            GL.Uniform4(GL.GetUniformLocation(shader.ProgramID, "envColor"), F3DEX2.EnvColor);
+            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "tex0"), 0);
+            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "tex1"), 1);
+            GL.Uniform4(GL.GetUniformLocation(shader.ProgramId, "primColor"), _f3Dex2.PrimColor);
+            GL.Uniform4(GL.GetUniformLocation(shader.ProgramId, "envColor"), _f3Dex2.EnvColor);
         }
     }
 }

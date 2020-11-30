@@ -6,6 +6,7 @@ using System.Text;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.SimpleF3DEX2
 {
@@ -256,29 +257,29 @@ namespace SceneNavi.SimpleF3DEX2
         {
             GL.Begin(PrimitiveType.Triangles);
 
-            foreach (int i in idx)
+            foreach (var i in idx)
             {
                 if (i >= f3dex2.VertexBuffer.Length) continue;
 
                 double[] S = new double[2], T = new double[2];
 
-                for (int j = 0; j < (OpenGLHelpers.Initialization.SupportsFunction("glActiveTextureARB") ? f3dex2.Textures.Length : 1); j++)
+                for (var j = 0; j < (Initialization.SupportsFunction("glActiveTextureARB") ? f3dex2.Textures.Length : 1); j++)
                 {
                     if (f3dex2.Textures[j].MaskS != 0)
                         S[j] = (f3dex2.VertexBuffer[i].TexCoord.X * f3dex2.Textures[j].ShiftScaleS * f3dex2.ScaleS[j] -
-                            ((f3dex2.Textures[j].ULS * General.Fixed2Float[2]) % (float)(1 << f3dex2.Textures[j].MaskS))) * f3dex2.Textures[j].ScaleS;
+                            ((f3dex2.Textures[j].ULS * General.Fixed2Float[2]) % (1 << f3dex2.Textures[j].MaskS))) * f3dex2.Textures[j].ScaleS;
                     else
                         S[j] = (f3dex2.VertexBuffer[i].TexCoord.X * f3dex2.Textures[j].ShiftScaleS * f3dex2.ScaleS[j] -
                             (f3dex2.Textures[j].ULS * General.Fixed2Float[2])) * f3dex2.Textures[j].ScaleS;
 
                     if (f3dex2.Textures[j].MaskT != 0)
                         T[j] = (f3dex2.VertexBuffer[i].TexCoord.Y * f3dex2.Textures[j].ShiftScaleT * f3dex2.ScaleT[j] -
-                            ((f3dex2.Textures[j].ULT * General.Fixed2Float[2]) % (float)(1 << f3dex2.Textures[j].MaskT))) * f3dex2.Textures[j].ScaleT;
+                            ((f3dex2.Textures[j].ULT * General.Fixed2Float[2]) % (1 << f3dex2.Textures[j].MaskT))) * f3dex2.Textures[j].ScaleT;
                     else
                         T[j] = (f3dex2.VertexBuffer[i].TexCoord.Y * f3dex2.Textures[j].ShiftScaleT * f3dex2.ScaleT[j] -
                             (f3dex2.Textures[j].ULT * General.Fixed2Float[2])) * f3dex2.Textures[j].ScaleT;
 
-                    OpenGLHelpers.Initialization.MultiTexCoord2Checked(TextureUnit.Texture0 + j, S[j], T[j]);
+                    Initialization.MultiTexCoord2Checked(TextureUnit.Texture0 + j, S[j], T[j]);
                 }
 
                 if (!Convert.ToBoolean(f3dex2.GeometryMode & (uint)General.GeometryMode.LIGHTING)) GL.Color4(f3dex2.VertexBuffer[i].Colors);
@@ -291,7 +292,7 @@ namespace SceneNavi.SimpleF3DEX2
 
         internal static int Pow2(int dim)
         {
-            int i = 1;
+            var i = 1;
 
             while (i < dim) i <<= 1;
 
@@ -300,8 +301,8 @@ namespace SceneNavi.SimpleF3DEX2
 
         internal static int PowOf(int dim)
         {
-            int num = 1;
-            int i = 0;
+            var num = 1;
+            var i = 0;
 
             while (num < dim)
             {
@@ -314,12 +315,12 @@ namespace SceneNavi.SimpleF3DEX2
 
         internal static int ShiftL(uint v, int s, int w)
         {
-            return (int)(((uint)v & (((uint)0x01 << w) - 1)) << s);
+            return (int)((v & (((uint)0x01 << w) - 1)) << s);
         }
 
         internal static int ShiftR(uint v, int s, int w)
         {
-            return (int)(((uint)v >> s) & (((int)0x01 << w) - 1));
+            return (int)((v >> s) & ((0x01 << w) - 1));
         }
     }
 }

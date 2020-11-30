@@ -14,11 +14,11 @@ namespace SceneNavi.HeaderCommands
     {
         public List<Entry> EnvSettingList { get; set; }
 
-        public EnvironmentSettings(Generic basecmd)
-            : base(basecmd)
+        public EnvironmentSettings(Generic baseCommand)
+            : base(baseCommand)
         {
             EnvSettingList = new List<Entry>();
-            for (int i = 0; i < GetCountGeneric(); i++) EnvSettingList.Add(new Entry(ROM, (uint)(GetAddressGeneric() + i * 22)));
+            for (var i = 0; i < GetCountGeneric(); i++) EnvSettingList.Add(new Entry(BaseRom, (uint)(GetAddressGeneric() + i * 22)));
         }
 
         public class Entry
@@ -34,16 +34,16 @@ namespace SceneNavi.HeaderCommands
             public ushort DrawDistance { get; set; }
             public ushort FogStart { get; set; }
 
-            ROMHandler.ROMHandler ROM;
+            ROMHandler.BaseRomHandler _baseRom;
 
             public Entry() { }
 
-            public Entry(ROMHandler.ROMHandler rom, uint adr)
+            public Entry(ROMHandler.BaseRomHandler baseRom, uint adr)
             {
-                ROM = rom;
+                _baseRom = baseRom;
                 Address = adr;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
                 if (segdata == null) return;
 
                 adr &= 0xFFFFFF;

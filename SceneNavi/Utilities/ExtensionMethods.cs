@@ -13,7 +13,7 @@ namespace SceneNavi
     public static class ExtensionMethods
     {
         // http://stackoverflow.com/a/3588137
-        public static void UIThread(this Control @this, Action code)
+        public static void UiThread(this Control @this, Action code)
         {
             if (@this.InvokeRequired)
             {
@@ -27,8 +27,8 @@ namespace SceneNavi
 
         public static void DoubleBuffered(this Control ctrl, bool setting)
         {
-            Type ctrlType = ctrl.GetType();
-            PropertyInfo pi = ctrlType.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+            var ctrlType = ctrl.GetType();
+            var pi = ctrlType.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             if (pi != null) pi.SetValue(ctrl, setting, null);
         }
 
@@ -54,7 +54,7 @@ namespace SceneNavi
             if (array == null)
                 return;
 
-            for (int i = 0; i < array.Length; i++)
+            for (var i = 0; i < array.Length; i++)
             {
                 array[i] = defaultValue;
             }
@@ -65,9 +65,9 @@ namespace SceneNavi
             if (array == null)
                 return;
 
-            for (int i = 0; i < array.Length; i += data.Length)
+            for (var i = 0; i < array.Length; i += data.Length)
             {
-                for (int j = 0; j < data.Length; j++)
+                for (var j = 0; j < data.Length; j++)
                 {
                     try
                     {
@@ -108,10 +108,10 @@ namespace SceneNavi
 
         public static void SetCommonImageFilter(this FileDialog fileDialog, string defaultExtension)
         {
-            List<ImageCodecInfo> codecs = ImageCodecInfo.GetImageEncoders().ToList();
-            string imageExtensions = string.Join(";", codecs.Select(ici => ici.FilenameExtension));
-            List<string> separateFilters = new List<string>();
-            foreach (ImageCodecInfo codec in codecs) separateFilters.Add(string.Format("{0} Files ({1})|{1}", codec.FormatDescription, codec.FilenameExtension.ToLowerInvariant()));
+            var codecs = ImageCodecInfo.GetImageEncoders().ToList();
+            var imageExtensions = string.Join(";", codecs.Select(ici => ici.FilenameExtension));
+            var separateFilters = new List<string>();
+            foreach (var codec in codecs) separateFilters.Add(string.Format("{0} Files ({1})|{1}", codec.FormatDescription, codec.FilenameExtension.ToLowerInvariant()));
             fileDialog.Filter = string.Format("{0}|Image Files ({1})|{1}|All Files (*.*)|*.*", string.Join("|", separateFilters), imageExtensions.ToLowerInvariant());
             if (defaultExtension != null) fileDialog.FilterIndex = (codecs.IndexOf(codecs.FirstOrDefault(x => x.FormatDescription.ToLowerInvariant().Contains(defaultExtension.ToLowerInvariant()))) + 1);
             else fileDialog.FilterIndex = (codecs.Count + 1);
@@ -119,9 +119,9 @@ namespace SceneNavi
 
         public static void SwapRGBAToBGRA(this byte[] buffer)
         {
-            for (int i = 0; i < buffer.Length; i += 4)
+            for (var i = 0; i < buffer.Length; i += 4)
             {
-                byte red = buffer[i];
+                var red = buffer[i];
                 buffer[i] = buffer[i + 2];
                 buffer[i + 2] = red;
             }
@@ -129,11 +129,11 @@ namespace SceneNavi
 
         public static string GetDescription(this Type objectType, string field)
         {
-            PropertyDescriptor propertyDescriptor = TypeDescriptor.GetProperties(objectType)[field];
+            var propertyDescriptor = TypeDescriptor.GetProperties(objectType)[field];
             if (propertyDescriptor == null) return field;
 
-            AttributeCollection attributes = propertyDescriptor.Attributes;
-            DescriptionAttribute description = (DescriptionAttribute)attributes[typeof(DescriptionAttribute)];
+            var attributes = propertyDescriptor.Attributes;
+            var description = (DescriptionAttribute)attributes[typeof(DescriptionAttribute)];
 
             if (description.Description == string.Empty) return field;
 

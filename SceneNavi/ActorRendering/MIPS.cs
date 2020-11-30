@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
 namespace SceneNavi.ActorRendering
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "IdentifierTypo")]
     public static class MIPS
     {
         public enum Opcode : byte
@@ -117,13 +121,13 @@ namespace SceneNavi.ActorRendering
         public const uint SafetyVal = 4;
 
         public static uint OP(uint x) { return ((x) << 26); }
-        public static uint OF(uint x) { return (((uint)(x) >> 2) & 0xFFFF); }
+        public static uint OF(uint x) { return ((x >> 2) & 0xFFFF); }
         public static uint SA(uint x) { return (((x) & 0x1F) << 6); }
         public static uint RD(uint x) { return (((x) & 0x1F) << 11); }
         public static uint RT(uint x) { return (((x) & 0x1F) << 16); }
         public static uint RS(uint x) { return (((x) & 0x1F) << 21); }
-        public static uint IM(uint x) { return ((uint)(x) & 0xFFFF); }
-        public static uint JT(uint x) { return (((uint)(x) >> 2) & 0x3FFFFFF); }
+        public static uint IM(uint x) { return (x & 0xFFFF); }
+        public static uint JT(uint x) { return ((x >> 2) & 0x3FFFFFF); }
 
         public static uint ADD(uint rd, uint rs, uint rt) { return (OP(0x00) | RS(rs) | RT(rt) | RD(rd) | 0x20); }
         public static uint ADDU(uint rd, uint rs, uint rt) { return (OP(0x00) | RS(rs) | RT(rt) | RD(rd) | 0x21); }
@@ -259,47 +263,47 @@ namespace SceneNavi.ActorRendering
 
         public static uint GetRS(uint word)
         {
-            return (uint)(uint)((word >> 21) & 31);
+            return (word >> 21) & 31;
         }
 
         public static uint GetRT(uint word)
         {
-            return (uint)((word >> 16) & 31);
+            return (word >> 16) & 31;
         }
 
         public static uint GetRD(uint word)
         {
-            return (uint)((word >> 11) & 31);
+            return (word >> 11) & 31;
         }
 
         public static uint GetSA(uint word)
         {
-            return (uint)((word >> 6) & 31);
+            return (word >> 6) & 31;
         }
 
         public static uint GetFT(uint word)
         {
-            return (uint)(uint)((word >> 21) & 31);
+            return (word >> 21) & 31;
         }
 
         public static uint GetFS(uint word)
         {
-            return (uint)((word >> 16) & 31);
+            return (word >> 16) & 31;
         }
 
         public static uint GetFD(uint word)
         {
-            return (uint)((word >> 11) & 31);
+            return (word >> 11) & 31;
         }
 
         public static uint GetBASE(uint word)
         {
-            return (uint)((word >> 21) & 31);
+            return (word >> 21) & 31;
         }
 
         public static uint GetIMM(uint word)
         {
-            return (uint)(word & 0xFFFF);
+            return word & 0xFFFF;
         }
 
         public static int GetSIMM(uint word)
@@ -314,7 +318,7 @@ namespace SceneNavi.ActorRendering
 
         public static uint GetTARGET(uint word)
         {
-            return (uint)((word & 0x3FFFFFF) << 2);
+            return (word & 0x3FFFFFF) << 2;
         }
     }
 }

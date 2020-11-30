@@ -9,19 +9,19 @@ namespace SceneNavi.HeaderCommands
     {
         public List<Entry> ObjectList { get; set; }
 
-        public Objects(Generic basecmd)
-            : base(basecmd)
+        public Objects(Generic baseCommand)
+            : base(baseCommand)
         {
             ObjectList = new List<Entry>();
-            for (int i = 0; i < GetCountGeneric(); i++) ObjectList.Add(new Entry(ROM, (uint)(GetAddressGeneric() + i * 2)));
+            for (var i = 0; i < GetCountGeneric(); i++) ObjectList.Add(new Entry(BaseRom, (uint)(GetAddressGeneric() + i * 2)));
         }
 
-        public void Store(byte[] databuf, int baseadr)
+        public void Store(byte[] dataBuffer, int baseAddress)
         {
-            foreach (HeaderCommands.Objects.Entry obj in this.ObjectList)
+            foreach (var obj in this.ObjectList)
             {
-                byte[] objbytes = BitConverter.GetBytes(Endian.SwapUInt16(obj.Number));
-                Buffer.BlockCopy(objbytes, 0, databuf, (int)(baseadr + (obj.Address & 0xFFFFFF)), objbytes.Length);
+                var objbytes = BitConverter.GetBytes(Endian.SwapUInt16(obj.Number));
+                Buffer.BlockCopy(objbytes, 0, dataBuffer, (int)(baseAddress + (obj.Address & 0xFFFFFF)), objbytes.Length);
             }
         }
 
@@ -33,13 +33,13 @@ namespace SceneNavi.HeaderCommands
             {
                 get
                 {
-                    return (Number < ROM.Objects.Count ? ROM.Objects[Number].Name : "(invalid?)");
+                    return (Number < _baseRom.Objects.Count ? _baseRom.Objects[Number].Name : "(invalid?)");
                 }
 
                 set
                 {
                     if (value == null) return;
-                    int objidx = ROM.Objects.FindIndex(x => x.Name.ToLowerInvariant() == value.ToLowerInvariant());
+                    var objidx = _baseRom.Objects.FindIndex(x => x.Name.ToLowerInvariant() == value.ToLowerInvariant());
                     if (objidx != -1)
                         Number = (ushort)objidx;
                     else
@@ -47,16 +47,16 @@ namespace SceneNavi.HeaderCommands
                 }
             }
 
-            ROMHandler.ROMHandler ROM;
+            ROMHandler.BaseRomHandler _baseRom;
 
             public Entry() { }
 
-            public Entry(ROMHandler.ROMHandler rom, uint adr)
+            public Entry(ROMHandler.BaseRomHandler baseRom, uint adr)
             {
-                ROM = rom;
+                _baseRom = baseRom;
                 Address = adr;
 
-                byte[] segdata = (byte[])ROM.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
                 if (segdata == null) return;
 
                 Number = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF)));

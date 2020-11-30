@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -11,9 +12,12 @@ using System.IO;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-
+using SceneNavi.HeaderCommands;
+using SceneNavi.Models;
 using SceneNavi.ROMHandler;
-using SceneNavi.OpenGLHelpers;
+using SceneNavi.ROMHandler.Interfaces;
+using SceneNavi.Utilities.OpenGLHelpers;
+using IContainer = Autofac.IContainer;
 
 namespace SceneNavi
 {
@@ -51,7 +55,7 @@ namespace SceneNavi
         {
             get
             {
-                List<string> all = new List<string>();
+                var all = new List<string>();
                 all.AddRange(requiredOglExtensionsGeneral);
                 all.AddRange(requiredOglExtensionsCombinerGeneral);
                 all.AddRange(requiredOglExtensionsARBCombiner);
@@ -73,7 +77,7 @@ namespace SceneNavi
         ToolModes internalToolMode;
         ToolModes currentToolMode
         {
-            get { return internalToolMode; }
+            get => internalToolMode;
             set
             {
                 Configuration.LastToolMode = internalToolMode = (Enum.IsDefined(typeof(ToolModes), value) ? internalToolMode = value : internalToolMode = ToolModes.Camera);
@@ -88,37 +92,37 @@ namespace SceneNavi
         CombinerTypes internalCombinerType;
         CombinerTypes currentCombinerType
         {
-            get { return internalCombinerType; }
+            get => internalCombinerType;
             set
             {
                 Configuration.CombinerType = internalCombinerType = (Enum.IsDefined(typeof(CombinerTypes), value) ? internalCombinerType = value : internalCombinerType = CombinerTypes.None);
-                if (rom != null) rom.Renderer.InitCombiner();
+                if (_baseRom != null) _baseRom.Renderer.InitCombiner();
                 displayListsDirty = true;
             }
         }
 
-        ROMHandler.ROMHandler rom;
+        BaseRomHandler _baseRom;
         bool individualFileMode;
         Dictionary<byte, string> bgms;
 
         ISceneTableEntry currentScene;
-        HeaderCommands.Rooms.RoomInfoClass currentRoom;
-        List<HeaderCommands.MeshHeader> allMeshHeaders;
-        HeaderCommands.Collision.Polygon currentCollisionPolygon;
-        HeaderCommands.Collision.PolygonType currentColPolygonType;
-        HeaderCommands.Collision.Waterbox currentWaterbox;
-        OpenGLHelpers.DisplayListEx.Triangle currentRoomTriangle;
+        RoomInfoClass currentRoom;
+        List<MeshHeader> allMeshHeaders;
+        Collision.Polygon currentCollisionPolygon;
+        Collision.PolygonType currentColPolygonType;
+        Collision.Waterbox currentWaterbox;
+        DisplayListEx.Triangle currentRoomTriangle;
         SimpleF3DEX2.Vertex currentRoomVertex;
-        HeaderCommands.EnvironmentSettings.Entry currentEnvSettings;
+        EnvironmentSettings.Entry currentEnvSettings;
 
         ISceneTableEntry tempScene;
-        HeaderCommands.Rooms tempRooms;
+        Rooms tempRooms;
 
         // weird but works?
-        HeaderCommands.Waypoints.PathHeader activePathHeader
+        PathHeader activePathHeader
         {
-            get { return (cbPathHeaders.SelectedItem as HeaderCommands.Waypoints.PathHeader); }
-            set { RefreshPathWaypoints(); }
+            get => (cbPathHeaders.SelectedItem as PathHeader);
+            set => RefreshPathWaypoints();
         }
 
         BindingSource roomActorComboBinding, transitionComboBinding, spawnPointComboBinding, collisionPolyDataBinding, colPolyTypeDataBinding, waypointPathComboDataBinding, waterboxComboDataBinding;
@@ -127,25 +131,28 @@ namespace SceneNavi
         DisplayList collisionDL, waterboxDL;
         TabPage lastTabPage;
 
-        HeaderCommands.IPickableObject pickedObject;
+        IPickableObject pickedObject;
         Vector2d pickObjDisplacement, pickObjLastPosition, pickObjPosition;
 
-        List<XMLActorDefinitionReader.Definition.Item.Option> roomsForWaterboxSelection;
+        List<Option> roomsForWaterboxSelection;
 
         public MainForm()
         {
             InitializeComponent();
 
-            Application.Idle += new EventHandler(Application_Idle);
-            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-            Program.Status.MessageChanged += new StatusMessageHandler.MessageChangedEvent(StatusMsg_OnStatusMessageChanged);
+            Application.Idle += Application_Idle;
+            Application.ApplicationExit += Application_ApplicationExit;
+            Program.Status.MessageChanged += StatusMsg_OnStatusMessageChanged;
 
             dgvObjects.DoubleBuffered(true);
             dgvPathWaypoints.DoubleBuffered(true);
 
             SetFormTitle();
+             
+          
+            
         }
-
+        
         private void StatusMsg_OnStatusMessageChanged(object sender, StatusMessageHandler.MessageChangedEventArgs e)
         {
             tsslStatus.Text = e.Message;
@@ -154,9 +161,9 @@ namespace SceneNavi
 
         private void SetFormTitle()
         {
-            string filenamePart = ((rom != null && rom.Loaded) ? string.Format(" - [{0}]", Path.GetFileName(rom.Filename)) : string.Empty);
-            string scenePart = (individualFileMode ? string.Format(" ({0})", Path.GetFileName(Configuration.LastSceneFile)) : string.Empty);
-            this.Text = string.Concat(Program.AppNameVer, filenamePart, scenePart);
+            var filenamePart = ((_baseRom != null && _baseRom.Loaded) ? $" - [{Path.GetFileName(_baseRom.Filename)}]" : string.Empty);
+            var scenePart = (individualFileMode ? $" ({Path.GetFileName(Configuration.LastSceneFile)})" : string.Empty);
+            Text = string.Concat(Program.AppNameVer, filenamePart, scenePart);
         }
 
         private void Application_Idle(object sender, EventArgs e)
@@ -172,7 +179,7 @@ namespace SceneNavi
 
         private void Application_ApplicationExit(object sender, EventArgs e)
         {
-            if (glText != null) glText.Dispose();
+            glText?.Dispose();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -200,7 +207,7 @@ namespace SceneNavi
 
             showWaterboxesPerRoomToolStripMenuItem.Checked = Configuration.ShowWaterboxesPerRoom;
 
-            enableVSyncToolStripMenuItem.Checked = customGLControl.VSync = Configuration.OGLVSync;
+            enableVSyncToolStripMenuItem.Checked = customGLControl.VSync = Configuration.OglvSync;
             enableAntiAliasingToolStripMenuItem.Checked = Configuration.EnableAntiAliasing;
             enableMipmapsToolStripMenuItem.Checked = Configuration.EnableMipmaps;
 
@@ -208,17 +215,17 @@ namespace SceneNavi
             currentCombinerType = Configuration.CombinerType;
 
             /* Create tool mode menu */
-            int i = 0;
-            foreach (KeyValuePair<ToolModes, string[]> kvp in toolModeNametable)
+            var i = 0;
+            foreach (var kvp in toolModeNametable)
             {
-                Controls.ToolStripRadioButtonMenuItem tsmi = new Controls.ToolStripRadioButtonMenuItem(kvp.Value[0]) { Tag = kvp.Key, CheckOnClick = true, HelpText = kvp.Value[1] };
+                var tsmi = new Controls.ToolStripRadioButtonMenuItem(kvp.Value[0]) { Tag = kvp.Key, CheckOnClick = true, HelpText = kvp.Value[1] };
                 if (currentToolMode == kvp.Key) tsmi.Checked = true;
 
-                tsmi.Click += new EventHandler((s, ex) =>
+                tsmi.Click += (s, ex) =>
                 {
-                    object tag = ((ToolStripMenuItem)s).Tag;
+                    var tag = ((ToolStripMenuItem)s).Tag;
                     if (tag is ToolModes) currentToolMode = ((ToolModes)tag);
-                });
+                };
 
                 mouseModeToolStripMenuItem.DropDownItems.Add(tsmi);
                 i++;
@@ -226,16 +233,16 @@ namespace SceneNavi
 
             /* Create combiner type menu */
             i = 0;
-            foreach (KeyValuePair<CombinerTypes, string[]> kvp in combinerTypeNametable)
+            foreach (var kvp in combinerTypeNametable)
             {
-                Controls.ToolStripRadioButtonMenuItem tsmi = new Controls.ToolStripRadioButtonMenuItem(kvp.Value[0]) { Tag = kvp.Key, CheckOnClick = true, HelpText = kvp.Value[1] };
+                var tsmi = new Controls.ToolStripRadioButtonMenuItem(kvp.Value[0]) { Tag = kvp.Key, CheckOnClick = true, HelpText = kvp.Value[1] };
                 if (currentCombinerType == kvp.Key) tsmi.Checked = true;
 
-                tsmi.Click += new EventHandler((s, ex) =>
+                tsmi.Click += (s, ex) =>
                 {
-                    object tag = ((ToolStripMenuItem)s).Tag;
+                    var tag = ((ToolStripMenuItem)s).Tag;
                     if (tag is CombinerTypes) currentCombinerType = ((CombinerTypes)tag);
-                });
+                };
 
                 combinerTypeToolStripMenuItem.DropDownItems.Add(tsmi);
                 i++;
@@ -248,7 +255,7 @@ namespace SceneNavi
         private void InitializeMenuHelp()
         {
             /* Kinda buggy in practice (ex. with disabled menu items...) */
-            foreach (SceneNavi.Controls.ToolStripHintMenuItem menuItem in menuStrip1.Items.FlattenMenu().ToList())
+            foreach (var menuItem in menuStrip1.Items.FlattenMenu().ToList())
             {
                 if (menuItem.HelpText == null) continue;
 
@@ -256,7 +263,7 @@ namespace SceneNavi
                 {
                     if (Program.IsHinting) return;
                     Program.IsHinting = true;
-                    Program.Status.Message = (s as SceneNavi.Controls.ToolStripHintMenuItem).HelpText;
+                    Program.Status.Message = (s as Controls.ToolStripHintMenuItem).HelpText;
                 });
                 menuItem.Unhint += ((s, e) =>
                 {
@@ -274,28 +281,29 @@ namespace SceneNavi
 
             if (!individualFileMode)
             {
-                root = new TreeNode(string.Format("{0} ({1}, v1.{2}; {3} scenes)", rom.Title, rom.GameID, rom.Version, rom.Scenes.Count)) { Tag = rom };
-                foreach (ISceneTableEntry ste in rom.Scenes)
+                root = new TreeNode(
+                    $"{_baseRom.Title} ({_baseRom.GameId}, v1.{_baseRom.Version}; {_baseRom.Scenes.Count} scenes)") { Tag = _baseRom };
+                foreach (var ste in _baseRom.Scenes)
                 {
-                    TreeNode scene = new TreeNode(string.Format("{0} (0x{1:X})", ste.GetName(), ste.GetSceneStartAddress())) { Tag = ste };
+                    var scene = new TreeNode($"{ste.GetName()} (0x{ste.GetSceneStartAddress():X})") { Tag = ste };
 
                     if (ste.GetSceneHeaders().Count != 0)
                     {
-                        HeaderCommands.Rooms rooms = ste.GetSceneHeaders()[0].Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms;
+                        var rooms = ste.GetSceneHeaders()[0].Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms;
                         if (rooms == null) continue;
 
-                        foreach (HeaderLoader shead in ste.GetSceneHeaders())
+                        foreach (var shead in ste.GetSceneHeaders())
                         {
-                            List<HeaderLoader> rhs = new List<HeaderLoader>();
-                            foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation)
+                            var rhs = new List<HeaderLoader>();
+                            foreach (var ric in rooms.RoomInformation)
                                 if (ric.Headers.Count != 0) rhs.Add(ric.Headers[shead.Number]);
 
-                            HeaderLoader.HeaderPair hp = new HeaderLoader.HeaderPair(shead, rhs);
+                            var hp = new HeaderPair(shead, rhs);
 
-                            System.Collections.DictionaryEntry de = new System.Collections.DictionaryEntry();
-                            foreach (System.Collections.DictionaryEntry d in rom.XMLStageDescriptions.Names)
+                            var de = new System.Collections.DictionaryEntry();
+                            foreach (System.Collections.DictionaryEntry d in _baseRom.XmlStageDescriptions.Names)
                             {
-                                HeaderLoader.StageKey sk = d.Key as HeaderLoader.StageKey;
+                                var sk = d.Key as StageKey;
                                 if (sk.SceneAddress == ste.GetSceneStartAddress() && sk.HeaderNumber == hp.SceneHeader.Number)
                                 {
                                     de = d;
@@ -304,10 +312,10 @@ namespace SceneNavi
                                 }
                             }
 
-                            TreeNode sheadnode = new TreeNode((de.Value == null ? string.Format("Stage #{0}", shead.Number) : (string)de.Value)) { Tag = hp };
-                            foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation)
+                            var sheadnode = new TreeNode((de.Value == null ? $"Stage #{shead.Number}" : (string)de.Value)) { Tag = hp };
+                            foreach (var ric in rooms.RoomInformation)
                             {
-                                TreeNode room = new TreeNode(string.Format("{0} (0x{1:X})", ric.Description, ric.Start)) { Tag = ric };
+                                var room = new TreeNode($"{ric.Description} (0x{ric.Start:X})") { Tag = ric };
                                 sheadnode.Nodes.Add(room);
                             }
 
@@ -324,23 +332,23 @@ namespace SceneNavi
             else
             {
                 root = new TreeNode(tempScene.GetName()) { Tag = tempScene };
-                HeaderCommands.Rooms rooms = tempScene.GetSceneHeaders()[0].Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms;
+                var rooms = tempScene.GetSceneHeaders()[0].Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms;
 
                 TreeNode nodeToSelect = null;
                 if (rooms != null)
                 {
-                    foreach (HeaderLoader shead in tempScene.GetSceneHeaders())
+                    foreach (var shead in tempScene.GetSceneHeaders())
                     {
-                        List<HeaderLoader> rhs = new List<HeaderLoader>();
-                        foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation)
+                        var rhs = new List<HeaderLoader>();
+                        foreach (var ric in rooms.RoomInformation)
                             if (ric.Headers.Count != 0) rhs.Add(ric.Headers[shead.Number]);
 
-                        HeaderLoader.HeaderPair hp = new HeaderLoader.HeaderPair(shead, rhs);
+                        var hp = new HeaderPair(shead, rhs);
 
-                        TreeNode sheadnode = new TreeNode(string.Format("Stage #{0}", shead.Number)) { Tag = hp };
-                        foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation)
+                        var sheadnode = new TreeNode($"Stage #{shead.Number}") { Tag = hp };
+                        foreach (var ric in rooms.RoomInformation)
                         {
-                            TreeNode room = new TreeNode(string.Format("{0} (0x{1:X})", ric.Description, ric.Start)) { Tag = ric };
+                            var room = new TreeNode($"{ric.Description} (0x{ric.Start:X})") { Tag = ric };
                             sheadnode.Nodes.Add(room);
                         }
                         sheadnode.Expand();
@@ -357,22 +365,22 @@ namespace SceneNavi
 
         private void PopulateMiscControls()
         {
-            if (rom == null) return;
+            if (_baseRom == null) return;
 
             bgms = new Dictionary<byte, string>();
-            foreach (System.Collections.DictionaryEntry de in rom.XMLSongNames.Names) bgms.Add((byte)de.Key, (string)de.Value);
+            foreach (System.Collections.DictionaryEntry de in _baseRom.XmlSongNames.Names) bgms.Add((byte)de.Key, (string)de.Value);
         }
 
         private void openROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             /* Get last ROM */
-            if (Configuration.LastROM != string.Empty)
+            if (Configuration.LastRom != string.Empty)
             {
-                ofdOpenROM.InitialDirectory = Path.GetDirectoryName(Configuration.LastROM);
-                ofdOpenROM.FileName = Path.GetFileName(Configuration.LastROM);
+                ofdOpenROM.InitialDirectory = Path.GetDirectoryName(Configuration.LastRom);
+                ofdOpenROM.FileName = Path.GetFileName(Configuration.LastRom);
             }
 
-            if (ofdOpenROM.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (ofdOpenROM.ShowDialog() == DialogResult.OK)
             {
                 Program.Status.Message = "Loading; please wait...";
                 Cursor.Current = Cursors.WaitCursor;
@@ -380,10 +388,10 @@ namespace SceneNavi
                 individualFileMode = false;
                 displayListsDirty = collisionDirty = waterboxesDirty = true;
 
-                Configuration.LastROM = ofdOpenROM.FileName;
-                rom = new ROMHandler.ROMHandler(ofdOpenROM.FileName);
+                Configuration.LastRom = ofdOpenROM.FileName;
+                _baseRom = new BaseRomHandler(ofdOpenROM.FileName);
 
-                if (rom.Loaded)
+                if (_baseRom.Loaded)
                 {
                     ResetCurrentData();
 
@@ -444,7 +452,7 @@ namespace SceneNavi
 
                 Cursor.Current = DefaultCursor;
 
-                editDataTablesToolStripMenuItem.Enabled = saveToolStripMenuItem.Enabled = openSceneToolStripMenuItem.Enabled = rOMInformationToolStripMenuItem.Enabled = customGLControl.Enabled = rom.Loaded;
+                editDataTablesToolStripMenuItem.Enabled = saveToolStripMenuItem.Enabled = openSceneToolStripMenuItem.Enabled = rOMInformationToolStripMenuItem.Enabled = customGLControl.Enabled = _baseRom.Loaded;
             }
         }
 
@@ -463,13 +471,13 @@ namespace SceneNavi
                 ofdOpenRoom.FileName = Path.GetFileName(Configuration.LastRoomFile);
             }
 
-            if (ofdOpenScene.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (ofdOpenScene.ShowDialog() == DialogResult.OK)
             {
                 Configuration.LastSceneFile = ofdOpenScene.FileName;
 
-                if ((tempScene = (!rom.IsMajora ? (ISceneTableEntry)new SceneTableEntryOcarina(rom, ofdOpenScene.FileName) : (ISceneTableEntry)new SceneTableEntryMajora(rom, ofdOpenScene.FileName))) != null)
+                if ((tempScene = (!_baseRom.IsMajora ? new SceneTableEntryOcarina(_baseRom, ofdOpenScene.FileName) : (ISceneTableEntry)new SceneTableEntryMajora(_baseRom, ofdOpenScene.FileName))) != null)
                 {
-                    if (ofdOpenRoom.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                    if (ofdOpenRoom.ShowDialog() != DialogResult.OK) return;
 
                     Configuration.LastRoomFile = ofdOpenRoom.FileName;
 
@@ -477,7 +485,7 @@ namespace SceneNavi
                     displayListsDirty = collisionDirty = waterboxesDirty = true;
 
                     ResetCurrentData(true);
-                    tempScene.ReadScene((tempRooms = new HeaderCommands.Rooms(rom, tempScene, ofdOpenRoom.FileName)));
+                    tempScene.ReadScene((tempRooms = new Rooms(_baseRom, tempScene, ofdOpenRoom.FileName)));
                     CreateSceneTree();
 
                     SetFormTitle();
@@ -526,52 +534,52 @@ namespace SceneNavi
                 ParseStoreHeaders(tempScene.GetSceneHeaders(), tempScene.GetData(), 0);
                 ParseStoreHeaders(tempRooms.RoomInformation[0].Headers, tempRooms.RoomInformation[0].Data, 0);
 
-                BinaryWriter bwScene = new BinaryWriter(File.Open(Configuration.LastSceneFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                var bwScene = new BinaryWriter(File.Open(Configuration.LastSceneFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                 bwScene.Write(tempScene.GetData());
                 bwScene.Close();
 
-                BinaryWriter bwRoom = new BinaryWriter(File.Open(Configuration.LastRoomFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                var bwRoom = new BinaryWriter(File.Open(Configuration.LastRoomFile, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
                 bwRoom.Write(tempRooms.RoomInformation[0].Data);
                 bwRoom.Close();
             }
             else
             {
                 /* Store scene table entries & scenes */
-                foreach (ISceneTableEntry ste in rom.Scenes)
+                foreach (var ste in _baseRom.Scenes)
                 {
                     ste.SaveTableEntry();
-                    ParseStoreHeaders(ste.GetSceneHeaders(), rom.Data, (int)ste.GetSceneStartAddress());
+                    ParseStoreHeaders(ste.GetSceneHeaders(), _baseRom.Data, (int)ste.GetSceneStartAddress());
                 }
 
                 /* Store entrance table entries */
-                foreach (EntranceTableEntry ete in rom.Entrances) ete.SaveTableEntry();
+                foreach (var ete in _baseRom.Entrances) ete.SaveTableEntry();
 
                 /* Copy code data */
-                Buffer.BlockCopy(rom.CodeData, 0, rom.Data, (int)rom.Code.PStart, rom.CodeData.Length);
+                Buffer.BlockCopy(_baseRom.CodeData, 0, _baseRom.Data, (int)_baseRom.Code.PStart, _baseRom.CodeData.Length);
 
                 /* Write to file */
-                BinaryWriter bw = new BinaryWriter(File.Open(rom.Filename, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
-                bw.Write(rom.Data);
+                var bw = new BinaryWriter(File.Open(_baseRom.Filename, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                bw.Write(_baseRom.Data);
                 bw.Close();
             }
         }
 
         private void ParseStoreHeaders(List<HeaderLoader> headers, byte[] databuf, int baseadr)
         {
-            foreach (HeaderLoader hl in headers)
+            foreach (var hl in headers)
             {
                 /* Fetch and parse room headers first */
                 if (!individualFileMode)
                 {
-                    HeaderCommands.Rooms rooms = (hl.Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms);
+                    var rooms = (hl.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms);
                     if (rooms != null)
                     {
-                        foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation) ParseStoreHeaders(ric.Headers, databuf, (int)ric.Start);
+                        foreach (var ric in rooms.RoomInformation) ParseStoreHeaders(ric.Headers, databuf, (int)ric.Start);
                     }
                 }
 
                 /* Now store all storeable commands */
-                foreach (HeaderCommands.IStoreable hc in hl.Commands.Where(x => x is HeaderCommands.IStoreable))
+                foreach (IStoreable hc in hl.Commands.Where(x => x is IStoreable))
                     hc.Store(databuf, baseadr);
             }
         }
@@ -589,51 +597,59 @@ namespace SceneNavi
 
         private void CreateStatusString()
         {
-            List<string> infostrs = new List<string>();
+            var infostrs = new List<string>();
 
             if (currentScene != null)
             {
                 if (currentRoom == null)
                 {
-                    infostrs.Add(string.Format("{0}", currentScene.GetName()));
+                    infostrs.Add($"{currentScene.GetName()}");
 
-                    HeaderCommands.Rooms rooms = (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms);
-                    if (rooms != null) infostrs.Add(string.Format("{0} room{1}", rooms.RoomInformation.Count, (rooms.RoomInformation.Count != 1 ? "s" : "")));
+                    var rooms = (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms);
+                    if (rooms != null) infostrs.Add(
+                        $"{rooms.RoomInformation.Count} room{(rooms.RoomInformation.Count != 1 ? "s" : "")}");
                 }
                 else if (currentRoom != null)
                 {
-                    infostrs.Add(string.Format("{0}, {1}", currentScene.GetName(), currentRoom.Description));
+                    infostrs.Add($"{currentScene.GetName()}, {currentRoom.Description}");
                 }
             }
             else
             {
-                infostrs.Add(string.Format("Ready{0}", ((Configuration.ShownIntelWarning || Configuration.ShownExtensionWarning) ? " (limited combiner)" : string.Empty)));
-                if (rom != null && rom.Scenes != null) infostrs.Add(string.Format("{0} ({1}, v1.{2}; {3} scenes)", rom.Title, rom.GameID, rom.Version, rom.Scenes.Count));
+                infostrs.Add(
+                    $"Ready{((Configuration.ShownIntelWarning || Configuration.ShownExtensionWarning) ? " (limited combiner)" : string.Empty)}");
+                if (_baseRom != null && _baseRom.Scenes != null) infostrs.Add(
+                    $"{_baseRom.Title} ({_baseRom.GameId}, v1.{_baseRom.Version}; {_baseRom.Scenes.Count} scenes)");
             }
 
             if (currentRoom != null && currentRoom.ActiveRoomActorData != null)
             {
-                infostrs.Add(string.Format("{0} room actor{1}", currentRoom.ActiveRoomActorData.ActorList.Count, (currentRoom.ActiveRoomActorData.ActorList.Count != 1 ? "s" : "")));
+                infostrs.Add(
+                    $"{currentRoom.ActiveRoomActorData.ActorList.Count} room actor{(currentRoom.ActiveRoomActorData.ActorList.Count != 1 ? "s" : "")}");
             }
 
             if (currentScene != null && currentScene.GetActiveTransitionData() != null && currentRoom == null)
             {
-                infostrs.Add(string.Format("{0} transition actor{1}", currentScene.GetActiveTransitionData().ActorList.Count, (currentScene.GetActiveTransitionData().ActorList.Count != 1 ? "s" : "")));
+                infostrs.Add(
+                    $"{currentScene.GetActiveTransitionData().ActorList.Count} transition actor{(currentScene.GetActiveTransitionData().ActorList.Count != 1 ? "s" : "")}");
             }
 
             if (currentScene != null && currentScene.GetActiveSpawnPointData() != null && currentRoom == null)
             {
-                infostrs.Add(string.Format("{0} spawn point{1}", currentScene.GetActiveSpawnPointData().ActorList.Count, (currentScene.GetActiveSpawnPointData().ActorList.Count != 1 ? "s" : "")));
+                infostrs.Add(
+                    $"{currentScene.GetActiveSpawnPointData().ActorList.Count} spawn point{(currentScene.GetActiveSpawnPointData().ActorList.Count != 1 ? "s" : "")}");
             }
 
             if (currentRoom != null && currentRoom.ActiveObjects != null)
             {
-                infostrs.Add(string.Format("{0} object{1}", currentRoom.ActiveObjects.ObjectList.Count, (currentRoom.ActiveObjects.ObjectList.Count != 1 ? "s" : "")));
+                infostrs.Add(
+                    $"{currentRoom.ActiveObjects.ObjectList.Count} object{(currentRoom.ActiveObjects.ObjectList.Count != 1 ? "s" : "")}");
             }
 
             if (currentScene != null && currentScene.GetActiveWaypoints() != null && currentRoom == null)
             {
-                infostrs.Add(string.Format("{0} path{1}", currentScene.GetActiveWaypoints().Paths.Count, (currentScene.GetActiveWaypoints().Paths.Count != 1 ? "s" : "")));
+                infostrs.Add(
+                    $"{currentScene.GetActiveWaypoints().Paths.Count} path{(currentScene.GetActiveWaypoints().Paths.Count != 1 ? "s" : "")}");
             }
 
             Program.Status.Message = string.Join("; ", infostrs);
@@ -645,41 +661,41 @@ namespace SceneNavi
 
             if (currentScene != null)
             {
-                if (!rom.IsMajora)
+                if (!_baseRom.IsMajora)
                 {
-                    SceneTableEntryOcarina steOcarina = (currentScene as SceneTableEntryOcarina);
-                    editAreaTitleCardToolStripMenuItem.Enabled = (!rom.IsMajora && steOcarina.LabelStartAddress != 0 && steOcarina.LabelEndAddress != 0);
+                    var steOcarina = (currentScene as SceneTableEntryOcarina);
+                    editAreaTitleCardToolStripMenuItem.Enabled = (!_baseRom.IsMajora && steOcarina.LabelStartAddress != 0 && steOcarina.LabelEndAddress != 0);
                 }
 
-                HeaderCommands.Rooms rooms = (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms);
+                var rooms = (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms);
                 if (rooms != null)
                 {
-                    roomsForWaterboxSelection = new List<XMLActorDefinitionReader.Definition.Item.Option>();
-                    roomsForWaterboxSelection.Add(new XMLActorDefinitionReader.Definition.Item.Option() { Description = "(All Rooms)", Value = 0x3F });
-                    foreach (HeaderCommands.Rooms.RoomInfoClass ric in rooms.RoomInformation)
-                        roomsForWaterboxSelection.Add(new XMLActorDefinitionReader.Definition.Item.Option() { Description = ric.Description, Value = ric.Number });
+                    roomsForWaterboxSelection = new List<Option>();
+                    roomsForWaterboxSelection.Add(new Option() { Description = "(All Rooms)", Value = 0x3F });
+                    foreach (var ric in rooms.RoomInformation)
+                        roomsForWaterboxSelection.Add(new Option() { Description = ric.Description, Value = ric.Number });
                 }
 
                 if (currentRoom == null)
                 {
-                    rom.SegmentMapping.Remove((byte)0x02);
-                    rom.SegmentMapping.Add((byte)0x02, currentScene.GetData());
+                    _baseRom.SegmentMapping.Remove((byte)0x02);
+                    _baseRom.SegmentMapping.Add((byte)0x02, currentScene.GetData());
 
-                    allMeshHeaders = new List<HeaderCommands.MeshHeader>();
+                    allMeshHeaders = new List<MeshHeader>();
 
                     if (rooms != null)
                     {
-                        foreach (HeaderLoader hl in rooms.RoomInformation.SelectMany(x => x.Headers))
-                            allMeshHeaders.Add(hl.Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.MeshHeader) as HeaderCommands.MeshHeader);
+                        foreach (var hl in rooms.RoomInformation.SelectMany(x => x.Headers))
+                            allMeshHeaders.Add(hl.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.MeshHeader) as MeshHeader);
                     }
                     allMeshHeaders = allMeshHeaders.Distinct().ToList();
                 }
                 else if (currentRoom != null)
                 {
-                    rom.SegmentMapping.Remove((byte)0x02);
-                    rom.SegmentMapping.Remove((byte)0x03);
-                    rom.SegmentMapping.Add((byte)0x02, currentScene.GetData());
-                    rom.SegmentMapping.Add((byte)0x03, currentRoom.Data);
+                    _baseRom.SegmentMapping.Remove((byte)0x02);
+                    _baseRom.SegmentMapping.Remove((byte)0x03);
+                    _baseRom.SegmentMapping.Add((byte)0x02, currentScene.GetData());
+                    _baseRom.SegmentMapping.Add((byte)0x03, currentRoom.Data);
                 }
             }
             else
@@ -722,7 +738,7 @@ namespace SceneNavi
                 cbSpecialObjs.Enabled = true;
                 cbSpecialObjs.DisplayMember = "Name";
                 cbSpecialObjs.ValueMember = "ObjectNumber";
-                cbSpecialObjs.DataSource = new BindingSource() { DataSource = HeaderCommands.SpecialObjects.Types };
+                cbSpecialObjs.DataSource = new BindingSource() { DataSource = SpecialObjects.Types };
                 cbSpecialObjs.DataBindings.Clear();
                 cbSpecialObjs.DataBindings.Add("SelectedValue", currentScene.GetActiveSpecialObjs(), "SelectedSpecialObjects");
             }
@@ -771,8 +787,10 @@ namespace SceneNavi
 
             if (currentScene != null && currentScene.GetActiveCollision() != null && currentScene.GetActiveCollision().Waterboxes.Count > 0)
             {
-                List<HeaderCommands.Collision.Waterbox> wblist = new List<HeaderCommands.Collision.Waterbox>();
-                wblist.Add(new HeaderCommands.Collision.Waterbox());
+                var wblist = new List<Collision.Waterbox>
+                {
+                    new Collision.Waterbox()
+                };
                 wblist.AddRange(currentScene.GetActiveCollision().Waterboxes);
 
                 waterboxComboDataBinding = new BindingSource();
@@ -798,7 +816,7 @@ namespace SceneNavi
                 cbSceneMetaBGM.DataBindings.Clear();
                 cbSceneMetaBGM.DataBindings.Add("SelectedValue", currentScene.GetActiveSettingsSoundScene(), "TrackID");
                 nudSceneMetaReverb.Value = currentScene.GetActiveSettingsSoundScene().Reverb;
-                nudSceneMetaNightSFX.Value = currentScene.GetActiveSettingsSoundScene().NightSfxID;
+                nudSceneMetaNightSFX.Value = currentScene.GetActiveSettingsSoundScene().NightSfxId;
                 nudSceneMetaReverb.Enabled = nudSceneMetaNightSFX.Enabled = true;
             }
             else
@@ -814,16 +832,14 @@ namespace SceneNavi
             waterboxesDirty = true;
         }
 
-        private void RefreshWaypointPathList(HeaderCommands.Waypoints wp)
+        private void RefreshWaypointPathList(Waypoints wp)
         {
             if (wp == null) return;
 
-            List<HeaderCommands.Waypoints.PathHeader> pathlist = new List<HeaderCommands.Waypoints.PathHeader>();
-            pathlist.Add(new HeaderCommands.Waypoints.PathHeader());
+            var pathlist = new List<PathHeader> {new PathHeader()};
             pathlist.AddRange(wp.Paths);
 
-            waypointPathComboDataBinding = new BindingSource();
-            waypointPathComboDataBinding.DataSource = pathlist;
+            waypointPathComboDataBinding = new BindingSource {DataSource = pathlist};
             cbPathHeaders.DataSource = waypointPathComboDataBinding;
             cbPathHeaders.DisplayMember = "Description";
             cbPathHeaders.Enabled = true;
@@ -850,7 +866,7 @@ namespace SceneNavi
 
         private void dgvObjects_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            DataGridView dgv = (sender as DataGridView);
+            var dgv = (sender as DataGridView);
 
             if (dgv.Columns[e.ColumnIndex].Name == "Number")
             {
@@ -858,7 +874,7 @@ namespace SceneNavi
                 {
                     try
                     {
-                        e.Value = string.Format("0x{0:X4}", e.Value);
+                        e.Value = $"0x{e.Value:X4}";
                         e.FormattingApplied = true;
                     }
                     catch
@@ -871,14 +887,14 @@ namespace SceneNavi
 
         private void dgvObjects_CellParsing(object sender, DataGridViewCellParsingEventArgs e)
         {
-            DataGridView dgv = (sender as DataGridView);
+            var dgv = (sender as DataGridView);
 
             if (dgv.Columns[e.ColumnIndex].Name == "Number")
             {
                 if (e != null && e.Value != null && e.DesiredType.Equals(typeof(ushort)))
                 {
-                    string str = (e.Value as string);
-                    bool ishex = str.StartsWith("0x");
+                    var str = (e.Value as string);
+                    var ishex = str.StartsWith("0x");
 
                     ushort val = 0;
                     if (ushort.TryParse((ishex ? str.Substring(2) : str), (ishex ? System.Globalization.NumberStyles.AllowHexSpecifier : System.Globalization.NumberStyles.None),
@@ -893,16 +909,16 @@ namespace SceneNavi
 
         private void dgvObjects_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
-            DataGridView dgv = (sender as DataGridView);
+            var dgv = (sender as DataGridView);
 
-            int column = dgv.CurrentCell.ColumnIndex;
-            string name = dgv.Columns[column].DataPropertyName;
+            var column = dgv.CurrentCell.ColumnIndex;
+            var name = dgv.Columns[column].DataPropertyName;
 
             if (name.Equals("Name") && e.Control is TextBox)
             {
-                TextBox tb = e.Control as TextBox;
+                var tb = e.Control as TextBox;
                 tb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                tb.AutoCompleteCustomSource = rom.ObjectNameACStrings;
+                tb.AutoCompleteCustomSource = _baseRom.ObjectNameAcStrings;
                 tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
             }
         }
@@ -914,7 +930,7 @@ namespace SceneNavi
 
         private void tvScenes_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Node.Tag is ROMHandler.ROMHandler)
+            if (e.Node.Tag is BaseRomHandler)
                 ResetCurrentData();
             if (e.Node.Tag is ISceneTableEntry)
             {
@@ -928,9 +944,9 @@ namespace SceneNavi
                 currentRoomTriangle = null;
                 currentRoomVertex = null;
             }
-            else if (e.Node.Tag is HeaderLoader.HeaderPair)
+            else if (e.Node.Tag is HeaderPair)
             {
-                HeaderLoader.HeaderPair hp = (e.Node.Tag as HeaderLoader.HeaderPair);
+                var hp = (e.Node.Tag as HeaderPair);
 
                 if (hp.SceneHeader.Parent != currentScene) currentScene = (hp.SceneHeader.Parent as ISceneTableEntry);
                 currentScene.SetCurrentSceneHeader(hp.SceneHeader);
@@ -940,15 +956,15 @@ namespace SceneNavi
                 currentRoomTriangle = null;
                 currentRoomVertex = null;
             }
-            else if (e.Node.Tag is HeaderCommands.Rooms.RoomInfoClass)
+            else if (e.Node.Tag is RoomInfoClass)
             {
-                HeaderLoader.HeaderPair hp = (e.Node.Parent.Tag as HeaderLoader.HeaderPair);
+                var hp = (e.Node.Parent.Tag as HeaderPair);
 
                 if (hp.SceneHeader.Parent != currentScene) currentScene = (hp.SceneHeader.Parent as ISceneTableEntry);
                 currentScene.SetCurrentSceneHeader(hp.SceneHeader);
                 currentEnvSettings = currentScene.GetActiveEnvSettings().EnvSettingList.First();
 
-                currentRoom = (e.Node.Tag as HeaderCommands.Rooms.RoomInfoClass);
+                currentRoom = (e.Node.Tag as RoomInfoClass);
                 if (hp.SceneHeader.Number < currentRoom.Headers.Count)
                     currentRoom.CurrentRoomHeader = currentRoom.Headers[hp.SceneHeader.Number];
 
@@ -961,14 +977,14 @@ namespace SceneNavi
 
         private void tvScenes_MouseUp(object sender, MouseEventArgs e)
         {
-            SceneNavi.Controls.TreeViewEx tree = (sender as SceneNavi.Controls.TreeViewEx);
+            var tree = (sender as Controls.TreeViewEx);
 
             if (e.Button == MouseButtons.Right)
             {
-                Point pt = new Point(e.X, e.Y);
+                var pt = new Point(e.X, e.Y);
                 tree.PointToClient(pt);
 
-                TreeNode Node = tree.GetNodeAt(pt);
+                var Node = tree.GetNodeAt(pt);
                 if (Node != null)
                 {
                     if (Node.Bounds.Contains(pt))
@@ -983,34 +999,33 @@ namespace SceneNavi
         private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO  make more useful! print statistics about the object in question in the msgbox? like actor counts, etc?
-            object tag = tvScenes.SelectedNode.Tag;
+            var tag = tvScenes.SelectedNode.Tag;
 
-            if (tag is ROMHandler.ROMHandler)
+            if (tag is BaseRomHandler)
             {
                 //meh
                 rOMInformationToolStripMenuItem_Click(rOMInformationToolStripMenuItem, EventArgs.Empty);
             }
             else if (tag is ISceneTableEntry)
             {
-                ISceneTableEntry ste = (tag as ISceneTableEntry);
+                var ste = (tag as ISceneTableEntry);
 
                 MessageBox.Show(
-                    string.Format("Filename: {0}\nROM location: 0x{1:X} - 0x{2:X}\nScene headers: {3} headers",
-                    ste.GetDMAFilename(), ste.GetSceneStartAddress(), ste.GetSceneEndAddress(), ste.GetSceneHeaders().Count),
+                    $"Filename: {ste.GetDMAFilename()}\nROM location: 0x{ste.GetSceneStartAddress():X} - 0x{ste.GetSceneEndAddress():X}\nScene headers: {ste.GetSceneHeaders().Count} headers",
                     "Scene Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else if (tag is HeaderLoader.HeaderPair)
+            else if (tag is HeaderPair)
             {
-                HeaderLoader.HeaderPair hp = (tag as HeaderLoader.HeaderPair);
+                var hp = (tag as HeaderPair);
                 MessageBox.Show(
-                    string.Format("Stage: {0}\nScene header: #{1} (0x{2:X})\n", hp.Description, hp.SceneHeader.Number, hp.SceneHeader.Offset),
+                    $"Stage: {hp.Description}\nScene header: #{hp.SceneHeader.Number} (0x{hp.SceneHeader.Offset:X})\n",
                     "Stage Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else if (tag is HeaderCommands.Rooms.RoomInfoClass)
+            else if (tag is RoomInfoClass)
             {
-                HeaderCommands.Rooms.RoomInfoClass ric = (tag as HeaderCommands.Rooms.RoomInfoClass);
+                var ric = (tag as RoomInfoClass);
                 MessageBox.Show(
-                    string.Format("Filename: {0}\nROM location: 0x{1:X} - 0x{2:X}\nRoom headers: {3} headers", ric.DMAFilename, ric.Start, ric.End, ric.Headers.Count),
+                    $"Filename: {ric.DmaFilename}\nROM location: 0x{ric.Start:X} - 0x{ric.End:X}\nRoom headers: {ric.Headers.Count} headers",
                     "Room Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -1047,10 +1062,10 @@ namespace SceneNavi
             supportsCreateShader = Initialization.SupportsFunction("glCreateShader");
             supportsGenProgramsARB = Initialization.SupportsFunction("glGenProgramsARB");
 
-            StringBuilder extErrorMessages = new StringBuilder();
-            List<string> extMissAll = new List<string>();
+            var extErrorMessages = new StringBuilder();
+            var extMissAll = new List<string>();
 
-            List<string> extMissGeneral = Initialization.CheckForExtensions(requiredOglExtensionsGeneral);
+            var extMissGeneral = Initialization.CheckForExtensions(requiredOglExtensionsGeneral);
             extMissAll.AddRange(extMissGeneral);
             if (extMissGeneral.Contains("GL_ARB_multisample"))
             {
@@ -1059,7 +1074,7 @@ namespace SceneNavi
                 extErrorMessages.AppendLine("Multisampling is not supported. Anti-aliasing support has been disabled.");
             }
 
-            List<string> extMissCombinerGeneral = Initialization.CheckForExtensions(requiredOglExtensionsCombinerGeneral);
+            var extMissCombinerGeneral = Initialization.CheckForExtensions(requiredOglExtensionsCombinerGeneral);
             extMissAll.AddRange(extMissCombinerGeneral);
             if (extMissCombinerGeneral.Contains("GL_ARB_multitexture"))
             {
@@ -1068,14 +1083,14 @@ namespace SceneNavi
             }
             else
             {
-                List<string> extMissARBCombiner = Initialization.CheckForExtensions(requiredOglExtensionsARBCombiner);
+                var extMissARBCombiner = Initialization.CheckForExtensions(requiredOglExtensionsARBCombiner);
                 extMissAll.AddRange(extMissARBCombiner);
                 if (extMissARBCombiner.Count > 0 || !supportsGenProgramsARB)
                 {
                     extErrorMessages.AppendLine("ARB Fragment Programs are not supported. ARB Assembly Combiner has been disabled.");
                 }
 
-                List<string> extMissGLSLCombiner = Initialization.CheckForExtensions(requiredOglExtensionsGLSLCombiner);
+                var extMissGLSLCombiner = Initialization.CheckForExtensions(requiredOglExtensionsGLSLCombiner);
                 extMissAll.AddRange(extMissGLSLCombiner);
                 if (extMissGLSLCombiner.Count > 0)
                 {
@@ -1091,13 +1106,13 @@ namespace SceneNavi
                 {
                     Configuration.ShownExtensionWarning = true;
 
-                    StringBuilder sb = new StringBuilder();
+                    var sb = new StringBuilder();
 
                     if (extMissAll.Count > 0)
                     {
                         sb.AppendFormat("The following OpenGL Extension{0} not supported by your hardware:\n", ((extMissAll.Count - 1) > 0 ? "s are" : " is"));
                         sb.AppendLine();
-                        foreach (string str in extMissAll) sb.AppendFormat("* {0}\n", str);
+                        foreach (var str in extMissAll) sb.AppendFormat("* {0}\n", str);
                         sb.AppendLine();
                     }
 
@@ -1160,7 +1175,7 @@ namespace SceneNavi
 
                 RenderInit(((GLControl)sender).ClientRectangle, Color.LightBlue);
 
-                if (rom != null && rom.Loaded)
+                if (_baseRom != null && _baseRom.Loaded)
                 {
                     /* Scene/rooms */
                     RenderScene();
@@ -1174,21 +1189,21 @@ namespace SceneNavi
                     {
                         /* Room actors */
                         if (Configuration.RenderRoomActors && currentRoom != null && currentRoom.ActiveRoomActorData != null)
-                            foreach (HeaderCommands.Actors.Entry ac in currentRoom.ActiveRoomActorData.ActorList)
-                                ac.Render(ac == (cbActors.SelectedItem as HeaderCommands.Actors.Entry) &&
-                                    cbActors.Visible ? HeaderCommands.PickableObjectRenderType.Selected : HeaderCommands.PickableObjectRenderType.Normal);
+                            foreach (var ac in currentRoom.ActiveRoomActorData.ActorList)
+                                ac.Render(ac == (cbActors.SelectedItem as Actors.Entry) &&
+                                    cbActors.Visible ? PickableObjectRenderType.Selected : PickableObjectRenderType.Normal);
 
                         /* Spawn points */
                         if (Configuration.RenderSpawnPoints && currentScene != null && currentScene.GetActiveSpawnPointData() != null)
-                            foreach (HeaderCommands.Actors.Entry ac in currentScene.GetActiveSpawnPointData().ActorList)
-                                ac.Render(ac == (cbSpawnPoints.SelectedItem as HeaderCommands.Actors.Entry) &&
-                                    cbSpawnPoints.Visible ? HeaderCommands.PickableObjectRenderType.Selected : HeaderCommands.PickableObjectRenderType.Normal);
+                            foreach (var ac in currentScene.GetActiveSpawnPointData().ActorList)
+                                ac.Render(ac == (cbSpawnPoints.SelectedItem as Actors.Entry) &&
+                                    cbSpawnPoints.Visible ? PickableObjectRenderType.Selected : PickableObjectRenderType.Normal);
 
                         /* Transitions */
                         if (Configuration.RenderTransitions && currentScene != null && currentScene.GetActiveTransitionData() != null)
-                            foreach (HeaderCommands.Actors.Entry ac in currentScene.GetActiveTransitionData().ActorList)
-                                ac.Render(ac == (cbTransitions.SelectedItem as HeaderCommands.Actors.Entry) &&
-                                    cbTransitions.Visible ? HeaderCommands.PickableObjectRenderType.Selected : HeaderCommands.PickableObjectRenderType.Normal);
+                            foreach (var ac in currentScene.GetActiveTransitionData().ActorList)
+                                ac.Render(ac == (cbTransitions.SelectedItem as Actors.Entry) &&
+                                    cbTransitions.Visible ? PickableObjectRenderType.Selected : PickableObjectRenderType.Normal);
 
                         /* Path waypoints */
                         if (Configuration.RenderPathWaypoints && activePathHeader != null && activePathHeader.Points != null)
@@ -1200,13 +1215,13 @@ namespace SceneNavi
                                 GL.Color3(0.25, 0.5, 1.0);
 
                                 GL.Begin(PrimitiveType.LineStrip);
-                                foreach (HeaderCommands.Waypoints.Waypoint wp in activePathHeader.Points) GL.Vertex3(wp.X, wp.Y, wp.Z);
+                                foreach (var wp in activePathHeader.Points) GL.Vertex3(wp.X, wp.Y, wp.Z);
                                 GL.End();
                             }
 
-                            HeaderCommands.Waypoints.Waypoint selwp = (dgvPathWaypoints.SelectedCells.Count != 0 ? dgvPathWaypoints.SelectedCells[0].OwningRow.DataBoundItem as HeaderCommands.Waypoints.Waypoint : null);
-                            foreach (HeaderCommands.Waypoints.Waypoint wp in activePathHeader.Points)
-                                wp.Render(wp == selwp && cbPathHeaders.Visible ? HeaderCommands.PickableObjectRenderType.Selected : HeaderCommands.PickableObjectRenderType.Normal);
+                            var selwp = (dgvPathWaypoints.SelectedCells.Count != 0 ? dgvPathWaypoints.SelectedCells[0].OwningRow.DataBoundItem as Waypoint : null);
+                            foreach (var wp in activePathHeader.Points)
+                                wp.Render(wp == selwp && cbPathHeaders.Visible ? PickableObjectRenderType.Selected : PickableObjectRenderType.Normal);
                         }
                     }
                     GL.PopAttrib();
@@ -1235,20 +1250,20 @@ namespace SceneNavi
                             if (Configuration.RenderCollisionAsWhite) GL.Color4(1.0, 1.0, 1.0, 0.5);
 
                             GL.Begin(PrimitiveType.Triangles);
-                            foreach (HeaderCommands.Collision.Polygon poly in currentScene.GetActiveCollision().Polygons)
+                            foreach (var poly in currentScene.GetActiveCollision().Polygons)
                             {
                                 if (poly == currentCollisionPolygon && cbCollisionPolys.Visible)
                                 {
                                     GL.Color4(0.5, 0.5, 1.0, 0.5);
-                                    poly.Render(HeaderCommands.PickableObjectRenderType.NoColor);
+                                    poly.Render(PickableObjectRenderType.NoColor);
                                     if (Configuration.RenderCollisionAsWhite) GL.Color4(1.0, 1.0, 1.0, 0.5);
                                 }
                                 else
                                 {
                                     if (Configuration.RenderCollisionAsWhite)
-                                        poly.Render(HeaderCommands.PickableObjectRenderType.NoColor);
+                                        poly.Render(PickableObjectRenderType.NoColor);
                                     else
-                                        poly.Render(HeaderCommands.PickableObjectRenderType.Normal);
+                                        poly.Render(PickableObjectRenderType.Normal);
                                 }
                             }
                             GL.End();
@@ -1258,7 +1273,7 @@ namespace SceneNavi
                             GL.LineWidth(2.0f);
                             GL.Color3(Color.Black);
                             GL.Begin(PrimitiveType.Triangles);
-                            foreach (HeaderCommands.Collision.Polygon poly in currentScene.GetActiveCollision().Polygons) poly.Render(HeaderCommands.PickableObjectRenderType.NoColor);
+                            foreach (var poly in currentScene.GetActiveCollision().Polygons) poly.Render(PickableObjectRenderType.NoColor);
                             GL.End();
 
                             GL.PopAttrib();
@@ -1289,27 +1304,27 @@ namespace SceneNavi
                             GL.Disable(EnableCap.CullFace);
 
                             GL.Begin(PrimitiveType.Quads);
-                            foreach (HeaderCommands.Collision.Waterbox wb in currentScene.GetActiveCollision().Waterboxes)
+                            foreach (var wb in currentScene.GetActiveCollision().Waterboxes)
                             {
-                                double alpha = ((Configuration.ShowWaterboxesPerRoom && currentRoom != null && (wb.RoomNumber != currentRoom.Number && wb.RoomNumber != 0x3F)) ? 0.1 : 0.5);
+                                var alpha = ((Configuration.ShowWaterboxesPerRoom && currentRoom != null && (wb.RoomNumber != currentRoom.Number && wb.RoomNumber != 0x3F)) ? 0.1 : 0.5);
 
                                 if (wb == currentWaterbox && cbWaterboxes.Visible)
                                     GL.Color4(0.5, 1.0, 0.5, alpha);
                                 else
                                     GL.Color4(0.0, 0.5, 1.0, alpha);
 
-                                wb.Render(HeaderCommands.PickableObjectRenderType.Normal);
+                                wb.Render(PickableObjectRenderType.Normal);
                             }
                             GL.End();
 
                             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
                             GL.LineWidth(2.0f);
                             GL.Begin(PrimitiveType.Quads);
-                            foreach (HeaderCommands.Collision.Waterbox wb in currentScene.GetActiveCollision().Waterboxes)
+                            foreach (var wb in currentScene.GetActiveCollision().Waterboxes)
                             {
-                                double alpha = ((Configuration.ShowWaterboxesPerRoom && currentRoom != null && (wb.RoomNumber != currentRoom.Number && wb.RoomNumber != 0x3F)) ? 0.1 : 0.5);
+                                var alpha = ((Configuration.ShowWaterboxesPerRoom && currentRoom != null && (wb.RoomNumber != currentRoom.Number && wb.RoomNumber != 0x3F)) ? 0.1 : 0.5);
                                 GL.Color4(0.0, 0.0, 0.0, alpha);
-                                wb.Render(HeaderCommands.PickableObjectRenderType.Normal);
+                                wb.Render(PickableObjectRenderType.Normal);
                             }
                             GL.End();
 
@@ -1325,7 +1340,7 @@ namespace SceneNavi
                     /* Render selected room triangle overlay */
                     if (currentRoomTriangle != null && !Configuration.RenderCollision)
                     {
-                        currentRoomTriangle.Render(HeaderCommands.PickableObjectRenderType.Normal);
+                        currentRoomTriangle.Render(PickableObjectRenderType.Normal);
                     }
 
                     /* 2D text overlay */
@@ -1344,7 +1359,7 @@ namespace SceneNavi
         {
             GL.ClearColor(clearColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            Initialization.CreateViewportAndProjection(Initialization.ProjectionTypes.Perspective, rect, 0.001f, (currentEnvSettings != null ? ((float)currentEnvSettings.DrawDistance / 50.0f) : 300.0f));
+            Initialization.CreateViewportAndProjection(Initialization.ProjectionTypes.Perspective, rect, 0.001f, (currentEnvSettings != null ? (currentEnvSettings.DrawDistance / 50.0f) : 300.0f));
             camera.Position();
             GL.Scale(oglSceneScale, oglSceneScale, oglSceneScale);
         }
@@ -1364,17 +1379,17 @@ namespace SceneNavi
             else if (currentScene != null && currentScene.GetCurrentSceneHeader() != null)
             {
                 /* Render all rooms */
-                foreach (HeaderCommands.Rooms.RoomInfoClass ric in
-                    (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms).RoomInformation)
+                foreach (var ric in
+                    (currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms).RoomInformation)
                 {
-                    rom.SegmentMapping.Remove((byte)0x02);
-                    rom.SegmentMapping.Remove((byte)0x03);
-                    rom.SegmentMapping.Add((byte)0x02, (ric.Parent as ISceneTableEntry).GetData());
-                    rom.SegmentMapping.Add((byte)0x03, ric.Data);
+                    _baseRom.SegmentMapping.Remove((byte)0x02);
+                    _baseRom.SegmentMapping.Remove((byte)0x03);
+                    _baseRom.SegmentMapping.Add((byte)0x02, (ric.Parent as ISceneTableEntry).GetData());
+                    _baseRom.SegmentMapping.Add((byte)0x03, ric.Data);
 
                     if (ric.Headers.Count == 0) continue;
 
-                    HeaderCommands.MeshHeader mh = (ric.Headers[0].Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.MeshHeader) as HeaderCommands.MeshHeader);
+                    var mh = (ric.Headers[0].Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.MeshHeader) as MeshHeader);
                     if (mh == null) continue;
 
                     RenderMeshHeader(mh);
@@ -1385,7 +1400,7 @@ namespace SceneNavi
             GL.PopAttrib();
         }
 
-        private void RenderMeshHeader(HeaderCommands.MeshHeader mh)
+        private void RenderMeshHeader(MeshHeader mh)
         {
             if (mh.DLs == null || displayListsDirty || mh.CachedWithTextures != Configuration.RenderTextures || mh.CachedWithCombinerType != Configuration.CombinerType)
             {
@@ -1425,16 +1440,16 @@ namespace SceneNavi
         private void RenderTextOverlay()
         {
             glText.Begin(customGLControl);
-            if (!Configuration.OGLVSync) glText.Print(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.00} FPS", fpsMonitor.Value), new Vector2d(10.0, 10.0), Color.FromArgb(128, Color.Black));
+            if (!Configuration.OglvSync) glText.Print(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.00} FPS", fpsMonitor.Value), new Vector2d(10.0, 10.0), Color.FromArgb(128, Color.Black));
             glText.Flush();
         }
 
-        private HeaderCommands.IPickableObject TryPickObject(int x, int y, bool moveable)
+        private IPickableObject TryPickObject(int x, int y, bool moveable)
         {
             if (currentScene == null) return null;
 
-            HeaderCommands.IPickableObject picked = null;
-            List<HeaderCommands.IPickableObject> pickobjs = new List<HeaderCommands.IPickableObject>();
+            IPickableObject picked = null;
+            var pickobjs = new List<IPickableObject>();
 
             /* Room model triangle vertices */
             if (!Configuration.RenderCollision && currentRoomTriangle != null)
@@ -1446,7 +1461,7 @@ namespace SceneNavi
             {
                 if (currentRoom.ActiveMeshHeader.DLs[0].Triangles[0].IsMoveable == moveable)
                 {
-                    foreach (DisplayListEx dlex in currentRoom.ActiveMeshHeader.DLs)
+                    foreach (var dlex in currentRoom.ActiveMeshHeader.DLs)
                         pickobjs.AddRange(dlex.Triangles);
                 }
             }
@@ -1491,17 +1506,17 @@ namespace SceneNavi
                 if (picked.IsMoveable != moveable) return null;
 
                 /* What's been picked...? */
-                if (picked is HeaderCommands.Waypoints.Waypoint)
+                if (picked is Waypoint)
                 {
                     dgvPathWaypoints.ClearSelection();
-                    DataGridViewRow row = dgvPathWaypoints.Rows.OfType<DataGridViewRow>().FirstOrDefault(xx => xx.DataBoundItem == picked as HeaderCommands.Waypoints.Waypoint);
+                    var row = dgvPathWaypoints.Rows.OfType<DataGridViewRow>().FirstOrDefault(xx => xx.DataBoundItem == picked as Waypoint);
                     if (row == null) return null;
                     row.Cells["X"].Selected = true;
                     tabControl1.SelectTab(tpWaypoints);
                 }
-                else if (picked is HeaderCommands.Actors.Entry)
+                else if (picked is Actors.Entry)
                 {
-                    HeaderCommands.Actors.Entry actor = (picked as HeaderCommands.Actors.Entry);
+                    var actor = (picked as Actors.Entry);
 
                     if (actor.IsSpawnPoint)
                     {
@@ -1519,33 +1534,33 @@ namespace SceneNavi
                         tabControl1.SelectTab(tpRoomActors);
                     }
                 }
-                else if (picked is HeaderCommands.Collision.Polygon)
+                else if (picked is Collision.Polygon)
                 {
-                    currentCollisionPolygon = (picked as HeaderCommands.Collision.Polygon);
+                    currentCollisionPolygon = (picked as Collision.Polygon);
 
                     cbCollisionPolys.SelectedItem = currentCollisionPolygon;
                     tabControl1.SelectTab(tpCollision);
                 }
-                else if (picked is HeaderCommands.Collision.Waterbox)
+                else if (picked is Collision.Waterbox)
                 {
-                    currentWaterbox = (picked as HeaderCommands.Collision.Waterbox);
+                    currentWaterbox = (picked as Collision.Waterbox);
 
                     cbWaterboxes.SelectedItem = currentWaterbox;
                     tabControl1.SelectTab(tpWaterboxes);
                 }
-                else if (picked is HeaderCommands.MeshHeader)
+                else if (picked is MeshHeader)
                 {
                     tvScenes.SelectedNode = tvScenes.FlattenTree().FirstOrDefault(xx =>
-                        xx.Tag == ((picked as HeaderCommands.MeshHeader).Parent as HeaderCommands.Rooms.RoomInfoClass) &&
-                        (xx.Parent.Tag as HeaderLoader.HeaderPair).SceneHeader.Number == currentScene.GetCurrentSceneHeader().Number);
+                        xx.Tag == ((picked as MeshHeader).Parent as RoomInfoClass) &&
+                        (xx.Parent.Tag as HeaderPair).SceneHeader.Number == currentScene.GetCurrentSceneHeader().Number);
                 }
-                else if (picked is OpenGLHelpers.DisplayListEx.Triangle)
+                else if (picked is DisplayListEx.Triangle)
                 {
                     if (currentRoomTriangle != picked)
                     {
                         if (currentRoomTriangle != null) currentRoomTriangle.SelectedVertex = null;
 
-                        currentRoomTriangle = (picked as OpenGLHelpers.DisplayListEx.Triangle);
+                        currentRoomTriangle = (picked as DisplayListEx.Triangle);
                         currentRoomVertex = null;
                     }
                 }
@@ -1558,7 +1573,7 @@ namespace SceneNavi
             return picked;
         }
 
-        private HeaderCommands.IPickableObject DoPicking(int x, int y, List<HeaderCommands.IPickableObject> objlist)
+        private IPickableObject DoPicking(int x, int y, List<IPickableObject> objlist)
         {
             /* It's MAGIC! I fucking hate picking and shit. */
             GL.PushAttrib(AttribMask.AllAttribBits);
@@ -1571,24 +1586,24 @@ namespace SceneNavi
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             RenderInit(customGLControl.ClientRectangle, Color.Black);
-            foreach (HeaderCommands.IPickableObject obj in objlist)
+            foreach (var obj in objlist)
             {
-                if (obj is HeaderCommands.Collision.Polygon || obj is OpenGLHelpers.DisplayListEx.Triangle)
+                if (obj is Collision.Polygon || obj is DisplayListEx.Triangle)
                     GL.Enable(EnableCap.CullFace);
                 else
                     GL.Disable(EnableCap.CullFace);
 
-                obj.Render(HeaderCommands.PickableObjectRenderType.Picking);
+                obj.Render(PickableObjectRenderType.Picking);
             }
 
             GL.PopAttrib();
 
-            byte[] pixel = new byte[4];
-            int[] viewport = new int[4];
+            var pixel = new byte[4];
+            var viewport = new int[4];
 
             GL.GetInteger(GetPName.Viewport, viewport);
             GL.ReadPixels(x, viewport[3] - y, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, pixel);
-            uint argb = (uint)((pixel[3] << 24) | (pixel[0] << 16) | (pixel[1] << 8) | pixel[2]);
+            var argb = (uint)((pixel[3] << 24) | (pixel[0] << 16) | (pixel[1] << 8) | pixel[2]);
 
             return objlist.FirstOrDefault(xx => (xx.PickColor.ToArgb() & 0xFFFFFF) == (int)(argb & 0xFFFFFF));
         }
@@ -1627,8 +1642,8 @@ namespace SceneNavi
                                 ((Control)sender).Focus();
 
                                 /* Mark GLDLs as dirty? */
-                                collisionDirty = (pickedObject is HeaderCommands.Collision.Polygon);
-                                waterboxesDirty = (pickedObject is HeaderCommands.Collision.Waterbox);
+                                collisionDirty = (pickedObject is Collision.Polygon);
+                                waterboxesDirty = (pickedObject is Collision.Waterbox);
 
                                 /* Static object? Camera */
                                 if (currentToolMode == ToolModes.StaticObjs)
@@ -1648,13 +1663,13 @@ namespace SceneNavi
                             {
                                 if (currentToolMode == ToolModes.MoveableObjs)
                                 {
-                                    if (pickedObject is HeaderCommands.Actors.Entry)
+                                    if (pickedObject is Actors.Entry)
                                     {
-                                        HeaderCommands.Actors.Entry ac = (pickedObject as HeaderCommands.Actors.Entry);
+                                        var ac = (pickedObject as Actors.Entry);
                                         /* Determine what menu entries should be enabled */
-                                        xAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationX) == null);
-                                        yAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationY) == null);
-                                        zAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == XMLActorDefinitionReader.Definition.Item.Usages.RotationZ) == null);
+                                        xAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == Usages.RotationX) == null);
+                                        yAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == Usages.RotationY) == null);
+                                        zAxisToolStripMenuItem.Enabled = !(ac.Definition.Items.FirstOrDefault(x => x.Usage == Usages.RotationZ) == null);
                                         rotateToolStripMenuItem.Enabled = (xAxisToolStripMenuItem.Enabled || yAxisToolStripMenuItem.Enabled || zAxisToolStripMenuItem.Enabled);
                                     }
                                     else
@@ -1703,7 +1718,7 @@ namespace SceneNavi
                             // TODO  make this not shitty; try to get the "new method" to work with anything that's not at (0,0,0)
 
                             /* Speed modifiers */
-                            double movemod = 3.0;
+                            var movemod = 3.0;
                             if (keysDown[(ushort)Keys.Space]) movemod = 8.0;
                             else if (keysDown[(ushort)Keys.ShiftKey]) movemod = 1.0;
 
@@ -1715,11 +1730,11 @@ namespace SceneNavi
                             if (pickObjDisplacement == Vector2d.Zero) return;
 
                             /* Calculate camera rotation */
-                            double CamXRotd = camera.Rot.X * (double)(Math.PI / 180);
-                            double CamYRotd = camera.Rot.Y * (double)(Math.PI / 180);
+                            var CamXRotd = camera.Rot.X * (Math.PI / 180);
+                            var CamYRotd = camera.Rot.Y * (Math.PI / 180);
 
                             /* WARNING: Cam position stuff below is "I dunno why it works, but it does!" */
-                            Vector3d objpos = pickedObject.Position;
+                            var objpos = pickedObject.Position;
 
                             if (Convert.ToBoolean(e.Button & MouseButtons.Middle) || (Convert.ToBoolean(e.Button & MouseButtons.Left) && keysDown[(ushort)Keys.ControlKey]))
                             {
@@ -1749,25 +1764,25 @@ namespace SceneNavi
                             pickedObject.Position = objpos;
 
                             /* Refresh GUI according to type of picked object */
-                            if (pickedObject is HeaderCommands.Waypoints.Waypoint)
+                            if (pickedObject is Waypoint)
                             {
                                 foreach (DataGridViewCell cell in dgvPathWaypoints.SelectedCells)
                                 {
-                                    for (int i = 0; i < dgvPathWaypoints.ColumnCount; i++) dgvPathWaypoints.UpdateCellValue(i, cell.RowIndex);
+                                    for (var i = 0; i < dgvPathWaypoints.ColumnCount; i++) dgvPathWaypoints.UpdateCellValue(i, cell.RowIndex);
                                 }
                             }
-                            else if (pickedObject is HeaderCommands.Actors.Entry)
+                            else if (pickedObject is Actors.Entry)
                             {
-                                HeaderCommands.Actors.Entry actor = (pickedObject as HeaderCommands.Actors.Entry);
+                                var actor = (pickedObject as Actors.Entry);
 
                                 if (actor.IsSpawnPoint)
-                                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExSpawnPoints);
+                                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExSpawnPoints);
                                 else if (actor.IsTransitionActor)
-                                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExTransitions);
+                                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExTransitions);
                                 else
-                                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExRoomActors);
+                                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExRoomActors);
                             }
-                            else if (pickedObject is HeaderCommands.Collision.Waterbox)
+                            else if (pickedObject is Collision.Waterbox)
                             {
                                 waterboxesDirty = true;
                                 RefreshWaterboxControls();
@@ -1806,9 +1821,9 @@ namespace SceneNavi
 
         private void EditVertexColor(SimpleF3DEX2.Vertex vertex)
         {
-            ColorPickerDialog cdlg = new ColorPickerDialog(Color.FromArgb(vertex.Colors[3], vertex.Colors[0], vertex.Colors[1], vertex.Colors[2]));
+            var cdlg = new ColorPickerDialog(Color.FromArgb(vertex.Colors[3], vertex.Colors[0], vertex.Colors[1], vertex.Colors[2]));
 
-            if (cdlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (cdlg.ShowDialog() == DialogResult.OK)
             {
                 vertex.Colors[0] = cdlg.Color.R;
                 vertex.Colors[1] = cdlg.Color.G;
@@ -1821,7 +1836,7 @@ namespace SceneNavi
                 currentRoom.Data[(vertex.Address & 0xFFFFFF) + 14] = vertex.Colors[2];
                 currentRoom.Data[(vertex.Address & 0xFFFFFF) + 15] = vertex.Colors[3];
 
-                vertex.Store(individualFileMode ? null : rom.Data, (int)currentRoom.Start);
+                vertex.Store(individualFileMode ? null : _baseRom.Data, (int)currentRoom.Start);
 
                 displayListsDirty = true;
             }
@@ -1842,13 +1857,13 @@ namespace SceneNavi
 
         private void nudSceneMetaNightSFX_ValueChanged(object sender, EventArgs e)
         {
-            if (currentScene != null && currentScene.GetActiveSettingsSoundScene() != null) currentScene.GetActiveSettingsSoundScene().NightSfxID = (byte)((NumericUpDown)sender).Value;
+            if (currentScene != null && currentScene.GetActiveSettingsSoundScene() != null) currentScene.GetActiveSettingsSoundScene().NightSfxId = (byte)((NumericUpDown)sender).Value;
         }
 
         private void RefreshRoomActorList()
         {
-            List<HeaderCommands.Actors.Entry> actorlist = new List<HeaderCommands.Actors.Entry>();
-            actorlist.Add(new HeaderCommands.Actors.Entry());
+            var actorlist = new List<Actors.Entry>();
+            actorlist.Add(new Actors.Entry());
             actorlist.AddRange(currentRoom.ActiveRoomActorData.ActorList);
 
             roomActorComboBinding = new BindingSource();
@@ -1860,8 +1875,8 @@ namespace SceneNavi
 
         private void RefreshTransitionList()
         {
-            List<HeaderCommands.Actors.Entry> actorlist = new List<HeaderCommands.Actors.Entry>();
-            actorlist.Add(new HeaderCommands.Actors.Entry());
+            var actorlist = new List<Actors.Entry>();
+            actorlist.Add(new Actors.Entry());
             actorlist.AddRange(currentScene.GetActiveTransitionData().ActorList);
 
             transitionComboBinding = new BindingSource();
@@ -1873,8 +1888,8 @@ namespace SceneNavi
 
         private void RefreshSpawnPointList()
         {
-            List<HeaderCommands.Actors.Entry> actorlist = new List<HeaderCommands.Actors.Entry>();
-            actorlist.Add(new HeaderCommands.Actors.Entry());
+            var actorlist = new List<Actors.Entry>();
+            actorlist.Add(new Actors.Entry());
             actorlist.AddRange(currentScene.GetActiveSpawnPointData().ActorList);
 
             spawnPointComboBinding = new BindingSource();
@@ -1886,56 +1901,56 @@ namespace SceneNavi
 
         private void cbActors_SelectedIndexChanged(object sender, EventArgs e)
         {
-            HeaderCommands.Actors.Entry ac = ((ComboBox)sender).SelectedItem as HeaderCommands.Actors.Entry;
-            pickedObject = (ac as HeaderCommands.IPickableObject);
+            var ac = ((ComboBox)sender).SelectedItem as Actors.Entry;
+            pickedObject = (ac as IPickableObject);
 
-            XMLActorDefinitionReader.CreateActorEditingControls(ac, tlpExRoomActors, new Action(() =>
+            XmlActorDefinitionReader.CreateActorEditingControls(ac, tlpExRoomActors, () =>
             {
-                int idx = ((ComboBox)sender).SelectedIndex;
+                var idx = ((ComboBox)sender).SelectedIndex;
                 RefreshRoomActorList();
                 ((ComboBox)sender).SelectedIndex = idx;
                 SelectActorNumberControl(tlpExRoomActors);
-            }), individual: individualFileMode);
+            }, individual: individualFileMode);
         }
 
         private void cbTransitions_SelectedIndexChanged(object sender, EventArgs e)
         {
-            HeaderCommands.Actors.Entry ac = ((ComboBox)sender).SelectedItem as HeaderCommands.Actors.Entry;
-            pickedObject = (ac as HeaderCommands.IPickableObject);
+            var ac = ((ComboBox)sender).SelectedItem as Actors.Entry;
+            pickedObject = (ac as IPickableObject);
 
-            HeaderCommands.Rooms rooms = null;
+            Rooms rooms = null;
             if (currentScene != null && currentScene.GetCurrentSceneHeader() != null)
-                rooms = currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms) as HeaderCommands.Rooms;
+                rooms = currentScene.GetCurrentSceneHeader().Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms;
 
-            XMLActorDefinitionReader.CreateActorEditingControls(ac, tlpExTransitions, new Action(() =>
+            XmlActorDefinitionReader.CreateActorEditingControls(ac, tlpExTransitions, () =>
             {
-                int idx = ((ComboBox)sender).SelectedIndex;
+                var idx = ((ComboBox)sender).SelectedIndex;
                 RefreshTransitionList();
                 ((ComboBox)sender).SelectedIndex = idx;
                 SelectActorNumberControl(tlpExTransitions);
-            }), (rooms != null ? rooms.RoomInformation : null), individualFileMode);
+            }, (rooms != null ? rooms.RoomInformation : null), individualFileMode);
         }
 
         private void cbSpawnPoints_SelectedIndexChanged(object sender, EventArgs e)
         {
-            HeaderCommands.Actors.Entry ac = ((ComboBox)sender).SelectedItem as HeaderCommands.Actors.Entry;
-            pickedObject = (ac as HeaderCommands.IPickableObject);
+            var ac = ((ComboBox)sender).SelectedItem as Actors.Entry;
+            pickedObject = (ac as IPickableObject);
 
-            XMLActorDefinitionReader.CreateActorEditingControls(ac, tlpExSpawnPoints, new Action(() =>
+            XmlActorDefinitionReader.CreateActorEditingControls(ac, tlpExSpawnPoints, () =>
             {
-                int idx = ((ComboBox)sender).SelectedIndex;
+                var idx = ((ComboBox)sender).SelectedIndex;
                 RefreshSpawnPointList();
                 ((ComboBox)sender).SelectedIndex = idx;
                 SelectActorNumberControl(tlpExSpawnPoints);
-            }), individual: individualFileMode);
+            }, individual: individualFileMode);
         }
 
         private void SelectActorNumberControl(TableLayoutPanel tlp)
         {
-            Control ctrl = tlp.Controls.Find("ActorNumber", false).FirstOrDefault();
+            var ctrl = tlp.Controls.Find("ActorNumber", false).FirstOrDefault();
             if (ctrl != null && ctrl is TextBox)
             {
-                TextBox txt = (ctrl as TextBox);
+                var txt = (ctrl as TextBox);
                 txt.SelectionStart = txt.Text.Length;
                 txt.Select();
             }
@@ -1943,12 +1958,12 @@ namespace SceneNavi
 
         private void cbPathHeaders_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            activePathHeader = (((ComboBox)sender).SelectedItem as HeaderCommands.Waypoints.PathHeader);
+            activePathHeader = (((ComboBox)sender).SelectedItem as PathHeader);
         }
 
         private void dgvPathWaypoints_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            using (SolidBrush b = new SolidBrush(((DataGridView)sender).RowHeadersDefaultCellStyle.ForeColor))
+            using (var b = new SolidBrush(((DataGridView)sender).RowHeadersDefaultCellStyle.ForeColor))
             {
                 e.Graphics.DrawString((e.RowIndex + 1).ToString(), e.InheritedRowStyle.Font, b, e.RowBounds.Location.X + 18, e.RowBounds.Location.Y + 4);
             }
@@ -1956,17 +1971,17 @@ namespace SceneNavi
 
         private void dgvPathWaypoints_SelectionChanged(object sender, EventArgs e)
         {
-            HeaderCommands.Waypoints.Waypoint selwp = (dgvPathWaypoints.SelectedCells.Count != 0 ? dgvPathWaypoints.SelectedCells[0].OwningRow.DataBoundItem as HeaderCommands.Waypoints.Waypoint : null);
+            var selwp = (dgvPathWaypoints.SelectedCells.Count != 0 ? dgvPathWaypoints.SelectedCells[0].OwningRow.DataBoundItem as Waypoint : null);
             if (selwp == null) return;
-            pickedObject = (selwp as HeaderCommands.IPickableObject);
+            pickedObject = (selwp as IPickableObject);
             collisionDirty = true;
         }
 
         private void RefreshCollisionPolyAndTypeLists()
         {
             /* Type list */
-            List<HeaderCommands.Collision.PolygonType> typelist = new List<HeaderCommands.Collision.PolygonType>();
-            typelist.Add(new HeaderCommands.Collision.PolygonType());
+            var typelist = new List<Collision.PolygonType>();
+            typelist.Add(new Collision.PolygonType());
             typelist.AddRange(currentScene.GetActiveCollision().PolygonTypes);
 
             colPolyTypeDataBinding = new BindingSource();
@@ -1976,14 +1991,14 @@ namespace SceneNavi
             cbCollisionPolyTypes.Enabled = true;
 
             txtColPolyRawData.Enabled = true;
-            cbColPolyGroundTypes.DataSource = HeaderCommands.Collision.PolygonType.GroundTypes;
+            cbColPolyGroundTypes.DataSource = Collision.PolygonType.GroundTypes;
             cbColPolyGroundTypes.DisplayMember = "Description";
             cbColPolyGroundTypes.Enabled = true;
             //TODO more editing stuff
 
             /* Poly list */
-            List<HeaderCommands.Collision.Polygon> polylist = new List<HeaderCommands.Collision.Polygon>();
-            polylist.Add(new HeaderCommands.Collision.Polygon());
+            var polylist = new List<Collision.Polygon>();
+            polylist.Add(new Collision.Polygon());
             polylist.AddRange(currentScene.GetActiveCollision().Polygons);
 
             collisionPolyDataBinding = new BindingSource();
@@ -2000,10 +2015,10 @@ namespace SceneNavi
 
         private void cbCollisionPolys_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentCollisionPolygon = (((ComboBox)sender).SelectedItem as HeaderCommands.Collision.Polygon);
+            currentCollisionPolygon = (((ComboBox)sender).SelectedItem as Collision.Polygon);
             if (currentCollisionPolygon == null) return;
 
-            pickedObject = (currentCollisionPolygon as HeaderCommands.IPickableObject);
+            pickedObject = (currentCollisionPolygon as IPickableObject);
             collisionDirty = true;
 
             lblColPolyType.Visible = nudColPolyType.Visible = btnJumpToPolyType.Visible = !currentCollisionPolygon.IsDummy;
@@ -2023,14 +2038,14 @@ namespace SceneNavi
         private void btnJumpToPolyType_Click(object sender, EventArgs e)
         {
             if (cbCollisionPolyTypes.Items.Count > 0)
-                cbCollisionPolyTypes.SelectedItem = (colPolyTypeDataBinding.List as List<HeaderCommands.Collision.PolygonType>).FirstOrDefault(x => x.Number == currentCollisionPolygon.PolygonType);
+                cbCollisionPolyTypes.SelectedItem = (colPolyTypeDataBinding.List as List<Collision.PolygonType>).FirstOrDefault(x => x.Number == currentCollisionPolygon.PolygonType);
         }
 
         private void cbCollisionPolyTypes_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (((ComboBox)sender).SelectedItem == null) return;
 
-            currentColPolygonType = (((ComboBox)sender).SelectedItem as HeaderCommands.Collision.PolygonType);
+            currentColPolygonType = (((ComboBox)sender).SelectedItem as Collision.PolygonType);
 
             busy = true;
             RefreshColPolyTypeControls();
@@ -2039,9 +2054,9 @@ namespace SceneNavi
 
         private void RefreshColPolyTypeControls()
         {
-            txtColPolyRawData.Text = string.Format("0x{0:X16}", currentColPolygonType.Raw);
+            txtColPolyRawData.Text = $"0x{currentColPolygonType.Raw:X16}";
             lblColPolyRawData.Visible = txtColPolyRawData.Visible = !currentColPolygonType.IsDummy;
-            cbColPolyGroundTypes.SelectedItem = HeaderCommands.Collision.PolygonType.GroundTypes.FirstOrDefault(x => x.Value == currentColPolygonType.GroundTypeID);
+            cbColPolyGroundTypes.SelectedItem = Collision.PolygonType.GroundTypes.FirstOrDefault(x => x.Value == currentColPolygonType.GroundTypeID);
             lblColPolyGroundType.Visible = cbColPolyGroundTypes.Visible = !currentColPolygonType.IsDummy;
 
             if (!busy) colPolyTypeDataBinding.ResetCurrentItem();
@@ -2051,12 +2066,12 @@ namespace SceneNavi
 
         private void txtColPolyRawData_TextChanged(object sender, EventArgs e)
         {
-            TextBox txt = (sender as TextBox);
+            var txt = (sender as TextBox);
             if (!txt.ContainsFocus) return;
 
-            System.Globalization.NumberStyles ns = (txt.Text.StartsWith("0x") ? System.Globalization.NumberStyles.HexNumber : System.Globalization.NumberStyles.Integer);
-            string valstr = (ns == System.Globalization.NumberStyles.HexNumber ? txt.Text.Substring(2) : txt.Text);
-            ulong newval = ulong.Parse(valstr, ns);
+            var ns = (txt.Text.StartsWith("0x") ? System.Globalization.NumberStyles.HexNumber : System.Globalization.NumberStyles.Integer);
+            var valstr = (ns == System.Globalization.NumberStyles.HexNumber ? txt.Text.Substring(2) : txt.Text);
+            var newval = ulong.Parse(valstr, ns);
 
             currentColPolygonType.Raw = newval;
             RefreshColPolyTypeControls();
@@ -2066,7 +2081,7 @@ namespace SceneNavi
         {
             if (!(sender as ComboBox).ContainsFocus) return;
 
-            currentColPolygonType.GroundTypeID = (((ComboBox)sender).SelectedItem as HeaderCommands.Collision.PolygonType.GroundType).Value;
+            currentColPolygonType.GroundTypeID = (((ComboBox)sender).SelectedItem as Collision.PolygonType.GroundType).Value;
             RefreshColPolyTypeControls();
         }
 
@@ -2080,12 +2095,12 @@ namespace SceneNavi
 
                 busy = true;
 
-                txtWaterboxPositionX.Text = string.Format("{0}", currentWaterbox.Position.X);
-                txtWaterboxPositionY.Text = string.Format("{0}", currentWaterbox.Position.Y);
-                txtWaterboxPositionZ.Text = string.Format("{0}", currentWaterbox.Position.Z);
-                txtWaterboxSizeX.Text = string.Format("{0}", currentWaterbox.SizeXZ.X);
-                txtWaterboxSizeZ.Text = string.Format("{0}", currentWaterbox.SizeXZ.Y);
-                txtWaterboxProperties.Text = string.Format("0x{0:X}", currentWaterbox.Properties);
+                txtWaterboxPositionX.Text = $"{currentWaterbox.Position.X}";
+                txtWaterboxPositionY.Text = $"{currentWaterbox.Position.Y}";
+                txtWaterboxPositionZ.Text = $"{currentWaterbox.Position.Z}";
+                txtWaterboxSizeX.Text = $"{currentWaterbox.SizeXZ.X}";
+                txtWaterboxSizeZ.Text = $"{currentWaterbox.SizeXZ.Y}";
+                txtWaterboxProperties.Text = $"0x{currentWaterbox.Properties:X}";
 
                 if (roomsForWaterboxSelection != null && roomsForWaterboxSelection.Count > 0)
                 {
@@ -2104,10 +2119,10 @@ namespace SceneNavi
 
         private void cbWaterboxes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentWaterbox = (((ComboBox)sender).SelectedItem as HeaderCommands.Collision.Waterbox);
+            currentWaterbox = (((ComboBox)sender).SelectedItem as Collision.Waterbox);
             if (currentWaterbox != null)
             {
-                pickedObject = (currentWaterbox as HeaderCommands.IPickableObject);
+                pickedObject = (currentWaterbox as IPickableObject);
                 waterboxesDirty = true;
 
                 txtWaterboxPositionX.Enabled = txtWaterboxPositionY.Enabled = txtWaterboxPositionZ.Enabled = txtWaterboxSizeX.Enabled = txtWaterboxSizeZ.Enabled = txtWaterboxProperties.Enabled
@@ -2124,7 +2139,7 @@ namespace SceneNavi
             {
                 currentWaterbox.Position = new Vector3d(double.Parse(txtWaterboxPositionX.Text), double.Parse(txtWaterboxPositionY.Text), double.Parse(txtWaterboxPositionZ.Text));
                 currentWaterbox.SizeXZ = new Vector2d(double.Parse(txtWaterboxSizeX.Text), double.Parse(txtWaterboxSizeZ.Text));
-                currentWaterbox.RoomNumber = (ushort)(cbWaterboxRoom.SelectedItem as XMLActorDefinitionReader.Definition.Item.Option).Value;
+                currentWaterbox.RoomNumber = (ushort)(cbWaterboxRoom.SelectedItem as Option).Value;
 
                 if (txtWaterboxProperties.Text.StartsWith("0x"))
                     currentWaterbox.Properties = ushort.Parse(txtWaterboxProperties.Text.Substring(2), System.Globalization.NumberStyles.HexNumber);
@@ -2185,9 +2200,9 @@ namespace SceneNavi
         {
             if (pickedObject == null) return;
 
-            if (pickedObject is HeaderCommands.Actors.Entry)
+            if (pickedObject is Actors.Entry)
             {
-                HeaderCommands.Actors.Entry ac = (pickedObject as HeaderCommands.Actors.Entry);
+                var ac = (pickedObject as Actors.Entry);
                 if (ac.IsTransitionActor)
                     cbTransitions.SelectedIndex = 0;
                 else if (ac.IsSpawnPoint)
@@ -2195,11 +2210,11 @@ namespace SceneNavi
                 else
                     cbActors.SelectedIndex = 0;
             }
-            else if (pickedObject is HeaderCommands.Waypoints.Waypoint)
+            else if (pickedObject is Waypoint)
             {
                 dgvPathWaypoints.ClearSelection();
             }
-            else if (pickedObject is HeaderCommands.Collision.Waterbox)
+            else if (pickedObject is Collision.Waterbox)
             {
                 cbWaterboxes.SelectedIndex = 0;
             }
@@ -2211,17 +2226,17 @@ namespace SceneNavi
         {
             if (pickedObject == null) return;
 
-            if (pickedObject is HeaderCommands.Actors.Entry)
+            if (pickedObject is Actors.Entry)
             {
-                HeaderCommands.Actors.Entry actor = (pickedObject as HeaderCommands.Actors.Entry);
+                var actor = (pickedObject as Actors.Entry);
                 actor.Rotation = Vector3d.Add(actor.Rotation, rot);
 
                 if (actor.IsSpawnPoint)
-                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExSpawnPoints);
+                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExSpawnPoints);
                 else if (actor.IsTransitionActor)
-                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExTransitions);
+                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExTransitions);
                 else
-                    XMLActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExRoomActors);
+                    XmlActorDefinitionReader.RefreshActorPositionRotation(actor, tlpExRoomActors);
             }
         }
 
@@ -2264,12 +2279,14 @@ namespace SceneNavi
         {
             if (currentRoomVertex == null) return;
 
-            StringBuilder vertexInfo = new StringBuilder();
+            var vertexInfo = new StringBuilder();
             vertexInfo.AppendFormat("Vertex at address 0x{0:X8}:\n\n", currentRoomVertex.Address);
             vertexInfo.AppendFormat("Position: {0}\n", currentRoomVertex.Position);
             vertexInfo.AppendFormat("Texture Coordinates: {0}\n", currentRoomVertex.TexCoord);
             vertexInfo.AppendFormat("Colors: ({0}, {1}, {2}, {3})\n", currentRoomVertex.Colors[0], currentRoomVertex.Colors[1], currentRoomVertex.Colors[2], currentRoomVertex.Colors[3]);
             vertexInfo.AppendFormat("Normals: ({0}, {1}, {2})\n", currentRoomVertex.Normals[0], currentRoomVertex.Normals[1], currentRoomVertex.Normals[2]);
+            
+          
 
             MessageBox.Show(vertexInfo.ToString(), "Vertex Properties", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -2294,23 +2311,24 @@ namespace SceneNavi
 
         private void enableVSyncToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            customGLControl.VSync = Configuration.OGLVSync = ((ToolStripMenuItem)sender).Checked;
+            customGLControl.VSync = Configuration.OglvSync = ((ToolStripMenuItem)sender).Checked;
         }
 
         private void enableAntiAliasingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             /* Determine anti-aliasing status */
-            if (Configuration.EnableAntiAliasing = ((ToolStripMenuItem)sender).Checked)
+            if (Configuration.EnableAntiAliasing == ((ToolStripMenuItem)sender).Checked)
             {
-                int samples = 0;
+                var samples = 0;
                 GL.GetInteger(GetPName.MaxSamples, out samples);
                 Configuration.AntiAliasingSamples = samples;
             }
             else
                 Configuration.AntiAliasingSamples = 0;
 
-            if (MessageBox.Show(string.Format("{0}abling anti-aliasing requires restarting SceneNavi.\n\nDo you want to restart the program now?", (Configuration.EnableAntiAliasing ? "En" : "Dis")),
-                "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+            if (MessageBox.Show(
+                    $"{(Configuration.EnableAntiAliasing ? "En" : "Dis")}abling anti-aliasing requires restarting SceneNavi.\n\nDo you want to restart the program now?",
+                "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 Configuration.IsRestarting = true;
                 Application.Restart();
@@ -2321,22 +2339,22 @@ namespace SceneNavi
         {
             Configuration.EnableMipmaps = ((ToolStripMenuItem)sender).Checked;
 
-            if (rom == null || rom.Scenes == null) return;
+            if (_baseRom == null || _baseRom.Scenes == null) return;
 
             /* Destroy, destroy! Kill all the display lists! ...or should I say "Exterminate!"? Then again, I'm not a Doctor Who fan... */
-            foreach (HeaderLoader sh in rom.Scenes.SelectMany(x => x.GetSceneHeaders()))
+            foreach (var sh in _baseRom.Scenes.SelectMany(x => x.GetSceneHeaders()))
             {
-                HeaderCommands.Rooms rooms = (sh.Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.Rooms)) as HeaderCommands.Rooms;
+                var rooms = (sh.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms)) as Rooms;
                 if (rooms == null) continue;
 
-                foreach (HeaderLoader rh in rooms.RoomInformation.SelectMany(x => x.Headers))
+                foreach (var rh in rooms.RoomInformation.SelectMany(x => x.Headers))
                 {
-                    HeaderCommands.MeshHeader mh = (rh.Commands.FirstOrDefault(x => x.Command == HeaderLoader.CommandTypeIDs.MeshHeader)) as HeaderCommands.MeshHeader;
+                    var mh = (rh.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.MeshHeader)) as MeshHeader;
                     if (mh != null) mh.DestroyDisplayLists();
                 }
             }
 
-            rom.Renderer.ResetTextureCache();
+            _baseRom.Renderer.ResetTextureCache();
 
             displayListsDirty = true;
         }
@@ -2396,28 +2414,28 @@ namespace SceneNavi
 
         private void rOMInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string info = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            var info = string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 "{0} ({1}, v1.{2}), {3} MB ({4} Mbit)\n{5}\nCreated by {6}, built on {7:F}\n\nCode file at 0x{8:X} - 0x{9:X} ({10})\n- DMA table address: 0x{11:X}\n- File name table address: {12}\n" +
                 "- Scene table address: {13}\n- Actor table address: {14}\n- Object table address: {15}\n- Entrance table address: {16}",
-                rom.Title, rom.GameID, rom.Version, (rom.Size / 0x100000), (rom.Size / 0x20000), (rom.HasZ64TablesHack ? "(uses 'z64tables' extended tables)\n" : ""),
-                rom.Creator, rom.BuildDate, rom.Code.PStart, (rom.Code.IsCompressed ? rom.Code.PEnd : rom.Code.VEnd),
-                (rom.Code.IsCompressed ? "compressed" : "uncompressed"), rom.DMATableAddress, (rom.HasFileNameTable ? ("0x" + rom.FileNameTableAddress.ToString("X")) : "none"),
-                (rom.HasZ64TablesHack ? ("0x" + rom.SceneTableAddress.ToString("X") + " (in ROM)") : ("0x" + rom.SceneTableAddress.ToString("X"))),
-                (rom.HasZ64TablesHack ? ("0x" + rom.ActorTableAddress.ToString("X") + " (in ROM)") : ("0x" + rom.ActorTableAddress.ToString("X"))),
-                (rom.HasZ64TablesHack ? ("0x" + rom.ObjectTableAddress.ToString("X") + " (in ROM)") : ("0x" + rom.ObjectTableAddress.ToString("X"))),
-                (rom.HasZ64TablesHack ? ("0x" + rom.EntranceTableAddress.ToString("X") + " (in ROM)") : ("0x" + rom.EntranceTableAddress.ToString("X"))));
+                _baseRom.Title, _baseRom.GameId, _baseRom.Version, (_baseRom.Size / 0x100000), (_baseRom.Size / 0x20000), (_baseRom.HasZ64TablesHack ? "(uses 'z64tables' extended tables)\n" : ""),
+                _baseRom.Creator, _baseRom.BuildDate, _baseRom.Code.PStart, (_baseRom.Code.IsCompressed ? _baseRom.Code.PEnd : _baseRom.Code.VEnd),
+                (_baseRom.Code.IsCompressed ? "compressed" : "uncompressed"), _baseRom.DmaTableAddress, (_baseRom.HasFileNameTable ? ("0x" + _baseRom.FileNameTableAddress.ToString("X")) : "none"),
+                (_baseRom.HasZ64TablesHack ? ("0x" + _baseRom.SceneTableAddress.ToString("X") + " (in ROM)") : ("0x" + _baseRom.SceneTableAddress.ToString("X"))),
+                (_baseRom.HasZ64TablesHack ? ("0x" + _baseRom.ActorTableAddress.ToString("X") + " (in ROM)") : ("0x" + _baseRom.ActorTableAddress.ToString("X"))),
+                (_baseRom.HasZ64TablesHack ? ("0x" + _baseRom.ObjectTableAddress.ToString("X") + " (in ROM)") : ("0x" + _baseRom.ObjectTableAddress.ToString("X"))),
+                (_baseRom.HasZ64TablesHack ? ("0x" + _baseRom.EntranceTableAddress.ToString("X") + " (in ROM)") : ("0x" + _baseRom.EntranceTableAddress.ToString("X"))));
 
             MessageBox.Show(info, "ROM Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void editDataTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new TableEditorForm(rom).ShowDialog();
+            new TableEditorForm(_baseRom).ShowDialog();
         }
 
         private void editAreaTitleCardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new TitleCardForm(rom, currentScene as SceneTableEntryOcarina).ShowDialog();
+            new TitleCardForm(_baseRom, currentScene as SceneTableEntryOcarina,null).ShowDialog();
         }
 
         private void checkForUpdateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2427,7 +2445,7 @@ namespace SceneNavi
 
         private void openGLInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            StringBuilder oglInfoString = new StringBuilder();
+            var oglInfoString = new StringBuilder();
 
             oglInfoString.AppendFormat("Vendor: {0}\n", Initialization.VendorString);
             oglInfoString.AppendFormat("Renderer: {0}\n", Initialization.RendererString);
@@ -2444,20 +2462,22 @@ namespace SceneNavi
 
             oglInfoString.AppendLine("Status of requested extensions:");
 
-            foreach (string extension in allRequiredOglExtensions) oglInfoString.AppendFormat("* {0}\t{1}\n", extension.PadRight(40), Initialization.CheckForExtension(extension) ? "supported" : "not supported");
+            foreach (var extension in allRequiredOglExtensions) oglInfoString.AppendFormat("* {0}\t{1}\n", extension.PadRight(40), Initialization.CheckForExtension(extension) ? "supported" : "not supported");
 
             MessageBox.Show(oglInfoString.ToString(), "OpenGL Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DateTime linkerTimestamp = AssemblyHelpers.RetrieveLinkerTimestamp();
+            var linkerTimestamp = AssemblyHelpers.RetrieveLinkerTimestamp();
 
-            string buildString = string.Format("(Build: {0})", linkerTimestamp.ToString("MM/dd/yyyy HH:mm:ss UTCzzz", System.Globalization.CultureInfo.InvariantCulture));
-            string yearString = (linkerTimestamp.Year == 2013 ? "2013" : string.Format("2013-{0}", linkerTimestamp.ToString("yyyy")));
+            var buildString =
+                $"(Build: {linkerTimestamp.ToString("MM/dd/yyyy HH:mm:ss UTCzzz", System.Globalization.CultureInfo.InvariantCulture)})";
+            var yearString = (linkerTimestamp.Year == 2013 ? "2013" : $"2013-{linkerTimestamp:yyyy}");
 
-            MessageBox.Show(string.Format("{0} {1}\n\nScene/room actor editor for The Legend of Zelda: Ocarina of Time\n\nWritten {2} by xdaniel / http://magicstone.de/dzd/", Program.AppNameVer, buildString, yearString),
-                string.Format("About {0}", Application.ProductName), MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                $"{Program.AppNameVer} {buildString}\n\nScene/room actor editor for The Legend of Zelda: Ocarina of Time\n\nWritten {yearString} by xdaniel / http://magicstone.de/dzd/",
+                $"About {Application.ProductName}", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         #endregion
