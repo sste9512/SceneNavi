@@ -7,6 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using MediatR;
+using NLog;
+using SceneNavi.ROMHandler;
+using SceneNavi.ROMHandler.Interfaces;
 
 namespace SceneNavi
 {
@@ -22,38 +27,44 @@ namespace SceneNavi
         const int TitleCardWidth = 144;
         int _titleCardHeight = 0;
 
-      
-        
-        private ITitleCardFormSettings _titleCardFormSettings;
-        readonly ROMHandler.BaseRomHandler _baseRom;
-        readonly ROMHandler.SceneTableEntryOcarina _scene;
-
         Bitmap _output;
         Rectangle _outputRect;
 
-        
-        
-        
-        public TitleCardForm(ROMHandler.BaseRomHandler baseRom, ROMHandler.SceneTableEntryOcarina sceneTableEntry, ITitleCardFormSettings titleCardFormSettings)
+
+        private readonly ITitleCardFormSettings _titleCardFormSettings;
+        private readonly IMediator _mediator;
+        private readonly ILogger _logger;
+        private readonly INavigation _navigation;
+        private readonly IRomHandler _baseRomHandler;
+        private readonly ISceneTableEntry _sceneTableEntry;
+
+
+        public TitleCardForm(IRomHandler romHandler, ISceneTableEntry sceneTableEntryTableEntry, ITitleCardFormSettings titleCardFormSettings, IMediator mediator, ILogger logger, INavigation navigation)
         {
             InitializeComponent();
-
-            _baseRom = baseRom;
-            _scene = sceneTableEntry;
+            _baseRomHandler = romHandler;
+            _sceneTableEntry = sceneTableEntryTableEntry;
             _titleCardFormSettings = titleCardFormSettings;
+            _mediator = mediator;
+            _logger = logger;
+            _navigation = navigation;
+        }
 
+        protected override void OnLoad(EventArgs e)
+        {
             ofdImage.SetCommonImageFilter("png");
             sfdImage.SetCommonImageFilter("png");
 
             ReadImageFromRom();
+            base.OnLoad(e);
         }
 
         private void ReadImageFromRom()
         {
-            _titleCardHeight = (int)((_scene.LabelEndAddress - _scene.LabelStartAddress) / TitleCardWidth);
+           // _titleCardHeight = (int)((_sceneTableEntry.LabelEndAddress - _sceneTableEntry.LabelStartAddress) / TitleCardWidth);
 
             var textureBuffer = new byte[TitleCardWidth * _titleCardHeight * 4];
-            SimpleF3DEX2.ImageHelper.Ia8(TitleCardWidth, _titleCardHeight, (TitleCardWidth / 8), _baseRom.Data, (int)_scene.LabelStartAddress, ref textureBuffer);
+            //SimpleF3DEX2.ImageHelper.Ia8(TitleCardWidth, _titleCardHeight, (TitleCardWidth / 8), _baseRom.Data, (int)_sceneTableEntry.LabelStartAddress, ref textureBuffer);
             textureBuffer.SwapRGBAToBGRA();
 
             _output = new Bitmap(TitleCardWidth, _titleCardHeight, PixelFormat.Format32bppArgb);
@@ -61,7 +72,7 @@ namespace SceneNavi
             var bmpData = _output.LockBits(_outputRect, ImageLockMode.ReadWrite, _output.PixelFormat);
             var ptr = bmpData.Scan0;
 
-            System.Runtime.InteropServices.Marshal.Copy(textureBuffer, 0, ptr, textureBuffer.Length);
+            Marshal.Copy(textureBuffer, 0, ptr, textureBuffer.Length);
            
             _output.UnlockBits(bmpData);
 
@@ -104,7 +115,8 @@ namespace SceneNavi
                 return null;
             }
 
-            var offset = _scene.LabelStartAddress;
+            //var offset = _sceneTableEntry.LabelStartAddress;
+            var offset = 0;
 
             for (var y = 0; y < import.Height; y++)
             {
@@ -118,7 +130,7 @@ namespace SceneNavi
 
                     var packed = (byte)(((byte)intensity).Scale(0, 0xFF, 0, 0xF) << 4);
                     packed |= pixelColor.A.Scale(0, 0xFF, 0, 0xF);
-                    _baseRom.Data[offset] = packed;
+                    //_baseRom.Data[offset] = packed;
 
                     offset++;
                 }

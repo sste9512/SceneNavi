@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{09D70578-1C8E-4E6A-80D1-1F0E5F9155A2}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SceneNavi</RootNamespace>
     <AssemblyName>SceneNavi</AssemblyName>
@@ -14,6 +15,23 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -40,6 +58,9 @@
     <ApplicationIcon>Bottled Fairy.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac, Version=6.0.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
       <HintPath>..\packages\Autofac.6.0.0\lib\netstandard2.0\Autofac.dll</HintPath>
@@ -60,6 +81,12 @@
     <Reference Include="Config.Net.Yaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=d836a57afd299520">
       <HintPath>..\packages\Config.Net.Yaml.4.13.7\lib\net452\Config.Net.Yaml.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="MediatR, Version=9.0.0.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2">
       <HintPath>..\packages\MediatR.9.0.0\lib\net461\MediatR.dll</HintPath>
@@ -82,6 +109,9 @@
       <HintPath>..\packages\Ninject.4.0.0-beta-0134\lib\net45\Ninject.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.7.5\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -90,11 +120,15 @@
       <HintPath>..\packages\OpenTK.GLControl.1.1.1589.5942\lib\NET40\OpenTK.GLControl.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SQLite.CodeFirst, Version=1.6.0.30, Culture=neutral, PublicKeyToken=eb96ba0a78d831a7, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLite.CodeFirst.1.6.0.30\lib\net45\SQLite.CodeFirst.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.ConfigurationManager, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\packages\System.Configuration.ConfigurationManager.4.7.0\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
@@ -106,6 +140,7 @@
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.7.1\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
       <Private>True</Private>
@@ -116,10 +151,15 @@
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Reactive, Version=5.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263">
+      <HintPath>..\packages\System.Reactive.5.0.0\lib\net472\System.Reactive.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.7.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Security.AccessControl, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.Security.AccessControl.4.7.0\lib\net461\System.Security.AccessControl.dll</HintPath>
@@ -133,6 +173,7 @@
       <HintPath>..\packages\System.Security.Principal.Windows.4.7.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Text.Encodings.Web, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\packages\System.Text.Encodings.Web.4.7.0\lib\netstandard2.0\System.Text.Encodings.Web.dll</HintPath>
@@ -142,8 +183,8 @@
       <HintPath>..\packages\System.Text.Json.4.7.0\lib\net461\System.Text.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.2\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Transactions" />
@@ -151,6 +192,7 @@
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -191,8 +233,11 @@
     <Compile Include="ActorRendering\MIPSEvaluator.cs" />
     <Compile Include="AssemblyHelpers.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Configurations\BaseConfig.cs" />
-    <Compile Include="Controls\CustomGLControl.cs">
+    <Compile Include="Configurations\IBaseConfig.cs" />
+    <Compile Include="Configurations\IGraphicsRenderingSettings.cs" />
+    <Compile Include="Configurations\IViewPortRenderSettings.cs" />
+    <Compile Include="Configurations\ILoggingConfig.cs" />
+    <Compile Include="Controls\GlRendererControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\HScrollBarEx.cs">
@@ -207,18 +252,26 @@
     <Compile Include="Controls\ToolStripRadioButtonMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Dependencies\Implementations\Camera.cs" />
+    <Compile Include="Dependencies\Implementations\FpsMonitor.cs" />
+    <Compile Include="Dependencies\Interfaces\ICamera.cs" />
+    <Compile Include="Dependencies\Interfaces\IFpsMonitor.cs" />
+    <Compile Include="Dependencies\Interfaces\IMemento.cs" />
+    <Compile Include="Dependencies\Interfaces\ITextPrinter.cs" />
+    <Compile Include="Dependencies\Implementations\TextPrinter.cs" />
     <Compile Include="Forms\ColorPickerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\ColorPickerDialog.Designer.cs">
       <DependentUpon>ColorPickerDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\CombinerTypes.cs" />
+    <Compile Include="Configurations\IMainFormConfig.cs" />
+    <Compile Include="Forms\MainForm.cs" />
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MainFormConstants.cs" />
     <Compile Include="Forms\TableEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -231,6 +284,7 @@
     <Compile Include="Forms\TitleCardForm.Designer.cs">
       <DependentUpon>TitleCardForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ToolModes.cs" />
     <Compile Include="Forms\UpdateCheckDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -247,12 +301,16 @@
     <Compile Include="HeaderCommands\Waypoint.cs" />
     <Compile Include="HeaderCommands\Waypoints.cs" />
     <Compile Include="HeaderCommands\SpecialObjects.cs" />
+    <Compile Include="INavigation.cs" />
     <Compile Include="Models\DefaultTypes.cs" />
     <Compile Include="Models\Definition.cs" />
     <Compile Include="Models\DisplayStyles.cs" />
     <Compile Include="Models\Item.cs" />
     <Compile Include="Models\Option.cs" />
     <Compile Include="Models\Usages.cs" />
+    <Compile Include="Navigation.cs" />
+    <Compile Include="Repository\DataLoader.cs" />
+    <Compile Include="Repository\RomActorDbContext.cs" />
     <Compile Include="RomHandlers\MajorasMaskRomHandler.cs" />
     <Compile Include="ROMHandler\ByteOrder.cs" />
     <Compile Include="ROMHandler\ByteOrderException.cs" />
@@ -266,6 +324,9 @@
     <Compile Include="ROMHandler\SceneTableEntryMajora.cs" />
     <Compile Include="ROMHandler\StageKey.cs" />
     <Compile Include="ROMHandler\StageKeyConverter.cs" />
+    <Compile Include="Services\Commands\MenuItemCommand.cs" />
+    <Compile Include="Services\Commands\MessageboxHandler.cs" />
+    <Compile Include="Services\Commands\MessageBoxQueryHandler.cs" />
     <Compile Include="SimpleF3DEX2\ImageHelper.cs" />
     <Compile Include="ROMHandler\ActorTableEntry.cs" />
     <Compile Include="Controls\ListViewEx.cs">
@@ -277,7 +338,6 @@
     <Compile Include="Controls\TreeViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Endian.cs" />
     <Compile Include="HeaderCommands\Actors.cs" />
     <Compile Include="HeaderCommands\Generic.cs" />
     <Compile Include="HeaderCommands\MeshHeader.cs" />
@@ -304,19 +364,16 @@
     <Compile Include="SimpleF3DEX2\TextureCache.cs" />
     <Compile Include="SimpleF3DEX2\UnpackedCombinerMux.cs" />
     <Compile Include="SimpleF3DEX2\Vertex.cs" />
-    <Compile Include="Startup\Startup.cs" />
+    <Compile Include="Startup.cs" />
     <Compile Include="StatusMessageHandler.cs" />
     <Compile Include="Utilities\ExtensionMethods.cs" />
     <Compile Include="Utilities\GUIHelpers.cs" />
-    <Compile Include="Utilities\OpenGLHelpers\Camera.cs" />
     <Compile Include="Utilities\OpenGLHelpers\DisplayList.cs" />
     <Compile Include="Utilities\OpenGLHelpers\DisplayListEx.cs" />
-    <Compile Include="Utilities\OpenGLHelpers\FPSMonitor.cs" />
     <Compile Include="Utilities\OpenGLHelpers\Initialization.cs" />
     <Compile Include="Utilities\OpenGLHelpers\MiscDrawingHelpers.cs" />
     <Compile Include="Utilities\OpenGLHelpers\ScreenWorldConversion.cs" />
     <Compile Include="Utilities\OpenGLHelpers\StockObjects.cs" />
-    <Compile Include="Utilities\OpenGLHelpers\TextPrinter.cs" />
     <Compile Include="VersionManagement.cs" />
     <Compile Include="XMLActorDefinitionReader.cs" />
     <Compile Include="XMLHashTableReader.cs" />
@@ -345,10 +402,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="UpdateData\sn-update.rtf" />
+    <None Include="XML\ActorDefinitions\DL\Database.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Bottled Fairy.ico" />
     <None Include="UpdateData\sn-update.htm" />
+    <Content Include="Resources\Bottled Fairy.ico" />
     <Content Include="XML\ActorDefinitions\DL\Database.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -410,10 +469,40 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\Commands" />
-    <Folder Include="Services\Queries" />
+    <Folder Include="Services\Queries\" />
+    <Folder Include="Startup\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SceneNavi.Domain\SceneNavi.Domain.csproj">
+      <Project>{0dd1cab8-ab75-411b-b7a6-2ae6f1241cbe}</Project>
+      <Name>SceneNavi.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SceneNavi.Entities\SceneNavi.Entities.csproj">
+      <Project>{e670ecc7-6b6b-4cc5-adbb-4ede120565a4}</Project>
+      <Name>SceneNavi.Entities</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using SceneNavi.ROMHandler.Interfaces;
 using SceneNavi.SimpleF3DEX2;
+using SceneNavi.Utilities;
 
 namespace SceneNavi.ROMHandler
 {
@@ -50,7 +51,7 @@ namespace SceneNavi.ROMHandler
 
         public List<ObjectTableEntry> Objects { get; private set; }
         public int ObjectTableAddress { get; private set; }
-        public ushort ObjectCount { get; private set; }
+        public ushort ObjectCount { get; private set; } 
         public AutoCompleteStringCollection ObjectNameAcStrings { get; private set; }
 
         public List<EntranceTableEntry> Entrances { get; private set; }
@@ -58,20 +59,20 @@ namespace SceneNavi.ROMHandler
 
         public Hashtable SegmentMapping { get; set; }
 
-        public F3DEX2Interpreter Renderer { get; private set; }
+        public F3Dex2Interpreter Renderer { get; private set; }
 
 
         // This seems to be a basic xml reader, not for game files but for project xml objects
         public XmlActorDefinitionReader XmlActorDefReader { get; private set; }
 
 
-        public XMLHashTableReader XmlActorNames { get; private set; }
-        public XMLHashTableReader XmlObjectNames { get; private set; }
-        public XMLHashTableReader XmlSongNames { get; private set; }
+        public XmlHashTableReader XmlActorNames { get; private set; }
+        public XmlHashTableReader XmlObjectNames { get; private set; }
+        public XmlHashTableReader XmlSongNames { get; private set; }
 
-        public XMLHashTableReader XmlSceneNames { get; private set; }
-        public XMLHashTableReader XmlRoomNames { get; private set; }
-        public XMLHashTableReader XmlStageDescriptions { get; private set; }
+        public XmlHashTableReader XmlSceneNames { get; private set; }
+        public XmlHashTableReader XmlRoomNames { get; private set; }
+        public XmlHashTableReader XmlStageDescriptions { get; private set; }
 
         public bool Loaded { get; private set; }
 
@@ -106,7 +107,7 @@ namespace SceneNavi.ROMHandler
 
                 /* Initialize segment and rendering systems */
                 SegmentMapping = new Hashtable();
-                Renderer = new F3DEX2Interpreter(this);
+                Renderer = new F3Dex2Interpreter(this);
 
                 /* Read ROM */
                 var binaryReader =
@@ -130,7 +131,7 @@ namespace SceneNavi.ROMHandler
                             "Byte Order Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
                         /* Ask for new filename */
-                        var fnnew = GUIHelpers.ShowSaveFileDialog(
+                        var fnnew = GuiHelpers.ShowSaveFileDialog(
                             "Nintendo 64 ROMs (*.z64;*.bin)|*.z64;*.bin|All Files (*.*)|*.*");
                         if (fnnew != string.Empty)
                         {
@@ -176,20 +177,20 @@ namespace SceneNavi.ROMHandler
                     {
                         /* Create remaining XML-related objects */
                         XmlActorNames =
-                            new XMLHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
                                 "ActorNames.xml");
                         XmlObjectNames =
-                            new XMLHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
                                 "ObjectNames.xml");
                         XmlSongNames =
-                            new XMLHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
                                 "SongNames.xml");
 
-                        XmlSceneNames = new XMLHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                        XmlSceneNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
                             $"{GameId}{Version:X1}"), "SceneNames.xml");
-                        XmlRoomNames = new XMLHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                        XmlRoomNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
                             $"{GameId}{Version:X1}"), "RoomNames.xml");
-                        XmlStageDescriptions = new XMLHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                        XmlStageDescriptions = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
                             $"{GameId}{Version:X1}"), "StageDescriptions.xml");
 
                         /* Determine if ROM uses z64tables hack */

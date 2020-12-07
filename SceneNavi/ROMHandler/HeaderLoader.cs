@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SceneNavi.HeaderCommands;
+using SceneNavi.ROMHandler.Interfaces;
 
 namespace SceneNavi.ROMHandler
 {

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.Forms;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.HeaderCommands

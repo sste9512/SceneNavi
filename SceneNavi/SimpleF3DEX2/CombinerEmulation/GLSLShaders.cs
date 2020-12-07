@@ -69,9 +69,9 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
 
         public bool Textured { get; private set; }
 
-        private F3DEX2Interpreter _f3Dex2;
+        private F3Dex2Interpreter _f3Dex2;
 
-        public GlslShaders(uint m0, uint m1, F3DEX2Interpreter f3dex2, bool tex)
+        public GlslShaders(uint m0, uint m1, F3Dex2Interpreter f3dex2, bool tex)
         {
             _f3Dex2 = f3dex2;
 

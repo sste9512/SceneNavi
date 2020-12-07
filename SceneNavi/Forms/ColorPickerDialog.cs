@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using SceneNavi.Utilities;
 
 namespace SceneNavi
 {
@@ -37,12 +38,12 @@ namespace SceneNavi
 
             if (localize)
             {
-                btnOK.Text = GUIHelpers.LoadLocalizedString("user32.dll", 800, "OK");
-                btnCancel.Text = GUIHelpers.LoadLocalizedString("user32.dll", 801, "Cancel");
+                btnOK.Text = GuiHelpers.LoadLocalizedString("user32.dll", 800, "OK");
+                btnCancel.Text = GuiHelpers.LoadLocalizedString("user32.dll", 801, "Cancel");
 
-                lblRed.Text = GUIHelpers.LoadLocalizedString("comdlg32.dll", 1049, "Red");
-                lblGreen.Text = GUIHelpers.LoadLocalizedString("comdlg32.dll", 1042, "Green");
-                lblBlue.Text = GUIHelpers.LoadLocalizedString("comdlg32.dll", 1052, "Blue");
+                lblRed.Text = GuiHelpers.LoadLocalizedString("comdlg32.dll", 1049, "Red");
+                lblGreen.Text = GuiHelpers.LoadLocalizedString("comdlg32.dll", 1042, "Green");
+                lblBlue.Text = GuiHelpers.LoadLocalizedString("comdlg32.dll", 1052, "Blue");
             }
         }
 

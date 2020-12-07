@@ -1,4 +1,6 @@
-﻿namespace SceneNavi
+﻿using SceneNavi.Utilities;
+
+namespace SceneNavi
 {
     partial class MainForm
     {
@@ -77,11 +79,11 @@
             this.openGLInformationToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
             this.aboutToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.bsiToolMode = new SceneNavi.GUIHelpers.ButtonStripItem();
-            this.separatorStripItem1 = new SceneNavi.GUIHelpers.SeparatorStripItem();
+            this.bsiToolMode = new GuiHelpers.ButtonStripItem();
+            this.separatorStripItem1 = new GuiHelpers.SeparatorStripItem();
             this.tsslStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.separatorStripItem2 = new SceneNavi.GUIHelpers.SeparatorStripItem();
-            this.bsiCamCoords = new SceneNavi.GUIHelpers.ButtonStripItem();
+            this.separatorStripItem2 = new GuiHelpers.SeparatorStripItem();
+            this.bsiCamCoords = new GuiHelpers.ButtonStripItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpScenes = new System.Windows.Forms.TabPage();
             this.tvScenes = new SceneNavi.Controls.TreeViewEx();
@@ -161,7 +163,7 @@
             this.ofdOpenRoom = new System.Windows.Forms.OpenFileDialog();
             this.cmsSceneTree = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.propertiesToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
-            this.customGLControl = new SceneNavi.Controls.CustomGLControl();
+            this._glRendererControl = new SceneNavi.Controls.GlRendererControl();
             this.cmsVertexEdit = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.changeColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
@@ -379,7 +381,7 @@
             this.resetCameraPositionToolStripMenuItem.HelpText = "Reset the camera\'s position";
             this.resetCameraPositionToolStripMenuItem.Name = "resetCameraPositionToolStripMenuItem";
             this.resetCameraPositionToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.resetCameraPositionToolStripMenuItem.Text = "&Reset Camera Position";
+            this.resetCameraPositionToolStripMenuItem.Text = "&Reset Camera RenderPosition";
             this.resetCameraPositionToolStripMenuItem.Click += new System.EventHandler(this.resetCameraPositionToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
@@ -1336,7 +1338,7 @@
             this.lblWaterboxPositionX.Name = "lblWaterboxPositionX";
             this.lblWaterboxPositionX.Size = new System.Drawing.Size(104, 26);
             this.lblWaterboxPositionX.TabIndex = 5;
-            this.lblWaterboxPositionX.Text = "Position (X):";
+            this.lblWaterboxPositionX.Text = "RenderPosition (X):";
             this.lblWaterboxPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtWaterboxPositionX
@@ -1356,7 +1358,7 @@
             this.lblWaterboxPositionY.Name = "lblWaterboxPositionY";
             this.lblWaterboxPositionY.Size = new System.Drawing.Size(104, 26);
             this.lblWaterboxPositionY.TabIndex = 5;
-            this.lblWaterboxPositionY.Text = "Position (Y):";
+            this.lblWaterboxPositionY.Text = "RenderPosition (Y):";
             this.lblWaterboxPositionY.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtWaterboxPositionY
@@ -1376,7 +1378,7 @@
             this.lblWaterboxPositionZ.Name = "lblWaterboxPositionZ";
             this.lblWaterboxPositionZ.Size = new System.Drawing.Size(104, 26);
             this.lblWaterboxPositionZ.TabIndex = 5;
-            this.lblWaterboxPositionZ.Text = "Position (Z):";
+            this.lblWaterboxPositionZ.Text = "RenderPosition (Z):";
             this.lblWaterboxPositionZ.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtWaterboxPositionZ
@@ -1600,24 +1602,24 @@
             this.propertiesToolStripMenuItem.Text = "&Properties";
             this.propertiesToolStripMenuItem.Click += new System.EventHandler(this.propertiesToolStripMenuItem_Click);
             // 
-            // customGLControl
+            // _glRendererControl
             // 
-            this.customGLControl.BackColor = System.Drawing.Color.Black;
-            this.customGLControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.customGLControl.Enabled = false;
-            this.customGLControl.Location = new System.Drawing.Point(0, 24);
-            this.customGLControl.Name = "customGLControl";
-            this.customGLControl.Size = new System.Drawing.Size(640, 480);
-            this.customGLControl.TabIndex = 0;
-            this.customGLControl.VSync = false;
-            this.customGLControl.Load += new System.EventHandler(this.customGLControl_Load);
-            this.customGLControl.Paint += new System.Windows.Forms.PaintEventHandler(this.customGLControl_Paint);
-            this.customGLControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.customGLControl_KeyDown);
-            this.customGLControl.KeyUp += new System.Windows.Forms.KeyEventHandler(this.customGLControl_KeyUp);
-            this.customGLControl.Leave += new System.EventHandler(this.customGLControl_Leave);
-            this.customGLControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseDown);
-            this.customGLControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseMove);
-            this.customGLControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseUp);
+            this._glRendererControl.BackColor = System.Drawing.Color.Black;
+            this._glRendererControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._glRendererControl.Enabled = false;
+            this._glRendererControl.Location = new System.Drawing.Point(0, 24);
+            this._glRendererControl.Name = "_glRendererControl";
+            this._glRendererControl.Size = new System.Drawing.Size(640, 480);
+            this._glRendererControl.TabIndex = 0;
+            this._glRendererControl.VSync = false;
+            this._glRendererControl.Load += new System.EventHandler(this.customGLControl_Load);
+            this._glRendererControl.Paint += new System.Windows.Forms.PaintEventHandler(this.customGLControl_Paint);
+            this._glRendererControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.customGLControl_KeyDown);
+            this._glRendererControl.KeyUp += new System.Windows.Forms.KeyEventHandler(this.customGLControl_KeyUp);
+            this._glRendererControl.Leave += new System.EventHandler(this.customGLControl_Leave);
+            this._glRendererControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseDown);
+            this._glRendererControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseMove);
+            this._glRendererControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.customGLControl_MouseUp);
             // 
             // cmsVertexEdit
             // 
@@ -1652,11 +1654,11 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(970, 528);
-            this.Controls.Add(this.customGLControl);
+            this.Controls.Add(this._glRendererControl);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+           // this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -1701,7 +1703,7 @@
 
         #endregion
 
-        private Controls.CustomGLControl customGLControl;
+        private Controls.GlRendererControl _glRendererControl;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private Controls.ToolStripHintMenuItem fileToolStripMenuItem;
@@ -1828,10 +1830,10 @@
         private Controls.ToolStripHintMenuItem enableAntiAliasingToolStripMenuItem;
         private Controls.ToolStripHintMenuItem openGLToolStripMenuItem;
         private Controls.ToolStripHintMenuItem enableMipmapsToolStripMenuItem;
-        private GUIHelpers.ButtonStripItem bsiCamCoords;
-        private GUIHelpers.ButtonStripItem bsiToolMode;
-        private GUIHelpers.SeparatorStripItem separatorStripItem1;
-        private GUIHelpers.SeparatorStripItem separatorStripItem2;
+        private GuiHelpers.ButtonStripItem bsiCamCoords;
+        private GuiHelpers.ButtonStripItem bsiToolMode;
+        private GuiHelpers.SeparatorStripItem separatorStripItem1;
+        private GuiHelpers.SeparatorStripItem separatorStripItem2;
         private Controls.ToolStripHintMenuItem openGLInformationToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip cmsVertexEdit;
         private System.Windows.Forms.ToolStripMenuItem changeColorToolStripMenuItem;

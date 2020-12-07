@@ -27,7 +27,7 @@ namespace SceneNavi.Utilities.OpenGLHelpers
             GL.LineWidth(4.0f);
             GL.DepthRange(0.0, 0.99999);
 
-            double radius = 12.0;
+            var radius = 12.0;
             GL.LineWidth(4.0f);
             GL.Begin(PrimitiveType.Lines);
             GL.Color3(1.0, 0.0, 0.0);
@@ -138,8 +138,8 @@ namespace SceneNavi.Utilities.OpenGLHelpers
 
         public static DisplayList GetDisplayList(string prop)
         {
-            Type tp = typeof(StockObjects);
-            System.Reflection.PropertyInfo propinfo = tp.GetProperty(prop, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var tp = typeof(StockObjects);
+            var propinfo = tp.GetProperty(prop, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             if (propinfo == null) return null;
             return (propinfo.GetValue(null, null) as DisplayList);
         }

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\steve\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\steve\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_SceneNavi.-803873150.00" t="ExcludeRecursive" />
+    <e p="C:\Users\steve\source\repos\SceneNavi" t="IncludeFlat">
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="SceneNavi" t="IncludeRecursive">
+        <e p="ActorRendering" t="Include">
+          <e p="GameActor.cs" t="Include" />
+          <e p="MIPS.cs" t="Include" />
+          <e p="MIPSEvaluator.cs" t="Include" />
+        </e>
+        <e p="app.config" t="Include" />
+        <e p="AssemblyHelpers.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Bottled Fairy.ico" t="Include" />
+        <e p="Configuration.cs" t="Include" />
+        <e p="Configurations" t="Include">
+          <e p="BaseConfig.cs" t="Include" />
+        </e>
+        <e p="Controls" t="Include">
+          <e p="CustomGLControl.cs" t="Include" />
+          <e p="HScrollBarEx.cs" t="Include" />
+          <e p="ListViewEx.cs" t="Include" />
+          <e p="RichLabel.cs" t="Include" />
+          <e p="TableLayoutPanelEx.cs" t="Include" />
+          <e p="ToolStripHintMenuItem.cs" t="Include" />
+          <e p="ToolStripRadioButtonMenuItem.cs" t="Include" />
+          <e p="TreeViewEx.cs" t="Include" />
+        </e>
+        <e p="Endian.cs" t="Include" />
+        <e p="Forms" t="Include">
+          <e p="ColorPickerDialog.cs" t="Include" />
+          <e p="ColorPickerDialog.Designer.cs" t="Include" />
+          <e p="ColorPickerDialog.resx" t="Include" />
+          <e p="CombinerTypes.cs" t="Include" />
+          <e p="MainForm.cs" t="Include" />
+          <e p="MainForm.Designer.cs" t="Include" />
+          <e p="MainForm.resx" t="Include" />
+          <e p="MainFormConstants.cs" t="Include" />
+          <e p="TableEditorForm.cs" t="Include" />
+          <e p="TableEditorForm.Designer.cs" t="Include" />
+          <e p="TableEditorForm.resx" t="Include" />
+          <e p="TitleCardForm.cs" t="Include" />
+          <e p="TitleCardForm.Designer.cs" t="Include" />
+          <e p="TitleCardForm.resx" t="Include" />
+          <e p="ToolModes.cs" t="Include" />
+          <e p="UpdateCheckDialog.cs" t="Include" />
+          <e p="UpdateCheckDialog.Designer.cs" t="Include" />
+          <e p="UpdateCheckDialog.resx" t="Include" />
+        </e>
+        <e p="HeaderCommands" t="Include">
+          <e p="Actors.cs" t="Include" />
+          <e p="Collision.cs" t="Include" />
+          <e p="EnvironmentSettings.cs" t="Include" />
+          <e p="Generic.cs" t="Include" />
+          <e p="IPickableObject.cs" t="Include" />
+          <e p="IStoreable.cs" t="Include" />
+          <e p="MeshHeader.cs" t="Include" />
+          <e p="Objects.cs" t="Include" />
+          <e p="PathHeader.cs" t="Include" />
+          <e p="RoomInfoClass.cs" t="Include" />
+          <e p="Rooms.cs" t="Include" />
+          <e p="SettingsSoundScene.cs" t="Include" />
+          <e p="SpecialObjects.cs" t="Include" />
+          <e p="Waypoint.cs" t="Include" />
+          <e p="Waypoints.cs" t="Include" />
+        </e>
+        <e p="Models" t="Include">
+          <e p="DefaultTypes.cs" t="Include" />
+          <e p="Definition.cs" t="Include" />
+          <e p="DisplayStyles.cs" t="Include" />
+          <e p="Item.cs" t="Include" />
+          <e p="Option.cs" t="Include" />
+          <e p="Usages.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+          <e p="Resources.Designer.cs" t="Include" />
+          <e p="Resources.resx" t="Include" />
+          <e p="Settings.Designer.cs" t="Include" />
+          <e p="Settings.settings" t="Include" />
+        </e>
+        <e p="Resources" t="Include">
+          <e p="bg_empty_2.png" t="Include" />
+          <e p="bg_empty_3.png" t="Include" />
+        </e>
+        <e p="ROMHandler" t="Include">
+          <e p="ActorTableEntry.cs" t="Include" />
+          <e p="BaseRomHandler.cs" t="Include" />
+          <e p="ByteOrder.cs" t="Include" />
+          <e p="ByteOrderException.cs" t="Include" />
+          <e p="CommandTypeIDs.cs" t="Include" />
+          <e p="DMATableEntry.cs" t="Include" />
+          <e p="EntranceTableEntry.cs" t="Include" />
+          <e p="HeaderLoader.cs" t="Include" />
+          <e p="HeaderPair.cs" t="Include" />
+          <e p="Interfaces" t="Include">
+            <e p="IHeaderParent.cs" t="Include" />
+            <e p="IRomHandler.cs" t="Include" />
+            <e p="ISceneTableEntry.cs" t="Include" />
+          </e>
+          <e p="ObjectTableEntry.cs" t="Include" />
+          <e p="RomConstants.cs" t="Include" />
+          <e p="RomHandlerException.cs" t="Include" />
+          <e p="SceneTableEntryMajora.cs" t="Include" />
+          <e p="SceneTableEntryOcarina.cs" t="Include" />
+          <e p="StageKey.cs" t="Include" />
+          <e p="StageKeyConverter.cs" t="Include" />
+        </e>
+        <e p="RomHandlers" t="Include">
+          <e p="MajorasMaskRomHandler.cs" t="Include" />
+        </e>
+        <e p="SceneNavi.csproj" t="IncludeRecursive" />
+        <e p="Services" t="Include">
+          <e p="Commands" t="Include" />
+          <e p="Queries" t="Include" />
+        </e>
+        <e p="SimpleF3DEX2" t="Include">
+          <e p="CombinerEmulation" t="Include">
+            <e p="ArbCombineManager.cs" t="Include" />
+            <e p="ArbCombineProgram.cs" t="Include" />
+            <e p="GLSLCombineManager.cs" t="Include" />
+            <e p="GLSLShaders.cs" t="Include" />
+            <e p="KnownCombinerMuxes.cs" t="Include" />
+          </e>
+          <e p="F3DEX2Interpreter.cs" t="Include" />
+          <e p="General.cs" t="Include" />
+          <e p="ImageHelper.cs" t="Include" />
+          <e p="OtherModeL.cs" t="Include" />
+          <e p="SimpleTriangle.cs" t="Include" />
+          <e p="Texture.cs" t="Include" />
+          <e p="TextureCache.cs" t="Include" />
+          <e p="UnpackedCombinerMux.cs" t="Include" />
+          <e p="Vertex.cs" t="Include" />
+        </e>
+        <e p="Startup" t="Include">
+          <e p="Startup.cs" t="Include" />
+        </e>
+        <e p="StatusMessageHandler.cs" t="Include" />
+        <e p="UpdateData" t="Include">
+          <e p="SceneNavi.txt" t="Include" />
+          <e p="sn-update.htm" t="Include" />
+          <e p="sn-update.rtf" t="Include" />
+        </e>
+        <e p="Utilities" t="Include">
+          <e p="ExtensionMethods.cs" t="Include" />
+          <e p="GUIHelpers.cs" t="Include" />
+          <e p="OpenGLHelpers" t="Include">
+            <e p="Camera.cs" t="Include" />
+            <e p="DisplayList.cs" t="Include" />
+            <e p="DisplayListEx.cs" t="Include" />
+            <e p="FPSMonitor.cs" t="Include" />
+            <e p="Initialization.cs" t="Include" />
+            <e p="MiscDrawingHelpers.cs" t="Include" />
+            <e p="ScreenWorldConversion.cs" t="Include" />
+            <e p="StockObjects.cs" t="Include" />
+            <e p="TextPrinter.cs" t="Include" />
+          </e>
+        </e>
+        <e p="VersionManagement.cs" t="Include" />
+        <e p="XML" t="Include">
+          <e p="ActorDefinitions" t="Include">
+            <e p="DL" t="Include">
+              <e p="Database.xml" t="Include" />
+            </e>
+            <e p="ZL" t="Include">
+              <e p="Database.xml" t="Include" />
+            </e>
+            <e p="ZS" t="Include">
+              <e p="Database.xml" t="Include" />
+            </e>
+          </e>
+          <e p="GameDataGeneric" t="Include">
+            <e p="DL" t="Include">
+              <e p="ActorNames.xml" t="Include" />
+              <e p="ObjectNames.xml" t="Include" />
+              <e p="SongNames.xml" t="Include" />
+            </e>
+            <e p="ZL" t="Include">
+              <e p="ActorNames.xml" t="Include" />
+              <e p="ObjectNames.xml" t="Include" />
+              <e p="SongNames.xml" t="Include" />
+            </e>
+            <e p="ZS" t="Include">
+              <e p="ActorNames.xml" t="Include" />
+              <e p="ObjectNames.xml" t="Include" />
+              <e p="SongNames.xml" t="Include" />
+            </e>
+          </e>
+          <e p="GameDataSpecific" t="Include">
+            <e p="CZLE0" t="Include">
+              <e p="RoomNames.xml" t="Include" />
+              <e p="SceneNames.xml" t="Include" />
+              <e p="StageDescriptions.xml" t="Include" />
+            </e>
+            <e p="NZLEF" t="Include">
+              <e p="RoomNames.xml" t="Include" />
+              <e p="SceneNames.xml" t="Include" />
+              <e p="StageDescriptions.xml" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="XMLActorDefinitionReader.cs" t="Include" />
+        <e p="XMLHashTableReader.cs" t="Include" />
+      </e>
+      <e p="SceneNavi.Domain" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="SceneNavi.Domain.csproj" t="IncludeRecursive" />
+      </e>
+      <e p="SceneNavi.Entities" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="SceneNavi.Entities.csproj" t="IncludeRecursive" />
+      </e>
+      <e p="SceneNavi.sln" t="IncludeFlat" />
+    </e>
+  </component>
+</project>

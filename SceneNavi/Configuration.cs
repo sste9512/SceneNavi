@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 
 using Nini.Config;
+using SceneNavi.Forms;
 
 namespace SceneNavi
 {
@@ -12,7 +13,7 @@ namespace SceneNavi
    
     
     
-    // This has been moved to its interface version in the configurations directory, for Config.net
+    // This has been moved to its interface version in the configurations directory, using Config.net
     static class Configuration
     {
         static readonly string ConfigName = "Main";
@@ -57,8 +58,8 @@ namespace SceneNavi
 
         public static bool RenderPathWaypoints
         {
-            get => (_source.Configs[ConfigName].GetBoolean("RenderPathWaypoints", false));
-            set => _source.Configs[ConfigName].Set("RenderPathWaypoints", value);
+            get => (_source.Configs[ConfigName].GetBoolean("RenderPathWayPoints", false));
+            set => _source.Configs[ConfigName].Set("RenderPathWayPoints", value);
         }
 
         public static bool LinkAllWPinPath
@@ -129,14 +130,14 @@ namespace SceneNavi
 
         public static bool RenderWaterboxes
         {
-            get => (_source.Configs[ConfigName].GetBoolean("RenderWaterboxes", true));
-            set => _source.Configs[ConfigName].Set("RenderWaterboxes", value);
+            get => (_source.Configs[ConfigName].GetBoolean("RenderWaterBoxes", true));
+            set => _source.Configs[ConfigName].Set("RenderWaterBoxes", value);
         }
 
         public static bool ShowWaterboxesPerRoom
         {
-            get => (_source.Configs[ConfigName].GetBoolean("ShowWaterboxesPerRoom", true));
-            set => _source.Configs[ConfigName].Set("ShowWaterboxesPerRoom", value);
+            get => (_source.Configs[ConfigName].GetBoolean("ShowWaterBoxesPerRoom", true));
+            set => _source.Configs[ConfigName].Set("ShowWaterBoxesPerRoom", value);
         }
 
         public static bool IsRestarting

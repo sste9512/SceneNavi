@@ -30,7 +30,7 @@
   <Element Key="0x0023">Room Changing Black Plane</Element>
   <Element Key="0x0024">(Last Unknown)</Element>
   <Element Key="0x0025">Lizalfos</Element>
-  <Element Key="0x0026">Wooden Post with Red Cloth</Element>
+  <Element Key="0x0026">Wooden Positiont with Red Cloth</Element>
   <Element Key="0x0027">King Dodongo</Element>
   <Element Key="0x0028">Queen Gohma</Element>
   <Element Key="0x0029">Princess Zelda Child</Element>
@@ -71,7 +71,7 @@
   <Element Key="0x004E">Elevator Platform</Element>
   <Element Key="0x004F">Lock-on Blue Spot? (Unknown)</Element>
   <Element Key="0x0050">Back and Forth Moving Platform</Element>
-  <Element Key="0x0051">Rotating Spike Cylinder</Element>
+  <Element Key="0x0051">Rotationating Spike Cylinder</Element>
   <Element Key="0x0052">Phantom Ganon</Element>
   <Element Key="0x0054">Armos</Element>
   <Element Key="0x0055">Deku Baba</Element>
@@ -86,7 +86,7 @@
   <Element Key="0x005E">Torch</Element>
   <Element Key="0x005F">Heart Container</Element>
   <Element Key="0x0060">Deku Scrub</Element>
-  <Element Key="0x0061">Large Rotating Stone Ring</Element>
+  <Element Key="0x0061">Large Rotationating Stone Ring</Element>
   <Element Key="0x0062">Statue Eyes</Element>
   <Element Key="0x0063">Bari</Element>
   <Element Key="0x0064">Dragon Head Statue</Element>
@@ -114,7 +114,7 @@
   <Element Key="0x0085">Dampe Grave Digging Game</Element>
   <Element Key="0x0086">Lowering Circular Platform</Element>
   <Element Key="0x0087">Forest Temple Elevator</Element>
-  <Element Key="0x0088">Rotating Room</Element>
+  <Element Key="0x0088">Rotationating Room</Element>
   <Element Key="0x0089">Forest Temple Ceiling</Element>
   <Element Key="0x008A">Beamos</Element>
   <Element Key="0x008B">Spiritual Stones/Goddesses/Triforce</Element>
@@ -221,7 +221,7 @@
   <Element Key="0x00F8">Hyrule Castle Gate</Element>
   <Element Key="0x00F9">Giant Rolling Boulder</Element>
   <Element Key="0x00FA">Moving Brick Wall</Element>
-  <Element Key="0x00FC">Rotating Cobra Mirror</Element>
+  <Element Key="0x00FC">Rotationating Cobra Mirror</Element>
   <Element Key="0x00FD">Climbable Mesh Wall</Element>
   <Element Key="0x00FE">Fishing Game, Fish, and Fisherman</Element>
   <Element Key="0x00FF">Push Block</Element>
@@ -245,7 +245,7 @@
   <Element Key="0x0114">Iron Knuckle Armor Pieces</Element>
   <Element Key="0x0115">Skullkid</Element>
   <Element Key="0x0116">Skullkid's Needle</Element>
-  <Element Key="0x0117">Silver Rupee/Large Rotating Pot</Element>
+  <Element Key="0x0117">Silver Rupee/Large Rotationating Pot</Element>
   <Element Key="0x0118">Vortex (Koume/Kotake kidnap Nabooru)</Element>
   <Element Key="0x0119">Bongo Bongo Shadow</Element>
   <Element Key="0x011A">Business Scrub</Element>
@@ -257,7 +257,7 @@
   <Element Key="0x0120">Zora's Domain Waterfall</Element>
   <Element Key="0x0121">Freezard</Element>
   <Element Key="0x0122">Dampe's Ghost</Element>
-  <Element Key="0x0123">Rotating Windmill Mechanism</Element>
+  <Element Key="0x0123">Rotationating Windmill Mechanism</Element>
   <Element Key="0x0124">Zora Diving Game</Element>
   <Element Key="0x0125">Grass Clump, doesn't regrow</Element>
   <Element Key="0x0126">Bean Planting Spot</Element>

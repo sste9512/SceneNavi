@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 using System.Windows.Forms.Design;
 
-namespace SceneNavi
+namespace SceneNavi.Utilities
 {
-    class GUIHelpers
+    class GuiHelpers
     {
         /// <summary>
         /// Show a file save dialog

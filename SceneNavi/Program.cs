@@ -25,15 +25,6 @@ namespace SceneNavi
         static void Main()
         {
             Mutex runOnce = null;
-            try
-            {
-                var baseRomHandler = Di.Resolve<IRomHandler>();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
 
 
             Console.Write("Initialising");
@@ -43,28 +34,27 @@ namespace SceneNavi
                 Configuration.IsRestarting = false;
                 Thread.Sleep(3000);
             }
-#if !DEBUG
+
             try
             {
-#endif
-            runOnce = new Mutex(true, "SOME_MUTEX_NAME");
+                runOnce = new Mutex(true, "SOME_MUTEX_NAME");
 
-            if (!runOnce.WaitOne(TimeSpan.Zero)) return;
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
-#if !DEBUG
+                if (!runOnce.WaitOne(TimeSpan.Zero)) return;
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(Di.Resolve<Form>(nameof(MainForm)));
+               // Application.Idle += Application_Idle;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Critical error occured: " + ex.GetType().FullName + " - " + ex.Message + "\nTarget site: " + ex.TargetSite, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show(
+                    "Critical error occured: " + ex.GetType().FullName + " - " + ex.Message + "\nTarget site: " +
+                    ex.TargetSite, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
             finally
             {
-                if (null != runOnce)
-                    runOnce.Close();
+                runOnce?.Close();
             }
-#endif
         }
     }
 }

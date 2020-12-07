@@ -13,6 +13,14 @@ using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi
 {
+
+    public class ActorDefinition
+    {
+        private Version ProgramVersion { get; set; }
+        public List<Definition> Definitions { get; private set; }
+    }
+
+
     public partial class XmlActorDefinitionReader
     {
         private Version ProgramVersion { get; set; }

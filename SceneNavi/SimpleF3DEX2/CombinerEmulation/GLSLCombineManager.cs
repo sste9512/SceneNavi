@@ -12,10 +12,10 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
     internal class GlslCombineManager
     {
         bool _supported;
-        F3DEX2Interpreter _f3Dex2;
+        F3Dex2Interpreter _f3Dex2;
         List<GlslShaders> _shaderCache;
 
-        public GlslCombineManager(F3DEX2Interpreter f3dex2)
+        public GlslCombineManager(F3Dex2Interpreter f3dex2)
         {
             _supported = ((GraphicsContext.CurrentContext as IGraphicsContextInternal).GetAddress("glCreateShader") != IntPtr.Zero);
             _f3Dex2 = f3dex2;

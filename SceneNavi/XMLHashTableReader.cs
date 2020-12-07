@@ -9,24 +9,35 @@ using System.ComponentModel;
 
 namespace SceneNavi
 {
-    public class XMLHashTableReader
+
+    public class HashTableDefinition
+    {
+        public Hashtable Names { get; private set; }
+        public Type KeyType { get; private set; }
+        public Type ValueType { get; private set; }
+    }
+
+
+    // This should be obsolete once the new yaml/json formats come out
+    [Obsolete]
+    public class XmlHashTableReader
     {
         public Hashtable Names { get; private set; }
         public Type KeyType { get; private set; }
         public Type ValueType { get; private set; }
 
-        public XMLHashTableReader(string defdir, string fn)
+        public XmlHashTableReader(string defdir, string fn)
         {
             Names = new Hashtable();
 
-            string path = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? throw new FileNotFoundException(), defdir);
+            var path = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? throw new FileNotFoundException(), defdir);
             if (!Directory.Exists(path)) return;
 
-            string file = Path.Combine(path, fn);
+            var file = Path.Combine(path, fn);
             if (!File.Exists(file)) return;
 
             /* Load XDocument */
-            XDocument xdoc = XDocument.Load(Path.Combine(path, fn));
+            var xdoc = XDocument.Load(Path.Combine(path, fn));
 
             /* Fetch Key- and ValueType */
             KeyType = Type.GetType((string)xdoc.Root.Attribute("KeyType"));
@@ -36,7 +47,7 @@ namespace SceneNavi
             var valconv = TypeDescriptor.GetConverter(ValueType);
 
             /* Parse elements */
-            foreach (XElement element in xdoc.Root.Elements())
+            foreach (var element in xdoc.Root.Elements())
             {
                 /* Convert values & add to list */
                 Names.Add(keyconv.ConvertFrom(element.Attribute("Key").Value), valconv.ConvertFrom(element.Value));

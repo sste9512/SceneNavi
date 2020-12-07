@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SceneNavi.ROMHandler;
+using SceneNavi.ROMHandler.Interfaces;
 
 namespace SceneNavi.HeaderCommands
 {

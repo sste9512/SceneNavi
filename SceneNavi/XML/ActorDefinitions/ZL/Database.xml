@@ -2,12 +2,12 @@
 <ActorDatabase ProgramVersion="1.0.1.2561">
   <Definition IsDefault="RoomActor, SpawnPoint">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Variable" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition IsDefault="TransitionActor">
@@ -16,10 +16,10 @@
     <Item Index="1" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Next)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="2" ValueType="System.Byte" Usage="NextRoomBack" Description="Previous Room" Mask="0xFF" ControlType="System.Windows.Forms.ComboBox"></Item>
     <Item Index="3" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Previous)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Variable" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition Number="0x0009" DisplayModel="ColoredDoor" PickModel="Door" FrontOffset="180.0">
@@ -28,19 +28,19 @@
     <Item Index="1" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Next)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="2" ValueType="System.Byte" Usage="NextRoomBack" Description="Previous Room" Mask="0xFF" ControlType="System.Windows.Forms.ComboBox"></Item>
     <Item Index="3" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Previous)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Variable" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition Number="0x000A" DisplayModel="ColoredSlab" PickModel="Slab" FrontOffset="180.0">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" Description="Chest Type" Mask="0xF000" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0x0000" Description="No action (large)"></Option>
       <Option Value="0x1000" Description="Clear Trigger (large)"></Option>
@@ -188,12 +188,12 @@
   </Definition>
   <Definition Number="0x0013">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Attached Switch" Mask="0x3F" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" Description="Type" Mask="0x07" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Fire Keese"></Option>
@@ -209,10 +209,10 @@
     <Item Index="1" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Next)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="2" ValueType="System.Byte" Usage="NextRoomBack" Description="Previous Room" Mask="0xFF" ControlType="System.Windows.Forms.ComboBox"></Item>
     <Item Index="3" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Previous)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Variable" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition Number="0x002E" DisplayModel="ColoredDoor" PickModel="Door" FrontOffset="180.0">
@@ -221,20 +221,20 @@
     <Item Index="1" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Next)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="2" ValueType="System.Byte" Usage="NextRoomBack" Description="Previous Room" Mask="0xFF" ControlType="System.Windows.Forms.ComboBox"></Item>
     <Item Index="3" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Camera (Previous)" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Generic variable" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition Number="0x0037">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" Description="Type" Mask="0x03" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Normal Skulltula"></Option>
       <Option Value="1" Description="Big Skulltula"></Option>
@@ -243,9 +243,9 @@
   </Definition>
   <Definition Number="0x003B">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Description="Sound Effect" Mask="0xFFFF" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0x0000" Description="Nothing"></Option>
       <Option Value="0x0001" Description="Stream"></Option>
@@ -273,12 +273,12 @@
   </Definition>
   <Definition Number="0x00F1">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.UInt16" Description="Appearance" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Ocarina of Time (tossed, higher)"></Option>
       <Option Value="1" Description="Ocarina of Time (tossed)"></Option>
@@ -288,9 +288,9 @@
   </Definition>
   <Definition Number="0x011B">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Description="Trigger Radius" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Description="Unknown (1)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Description="Unknown (2)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
@@ -301,12 +301,12 @@
   </Definition>
   <Definition Number="0x012A">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Switch Number" Mask="0x3F" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" Description="Appearance" Mask="0x07" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Floor switch"></Option>
@@ -335,12 +335,12 @@
   </Definition>-->
   <Definition Number="0x018D">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Attached Switch" Mask="0x3F" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" Description="Type" Mask="0x03" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Waterhole bottom"></Option>
@@ -349,23 +349,23 @@
   </Definition>
   <Definition Number="0x01B9">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Flag" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Message Number" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
   </Definition>
   <Definition Number="0x01BC">
     <Item Index="0" ValueType="System.UInt16" DisplayStyle="Hexadecimal" Usage="ActorNumber" Description="Actor Type" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="2" ValueType="System.Int16" Usage="PositionX" Description="Position (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="4" ValueType="System.Int16" Usage="PositionY" Description="Position (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="6" ValueType="System.Int16" Usage="PositionZ" Description="Position (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationX" Description="Rotation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationY" Description="Rotation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
-    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationZ" Description="Rotation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="2" ValueType="System.Int16" Usage="RenderPositionitionX" Description="RenderPositionition (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="4" ValueType="System.Int16" Usage="RenderPositionitionY" Description="RenderPositionition (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="6" ValueType="System.Int16" Usage="RenderPositionitionZ" Description="RenderPositionition (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="8" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationX" Description="Rotationation (X)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="10" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationY" Description="Rotationation (Y)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
+    <Item Index="12" ValueType="System.Int16" DisplayStyle="Hexadecimal" Usage="RotationationZ" Description="Rotationation (Z)" Mask="0xFFFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="14" ValueType="System.Byte" DisplayStyle="Hexadecimal" Description="Path Number" Mask="0xFF" ControlType="System.Windows.Forms.TextBox"></Item>
     <Item Index="15" ValueType="System.Byte" Description="Type" Mask="0x03" ControlType="System.Windows.Forms.ComboBox">
       <Option Value="0" Description="Purple pants (stationary)"></Option>

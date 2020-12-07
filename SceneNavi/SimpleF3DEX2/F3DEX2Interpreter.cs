@@ -6,16 +6,16 @@ using System.Text;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-
+using SceneNavi.Forms;
 using SceneNavi.ROMHandler;
 using SceneNavi.SimpleF3DEX2.CombinerEmulation;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.SimpleF3DEX2
 {
-    public class F3DEX2Interpreter
+    public class F3Dex2Interpreter
     {
-        public delegate void UcodeCommandDelegate(uint w0, uint w1);
+        public delegate void UCodeCommandDelegate(uint w0, uint w1);
 
         class Macro
         {
@@ -31,14 +31,14 @@ namespace SceneNavi.SimpleF3DEX2
             }
         }
 
-        UcodeCommandDelegate[] ucodecmds;
-        List<Macro> macros;
-        bool inmacro;
+        UCodeCommandDelegate[] _ucodecmds;
+        List<Macro> _macros;
+        bool _inmacro;
 
         internal List<SimpleTriangle> LastTriList { get; private set; }
 
         internal Vertex[] VertexBuffer { get; private set; }
-        uint rdphalf1, texaddress;
+        uint _rdphalf1, _texaddress;
         internal uint LastComb0 { get; private set; }
         internal uint LastComb1 { get; private set; }
         public uint GeometryMode { get; private set; }
@@ -46,25 +46,25 @@ namespace SceneNavi.SimpleF3DEX2
         public SimpleF3DEX2.OtherModeL OtherModeL { get; private set; }
         internal Color4 PrimColor { get; private set; }
         internal Color4 EnvColor { get; private set; }
-        Stack<Matrix4d> mtxstack;
+        Stack<Matrix4d> _mtxstack;
         internal Texture[] Textures { get; private set; }
-        Color4[] palette;
-        List<TextureCache> texcache;
-        int activetex;
-        bool multitex;
+        Color4[] _palette;
+        List<TextureCache> _texcache;
+        int _activetex;
+        bool _multitex;
         public float[] ScaleS { get; private set; }
         public float[] ScaleT { get; private set; }
 
-        ArbCombineManager arbCombiner;
-        GlslCombineManager glslCombiner;
+        ArbCombineManager _arbCombiner;
+        GlslCombineManager _glslCombiner;
 
         ROMHandler.BaseRomHandler _baseRom;
-        Stack<DisplayListEx> ActiveGLDL;
+        Stack<DisplayListEx> _activeGldl;
 
-        public F3DEX2Interpreter(ROMHandler.BaseRomHandler baseRom)
+        public F3Dex2Interpreter(ROMHandler.BaseRomHandler baseRom)
         {
             _baseRom = baseRom;
-            ActiveGLDL = new Stack<DisplayListEx>();
+            _activeGldl = new Stack<DisplayListEx>();
 
             InitializeParser();
             InitializeMacros();
@@ -72,18 +72,18 @@ namespace SceneNavi.SimpleF3DEX2
             LastTriList = new List<SimpleTriangle>();
 
             VertexBuffer = new Vertex[32];
-            rdphalf1 = GeometryMode = OtherModeH = LastComb0 = LastComb1 = 0;
+            _rdphalf1 = GeometryMode = OtherModeH = LastComb0 = LastComb1 = 0;
             OtherModeL = SimpleF3DEX2.OtherModeL.Empty;
-            mtxstack = new Stack<Matrix4d>();
-            mtxstack.Push(Matrix4d.Identity);
+            _mtxstack = new Stack<Matrix4d>();
+            _mtxstack.Push(Matrix4d.Identity);
 
             Textures = new Texture[2];
             Textures[0] = new Texture();
             Textures[1] = new Texture();
-            palette = new Color4[256];
-            texcache = new List<TextureCache>();
-            activetex = 0;
-            multitex = false;
+            _palette = new Color4[256];
+            _texcache = new List<TextureCache>();
+            _activetex = 0;
+            _multitex = false;
             ScaleS = new float[2];
             ScaleT = new float[2];
 
@@ -92,15 +92,15 @@ namespace SceneNavi.SimpleF3DEX2
 
         public void InitCombiner()
         {
-            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && arbCombiner == null)
+            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && _arbCombiner == null)
             {
                 Program.Status.Message = "Initializing ARB combiner...";
-                arbCombiner = new ArbCombineManager();
+                _arbCombiner = new ArbCombineManager();
             }
-            else if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner == null)
+            else if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner == null)
             {
                 Program.Status.Message = "Initializing GLSL combiner...";
-                glslCombiner = new GlslCombineManager(this);
+                _glslCombiner = new GlslCombineManager(this);
             }
         }
 
@@ -108,61 +108,70 @@ namespace SceneNavi.SimpleF3DEX2
         {
             ResetTextureCache();
 
-            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && arbCombiner != null) arbCombiner.ResetFragmentCache();
+            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && _arbCombiner != null) _arbCombiner.ResetFragmentCache();
 
             if (LastTriList != null) LastTriList.Clear();
         }
 
         public void ResetTextureCache()
         {
-            if (texcache != null)
+            if (_texcache != null)
             {
-                foreach (var tc in texcache) if (GL.IsTexture(tc.GLID)) GL.DeleteTexture(tc.GLID);
-                texcache.Clear();
+                foreach (var tc in _texcache) if (GL.IsTexture(tc.GLID)) GL.DeleteTexture(tc.GLID);
+                _texcache.Clear();
             }
         }
 
         private void InitializeParser()
         {
-            ucodecmds = new UcodeCommandDelegate[256];
-            for (var i = 0; i < ucodecmds.Length; i++) ucodecmds[i] = new UcodeCommandDelegate((w0, w1) => { });
-            ucodecmds[(byte)General.UcodeCmds.VTX] = CommandVtx;
-            ucodecmds[(byte)General.UcodeCmds.TRI1] = CommandTri1;
-            ucodecmds[(byte)General.UcodeCmds.TRI2] = CommandTri2;
-            ucodecmds[(byte)General.UcodeCmds.DL] = CommandDL;
-            ucodecmds[(byte)General.UcodeCmds.RDPHALF_1] = CommandRDPHalf1;
-            ucodecmds[(byte)General.UcodeCmds.BRANCH_Z] = CommandBranchZ;
-            ucodecmds[(byte)General.UcodeCmds.GEOMETRYMODE] = CommandGeometryMode;
-            ucodecmds[(byte)General.UcodeCmds.MTX] = CommandMtx;
-            ucodecmds[(byte)General.UcodeCmds.POPMTX] = CommandPopMtx;
-            ucodecmds[(byte)General.UcodeCmds.SETOTHERMODE_H] = CommandSetOtherModeH;
-            ucodecmds[(byte)General.UcodeCmds.SETOTHERMODE_L] = CommandSetOtherModeL;
-            ucodecmds[(byte)General.UcodeCmds.TEXTURE] = CommandTexture;
-            ucodecmds[(byte)General.UcodeCmds.SETTIMG] = CommandSetTImage;
-            ucodecmds[(byte)General.UcodeCmds.SETTILE] = CommandSetTile;
-            ucodecmds[(byte)General.UcodeCmds.SETTILESIZE] = CommandSetTileSize;
-            ucodecmds[(byte)General.UcodeCmds.LOADBLOCK] = CommandLoadBlock;
-            ucodecmds[(byte)General.UcodeCmds.SETCOMBINE] = CommandSetCombine;
-            ucodecmds[(byte)General.UcodeCmds.SETPRIMCOLOR] = CommandSetPrimColor;
-            ucodecmds[(byte)General.UcodeCmds.SETENVCOLOR] = CommandSetEnvColor;
+            _ucodecmds = new UCodeCommandDelegate[256];
+            for (var i = 0; i < _ucodecmds.Length; i++) _ucodecmds[i] = new UCodeCommandDelegate((w0, w1) => { });
+            _ucodecmds[(byte)General.UcodeCmds.VTX] = CommandVtx;
+            _ucodecmds[(byte)General.UcodeCmds.TRI1] = CommandTri1;
+            _ucodecmds[(byte)General.UcodeCmds.TRI2] = CommandTri2;
+            _ucodecmds[(byte)General.UcodeCmds.DL] = CommandDl;
+            _ucodecmds[(byte)General.UcodeCmds.RDPHALF_1] = CommandRdpHalf1;
+            _ucodecmds[(byte)General.UcodeCmds.BRANCH_Z] = CommandBranchZ;
+            _ucodecmds[(byte)General.UcodeCmds.GEOMETRYMODE] = CommandGeometryMode;
+            _ucodecmds[(byte)General.UcodeCmds.MTX] = CommandMtx;
+            _ucodecmds[(byte)General.UcodeCmds.POPMTX] = CommandPopMtx;
+            _ucodecmds[(byte)General.UcodeCmds.SETOTHERMODE_H] = CommandSetOtherModeH;
+            _ucodecmds[(byte)General.UcodeCmds.SETOTHERMODE_L] = CommandSetOtherModeL;
+            _ucodecmds[(byte)General.UcodeCmds.TEXTURE] = CommandTexture;
+            _ucodecmds[(byte)General.UcodeCmds.SETTIMG] = CommandSetTImage;
+            _ucodecmds[(byte)General.UcodeCmds.SETTILE] = CommandSetTile;
+            _ucodecmds[(byte)General.UcodeCmds.SETTILESIZE] = CommandSetTileSize;
+            _ucodecmds[(byte)General.UcodeCmds.LOADBLOCK] = CommandLoadBlock;
+            _ucodecmds[(byte)General.UcodeCmds.SETCOMBINE] = CommandSetCombine;
+            _ucodecmds[(byte)General.UcodeCmds.SETPRIMCOLOR] = CommandSetPrimColor;
+            _ucodecmds[(byte)General.UcodeCmds.SETENVCOLOR] = CommandSetEnvColor;
         }
 
         private void InitializeMacros()
         {
-            macros = new List<Macro>();
-            macros.Add(new Macro(MacroLoadTextureBlock, new General.UcodeCmds[] {
-                General.UcodeCmds.SETTIMG, General.UcodeCmds.SETTILE, General.UcodeCmds.RDPLOADSYNC, General.UcodeCmds.LOADBLOCK, General.UcodeCmds.RDPPIPESYNC, General.UcodeCmds.SETTILE, General.UcodeCmds.SETTILESIZE
-            }));
-            macros.Add(new Macro(MacroLoadTLUT, new General.UcodeCmds[] {
-                General.UcodeCmds.SETTIMG, General.UcodeCmds.RDPTILESYNC, General.UcodeCmds.SETTILE, General.UcodeCmds.RDPLOADSYNC, General.UcodeCmds.LOADTLUT, General.UcodeCmds.RDPPIPESYNC
-            }));
+            _macros = new List<Macro>
+            {
+                new Macro(MacroLoadTextureBlock,
+                    new General.UcodeCmds[]
+                    {
+                        General.UcodeCmds.SETTIMG, General.UcodeCmds.SETTILE, General.UcodeCmds.RDPLOADSYNC,
+                        General.UcodeCmds.LOADBLOCK, General.UcodeCmds.RDPPIPESYNC, General.UcodeCmds.SETTILE,
+                        General.UcodeCmds.SETTILESIZE
+                    }),
+                new Macro(MacroLoadTlut,
+                    new General.UcodeCmds[]
+                    {
+                        General.UcodeCmds.SETTIMG, General.UcodeCmds.RDPTILESYNC, General.UcodeCmds.SETTILE,
+                        General.UcodeCmds.RDPLOADSYNC, General.UcodeCmds.LOADTLUT, General.UcodeCmds.RDPPIPESYNC
+                    })
+            };
         }
 
         public void Render(uint adr, bool call = false, DisplayListEx gldl = null)
         {
             try
             {
-                ActiveGLDL.Push(gldl);
+                _activeGldl.Push(gldl);
 
                 /* Set some defaults */
                 if (!call)
@@ -203,10 +212,10 @@ namespace SceneNavi.SimpleF3DEX2
                     if (cmd == (byte)General.UcodeCmds.ENDDL) break;
 
                     /* Try to detect macros if any are defined */
-                    inmacro = false;
-                    if (macros != null)
+                    _inmacro = false;
+                    if (_macros != null)
                     {
-                        foreach (var m in macros)
+                        foreach (var m in _macros)
                         {
                             if (adr + ((m.Commands.Length + 3) * 8) > segdata.Length) break;
 
@@ -221,7 +230,7 @@ namespace SceneNavi.SimpleF3DEX2
                                 if (i < m.Commands.Length) nextcmd[i] = (General.UcodeCmds)(nextw0[i] >> 24);
                             }
 
-                            if (inmacro = (Enumerable.SequenceEqual(m.Commands, nextcmd)))
+                            if (_inmacro = (Enumerable.SequenceEqual(m.Commands, nextcmd)))
                             {
                                 m.Function(nextw0, nextw1);
                                 adr += (uint)(m.Commands.Length * 8);
@@ -231,10 +240,10 @@ namespace SceneNavi.SimpleF3DEX2
                     }
 
                     /* No macro detected */
-                    if (!inmacro)
+                    if (!_inmacro)
                     {
                         /* Execute command */
-                        ucodecmds[cmd](Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr)), Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 4)));
+                        _ucodecmds[cmd](Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr)), Endian.SwapUInt32(BitConverter.ToUInt32(segdata, (int)adr + 4)));
                         adr += 8;
 
                         /* Texture loading hack; if SetCombine OR LoadBlock command detected, try loading textures again (fixes Water Temple 1st room, borked walls; SM64toZ64 conversions?) */
@@ -248,7 +257,7 @@ namespace SceneNavi.SimpleF3DEX2
             }
             finally
             {
-                ActiveGLDL.Pop();
+                _activeGldl.Pop();
             }
         }
 
@@ -256,20 +265,20 @@ namespace SceneNavi.SimpleF3DEX2
         {
             if (!Configuration.RenderTextures) return;
 
-            activetex = (int)((w1[6] >> 24) & 0x01);
-            multitex = (activetex == 1);
+            _activetex = (int)((w1[6] >> 24) & 0x01);
+            _multitex = (_activetex == 1);
 
             CommandSetTImage(w0[0], w1[0]);
             CommandSetTile(w0[5], w1[5]);
             CommandSetTileSize(w0[6], w1[6]);
 
-            if ((Textures[activetex].Format == 0x40 || Textures[activetex].Format == 0x48 || Textures[activetex].Format == 0x50) &&
+            if ((Textures[_activetex].Format == 0x40 || Textures[_activetex].Format == 0x48 || Textures[_activetex].Format == 0x50) &&
                 ((w0[7] >> 24) == (byte)General.UcodeCmds.SETTIMG) || ((w0[8] >> 24) == (byte)General.UcodeCmds.SETTIMG)) return;
 
             LoadTextures();
         }
 
-        private void MacroLoadTLUT(uint[] w0, uint[] w1)
+        private void MacroLoadTlut(uint[] w0, uint[] w1)
         {
             if (!Configuration.RenderTextures) return;
 
@@ -286,11 +295,11 @@ namespace SceneNavi.SimpleF3DEX2
             {
                 var r = (ushort)((segdata[adr] << 8) | segdata[adr + 1]);
 
-                palette[i].R = (byte)((r & 0xF800) >> 8);
-                palette[i].G = (byte)(((r & 0x07C0) << 5) >> 8);
-                palette[i].B = (byte)(((r & 0x003E) << 18) >> 16);
-                palette[i].A = 0;
-                if ((r & 0x0001) == 1) palette[i].A = 0xFF;
+                _palette[i].R = (byte)((r & 0xF800) >> 8);
+                _palette[i].G = (byte)(((r & 0x07C0) << 5) >> 8);
+                _palette[i].B = (byte)(((r & 0x003E) << 18) >> 16);
+                _palette[i].A = 0;
+                if ((r & 0x0001) == 1) _palette[i].A = 0xFF;
 
                 adr += 2;
             }
@@ -301,11 +310,11 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandVtx(uint w0, uint w1)
         {
             /* Vtx */
-            var N = (byte)((w0 >> 12) & 0xFF);
-            var V0 = (byte)(((w0 >> 1) & 0x7F) - N);
-            if (N > VertexBuffer.Length || V0 > VertexBuffer.Length) return;
+            var n = (byte)((w0 >> 12) & 0xFF);
+            var v0 = (byte)(((w0 >> 1) & 0x7F) - n);
+            if (n > VertexBuffer.Length || v0 > VertexBuffer.Length) return;
 
-            for (var i = 0; i < N; i++) VertexBuffer[V0 + i] = new Vertex(_baseRom, (byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), mtxstack.Peek());
+            for (var i = 0; i < n; i++) VertexBuffer[v0 + i] = new Vertex(_baseRom, (byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), _mtxstack.Peek());
         }
 
         private void CommandTri1(uint w0, uint w1)
@@ -316,7 +325,7 @@ namespace SceneNavi.SimpleF3DEX2
             foreach (var idx in idxs) if (idx >= VertexBuffer.Length) return;
             General.RenderTriangles(this, idxs);
 
-            if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
+            if (_activeGldl.Peek() != null) _activeGldl.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
 
             LastTriList.Add(new SimpleTriangle(VertexBuffer[idxs[0]].Position, VertexBuffer[idxs[1]].Position, VertexBuffer[idxs[2]].Position));
         }
@@ -333,32 +342,32 @@ namespace SceneNavi.SimpleF3DEX2
             foreach (var idx in idxs) if (idx >= VertexBuffer.Length) return;
             General.RenderTriangles(this, idxs);
 
-            if (ActiveGLDL != null)
+            if (_activeGldl != null)
             {
-                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
-                if (ActiveGLDL.Peek() != null) ActiveGLDL.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[3]], VertexBuffer[idxs[4]], VertexBuffer[idxs[5]]));
+                if (_activeGldl.Peek() != null) _activeGldl.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[0]], VertexBuffer[idxs[1]], VertexBuffer[idxs[2]]));
+                if (_activeGldl.Peek() != null) _activeGldl.Peek().Triangles.Add(new DisplayListEx.Triangle(VertexBuffer[idxs[3]], VertexBuffer[idxs[4]], VertexBuffer[idxs[5]]));
             }
 
             LastTriList.Add(new SimpleTriangle(VertexBuffer[idxs[0]].Position, VertexBuffer[idxs[1]].Position, VertexBuffer[idxs[2]].Position));
             LastTriList.Add(new SimpleTriangle(VertexBuffer[idxs[3]].Position, VertexBuffer[idxs[4]].Position, VertexBuffer[idxs[5]].Position));
         }
 
-        private void CommandDL(uint w0, uint w1)
+        private void CommandDl(uint w0, uint w1)
         {
             /* DL */
-            if ((byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, ActiveGLDL.Peek());
+            if ((byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, _activeGldl.Peek());
         }
 
-        private void CommandRDPHalf1(uint w0, uint w1)
+        private void CommandRdpHalf1(uint w0, uint w1)
         {
             /* RDPHalf_1 */
-            rdphalf1 = w1;
+            _rdphalf1 = w1;
         }
 
         private void CommandBranchZ(uint w0, uint w1)
         {
             /* Branch_Z */
-            if ((byte[])_baseRom.SegmentMapping[(byte)(rdphalf1 >> 24)] != null) Render(rdphalf1, true, ActiveGLDL.Peek());
+            if ((byte[])_baseRom.SegmentMapping[(byte)(_rdphalf1 >> 24)] != null) Render(_rdphalf1, true, _activeGldl.Peek());
         }
 
         private void CommandGeometryMode(uint w0, uint w1)
@@ -368,7 +377,7 @@ namespace SceneNavi.SimpleF3DEX2
             GeometryMode = (GeometryMode & ~clr) | w1;
             General.PerformModeChanges(this);
 
-            if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null) glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+            if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null) _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
         }
 
         private void CommandMtx(uint w0, uint w1)
@@ -378,7 +387,7 @@ namespace SceneNavi.SimpleF3DEX2
             var madr = (w1 & 0xFFFFFF);
             var msegdata = (byte[])_baseRom.SegmentMapping[mseg];
 
-            if (mseg == 0x80) mtxstack.Pop();
+            if (mseg == 0x80) _mtxstack.Pop();
             if (msegdata == null) return;
 
             ushort mt1, mt2;
@@ -401,13 +410,13 @@ namespace SceneNavi.SimpleF3DEX2
                 matrix[8], matrix[9], matrix[10], matrix[11],
                 matrix[12], matrix[13], matrix[14], matrix[15]);
 
-            mtxstack.Push(glmatrix);
+            _mtxstack.Push(glmatrix);
         }
 
         private void CommandPopMtx(uint w0, uint w1)
         {
             /* PopMtx */
-            mtxstack.Pop();
+            _mtxstack.Pop();
         }
 
         private void CommandSetOtherModeH(uint w0, uint w1)
@@ -431,7 +440,7 @@ namespace SceneNavi.SimpleF3DEX2
 
             General.PerformModeChanges(this);
 
-            if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null) glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+            if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null) _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
         }
 
         private void CommandSetOtherModeL(uint w0, uint w1)
@@ -445,15 +454,15 @@ namespace SceneNavi.SimpleF3DEX2
                 OtherModeL = new SimpleF3DEX2.OtherModeL(data);
                 General.PerformModeChanges(this);
 
-                if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null) glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+                if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null) _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
             }
         }
 
         private void CommandTexture(uint w0, uint w1)
         {
             /* Texture */
-            activetex = 0;
-            multitex = false;
+            _activetex = 0;
+            _multitex = false;
 
             Textures[0] = new Texture();
             Textures[1] = new Texture();
@@ -468,42 +477,42 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandSetTImage(uint w0, uint w1)
         {
             /* SetTImage */
-            if (inmacro)
-                texaddress = w1;
+            if (_inmacro)
+                _texaddress = w1;
             else
-                Textures[activetex].Address = w1;
+                Textures[_activetex].Address = w1;
         }
 
         private void CommandSetTile(uint w0, uint w1)
         {
             /* SetTile */
-            if (inmacro)
-                Textures[activetex].Address = texaddress;
+            if (_inmacro)
+                Textures[_activetex].Address = _texaddress;
 
-            Textures[activetex].Format = (byte)((w0 & 0xFF0000) >> 16);
-            Textures[activetex].CMS = (uint)General.ShiftR(w1, 8, 2);
-            Textures[activetex].CMT = (uint)General.ShiftR(w1, 18, 2);
-            Textures[activetex].LineSize = General.ShiftR(w0, 9, 9);
-            Textures[activetex].Palette = General.ShiftR(w1, 20, 4);
-            Textures[activetex].ShiftS = General.ShiftR(w1, 0, 4);
-            Textures[activetex].ShiftT = General.ShiftR(w1, 10, 4);
-            Textures[activetex].MaskS = General.ShiftR(w1, 4, 4);
-            Textures[activetex].MaskT = General.ShiftR(w1, 14, 4);
+            Textures[_activetex].Format = (byte)((w0 & 0xFF0000) >> 16);
+            Textures[_activetex].CMS = (uint)General.ShiftR(w1, 8, 2);
+            Textures[_activetex].CMT = (uint)General.ShiftR(w1, 18, 2);
+            Textures[_activetex].LineSize = General.ShiftR(w0, 9, 9);
+            Textures[_activetex].Palette = General.ShiftR(w1, 20, 4);
+            Textures[_activetex].ShiftS = General.ShiftR(w1, 0, 4);
+            Textures[_activetex].ShiftT = General.ShiftR(w1, 10, 4);
+            Textures[_activetex].MaskS = General.ShiftR(w1, 4, 4);
+            Textures[_activetex].MaskT = General.ShiftR(w1, 14, 4);
         }
 
         private void CommandSetTileSize(uint w0, uint w1)
         {
             /* SetTileSize */
-            var ULS = (uint)General.ShiftR(w0, 12, 12);
-            var ULT = (uint)General.ShiftR(w0, 0, 12);
-            var LRS = (uint)General.ShiftR(w1, 12, 12);
-            var LRT = (uint)General.ShiftR(w1, 0, 12);
+            var uls = (uint)General.ShiftR(w0, 12, 12);
+            var ult = (uint)General.ShiftR(w0, 0, 12);
+            var lrs = (uint)General.ShiftR(w1, 12, 12);
+            var lrt = (uint)General.ShiftR(w1, 0, 12);
 
-            Textures[activetex].Tile = General.ShiftR(w1, 24, 3);
-            Textures[activetex].ULS = General.ShiftR(ULS, 2, 10);
-            Textures[activetex].ULT = General.ShiftR(ULT, 2, 10);
-            Textures[activetex].LRS = General.ShiftR(LRS, 2, 10);
-            Textures[activetex].LRT = General.ShiftR(LRT, 2, 10);
+            Textures[_activetex].Tile = General.ShiftR(w1, 24, 3);
+            Textures[_activetex].ULS = General.ShiftR(uls, 2, 10);
+            Textures[_activetex].ULT = General.ShiftR(ult, 2, 10);
+            Textures[_activetex].LRS = General.ShiftR(lrs, 2, 10);
+            Textures[_activetex].LRT = General.ShiftR(lrt, 2, 10);
         }
 
         private void CommandLoadBlock(uint w0, uint w1)
@@ -518,13 +527,13 @@ namespace SceneNavi.SimpleF3DEX2
             LastComb0 = (w0 & 0xFFFFFF);
             LastComb1 = w1;
 
-            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && arbCombiner != null)
+            if (Configuration.CombinerType == CombinerTypes.ArbCombiner && _arbCombiner != null)
             {
-                arbCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+                _arbCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
             }
-            else if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null)
+            else if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null)
             {
-                glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+                _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
             }
         }
 
@@ -545,9 +554,9 @@ namespace SceneNavi.SimpleF3DEX2
                 GL.Arb.ProgramEnvParameter4(AssemblyProgramTargetArb.FragmentProgram, 0, PrimColor.R, PrimColor.G, PrimColor.B, PrimColor.A);
                 GL.Arb.ProgramEnvParameter4(AssemblyProgramTargetArb.FragmentProgram, 2, l, l, l, l);
             }
-            else if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null)
+            else if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null)
             {
-                glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+                _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
             }
             else
             {
@@ -570,9 +579,9 @@ namespace SceneNavi.SimpleF3DEX2
             {
                 GL.Arb.ProgramEnvParameter4(AssemblyProgramTargetArb.FragmentProgram, 1, EnvColor.R, EnvColor.G, EnvColor.B, EnvColor.A);
             }
-            else if (Configuration.CombinerType == CombinerTypes.GLSLCombiner && glslCombiner != null)
+            else if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner != null)
             {
-                glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
+                _glslCombiner.BindCombiner(LastComb0, LastComb1, Configuration.RenderTextures);
             }
         }
 
@@ -591,7 +600,7 @@ namespace SceneNavi.SimpleF3DEX2
                     }
                     break;
 
-                case CombinerTypes.GLSLCombiner:
+                case CombinerTypes.GlslCombiner:
                     {
                         CalculateTextureSize(0);
                         Initialization.ActiveTextureChecked(TextureUnit.Texture0);
@@ -605,7 +614,7 @@ namespace SceneNavi.SimpleF3DEX2
                             GL.Enable(EnableCap.Texture2D);
                             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-                            if (multitex) GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(1));
+                            if (_multitex) GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(1));
                         }
                     }
                     break;
@@ -624,7 +633,7 @@ namespace SceneNavi.SimpleF3DEX2
                         GL.Enable(EnableCap.Texture2D);
                         GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
 
-                        if (multitex)
+                        if (_multitex)
                         {
                             CalculateTextureSize(1);
                             Initialization.ActiveTextureChecked(TextureUnit.Texture1);
@@ -650,7 +659,7 @@ namespace SceneNavi.SimpleF3DEX2
         {
             var tag = _baseRom.SegmentMapping[(byte)(Textures[tx].Address >> 24)];
 
-            foreach (var cached in texcache)
+            foreach (var cached in _texcache)
             {
                 if (cached.Tag == tag && cached.Format == Textures[tx].Format && cached.Address == Textures[tx].Address &&
                     cached.RealHeight == Textures[tx].RealHeight && cached.RealWidth == Textures[tx].RealWidth)
@@ -658,7 +667,7 @@ namespace SceneNavi.SimpleF3DEX2
             }
 
             var newcached = new TextureCache(tag, Textures[tx], LoadTexture(tx));
-            texcache.Add(newcached);
+            _texcache.Add(newcached);
             return newcached.GLID;
         }
 
@@ -683,7 +692,7 @@ namespace SceneNavi.SimpleF3DEX2
                     (int)Textures[tx].Height,
                     (int)Textures[tx].LineSize,
                     (int)Textures[tx].Palette,
-                    palette);
+                    _palette);
 
             var glid = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, glid);
@@ -720,138 +729,138 @@ namespace SceneNavi.SimpleF3DEX2
 
         private void CalculateTextureSize(int tx)
         {
-            int MaxTexel = 0, LineShift = 0;
+            int maxTexel = 0, lineShift = 0;
 
             switch (Textures[tx].Format)
             {
                 /* 4-bit */
                 case 0x00:
                     // RGBA
-                    MaxTexel = 4096; LineShift = 4;
+                    maxTexel = 4096; lineShift = 4;
                     break;
                 case 0x40:
                     // CI
-                    MaxTexel = 4096; LineShift = 4;
+                    maxTexel = 4096; lineShift = 4;
                     break;
                 case 0x60:
                     // IA
-                    MaxTexel = 8192; LineShift = 4;
+                    maxTexel = 8192; lineShift = 4;
                     break;
                 case 0x80:
                     // I
-                    MaxTexel = 8192; LineShift = 4;
+                    maxTexel = 8192; lineShift = 4;
                     break;
 
                 /* 8-bit */
                 case 0x08:
                     // RGBA
-                    MaxTexel = 2048; LineShift = 3;
+                    maxTexel = 2048; lineShift = 3;
                     break;
                 case 0x48:
                     // CI
-                    MaxTexel = 2048; LineShift = 3;
+                    maxTexel = 2048; lineShift = 3;
                     break;
                 case 0x68:
                     // IA
-                    MaxTexel = 4096; LineShift = 3;
+                    maxTexel = 4096; lineShift = 3;
                     break;
                 case 0x88:
                     // I
-                    MaxTexel = 4096; LineShift = 3;
+                    maxTexel = 4096; lineShift = 3;
                     break;
 
                 /* 16-bit */
                 case 0x10:
                     // RGBA
-                    MaxTexel = 2048; LineShift = 2;
+                    maxTexel = 2048; lineShift = 2;
                     break;
                 case 0x50:
                     // CI
-                    MaxTexel = 2048; LineShift = 0;
+                    maxTexel = 2048; lineShift = 0;
                     break;
                 case 0x70:
                     // IA
-                    MaxTexel = 2048; LineShift = 2;
+                    maxTexel = 2048; lineShift = 2;
                     break;
                 case 0x90:
                     // I
-                    MaxTexel = 2048; LineShift = 0;
+                    maxTexel = 2048; lineShift = 0;
                     break;
 
                 /* 32-bit */
                 case 0x18:
                     // RGBA
-                    MaxTexel = 1024; LineShift = 2;
+                    maxTexel = 1024; lineShift = 2;
                     break;
 
                 default:
                     return;
             }
 
-            var Line_Width = ((int)Textures[tx].LineSize << LineShift);
+            var lineWidth = ((int)Textures[tx].LineSize << lineShift);
 
-            var Tile_Width = ((int)Textures[tx].LRS - (int)Textures[tx].ULS) + 1;
-            var Tile_Height = ((int)Textures[tx].LRT - (int)Textures[tx].ULT) + 1;
+            var tileWidth = ((int)Textures[tx].LRS - (int)Textures[tx].ULS) + 1;
+            var tileHeight = ((int)Textures[tx].LRT - (int)Textures[tx].ULT) + 1;
 
-            var Mask_Width = 1 << (int)Textures[tx].MaskS;
-            var Mask_Height = 1 << (int)Textures[tx].MaskT;
+            var maskWidth = 1 << (int)Textures[tx].MaskS;
+            var maskHeight = 1 << (int)Textures[tx].MaskT;
 
-            var Line_Height = 0;
-            if (Line_Width > 0)
-                Line_Height = Math.Min(MaxTexel / Line_Width, Tile_Height);
+            var lineHeight = 0;
+            if (lineWidth > 0)
+                lineHeight = Math.Min(maxTexel / lineWidth, tileHeight);
 
-            if ((Textures[tx].MaskS > 0) && ((Mask_Width * Mask_Height) <= MaxTexel))
-                Textures[tx].Width = Mask_Width;
-            else if ((Tile_Width * Tile_Height) <= MaxTexel)
-                Textures[tx].Width = Tile_Width;
+            if ((Textures[tx].MaskS > 0) && ((maskWidth * maskHeight) <= maxTexel))
+                Textures[tx].Width = maskWidth;
+            else if ((tileWidth * tileHeight) <= maxTexel)
+                Textures[tx].Width = tileWidth;
             else
-                Textures[tx].Width = Line_Width;
+                Textures[tx].Width = lineWidth;
 
-            if ((Textures[tx].MaskT > 0) && ((Mask_Width * Mask_Height) <= MaxTexel))
-                Textures[tx].Height = Mask_Height;
-            else if ((Tile_Width * Tile_Height) <= MaxTexel)
-                Textures[tx].Height = Tile_Height;
+            if ((Textures[tx].MaskT > 0) && ((maskWidth * maskHeight) <= maxTexel))
+                Textures[tx].Height = maskHeight;
+            else if ((tileWidth * tileHeight) <= maxTexel)
+                Textures[tx].Height = tileHeight;
             else
-                Textures[tx].Height = Line_Height;
+                Textures[tx].Height = lineHeight;
 
-            var Clamp_Width = 0;
-            var Clamp_Height = 0;
+            var clampWidth = 0;
+            var clampHeight = 0;
 
             if (Textures[tx].CMS == 1)
-                Clamp_Width = Tile_Width;
+                clampWidth = tileWidth;
             else
-                Clamp_Width = (int)Textures[tx].Width;
+                clampWidth = (int)Textures[tx].Width;
 
             if (Textures[tx].CMT == 1)
-                Clamp_Height = Tile_Height;
+                clampHeight = tileHeight;
             else
-                Clamp_Height = (int)Textures[tx].Height;
+                clampHeight = (int)Textures[tx].Height;
 
-            if (Clamp_Width > 256) Textures[tx].CMS &= ~(uint)0x01;
-            if (Clamp_Height > 256) Textures[tx].CMT &= ~(uint)0x01;
+            if (clampWidth > 256) Textures[tx].CMS &= ~(uint)0x01;
+            if (clampHeight > 256) Textures[tx].CMT &= ~(uint)0x01;
 
-            if (Mask_Width > Textures[tx].Width)
+            if (maskWidth > Textures[tx].Width)
             {
                 Textures[tx].MaskS = General.PowOf((int)Textures[tx].Width);
-                Mask_Width = 1 << (int)Textures[tx].MaskS;
+                maskWidth = 1 << (int)Textures[tx].MaskS;
             }
-            if (Mask_Height > Textures[tx].Height)
+            if (maskHeight > Textures[tx].Height)
             {
                 Textures[tx].MaskT = General.PowOf((int)Textures[tx].Height);
-                Mask_Height = 1 << (int)Textures[tx].MaskT;
+                maskHeight = 1 << (int)Textures[tx].MaskT;
             }
 
             if (Textures[tx].CMS == 2 || Textures[tx].CMS == 3)
-                Textures[tx].RealWidth = General.Pow2(Clamp_Width);
+                Textures[tx].RealWidth = General.Pow2(clampWidth);
             else if (Textures[tx].CMS == 1)
-                Textures[tx].RealWidth = General.Pow2(Mask_Width);
+                Textures[tx].RealWidth = General.Pow2(maskWidth);
             else
                 Textures[tx].RealWidth = General.Pow2((int)Textures[tx].Width);
 
             if (Textures[tx].CMT == 2 || Textures[tx].CMT == 3)
-                Textures[tx].RealHeight = General.Pow2(Clamp_Height);
+                Textures[tx].RealHeight = General.Pow2(clampHeight);
             else if (Textures[tx].CMT == 1)
-                Textures[tx].RealHeight = General.Pow2(Mask_Height);
+                Textures[tx].RealHeight = General.Pow2(maskHeight);
             else
                 Textures[tx].RealHeight = General.Pow2((int)Textures[tx].Height);
 

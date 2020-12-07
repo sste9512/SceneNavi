@@ -1,4 +1,9 @@
-﻿namespace SceneNavi
+﻿namespace SceneNavi.Forms
 {
-    public enum CombinerTypes { None, ArbCombiner, GLSLCombiner }
+    public enum CombinerTypes
+    {
+        None,
+        ArbCombiner,
+        GlslCombiner
+    }
 }

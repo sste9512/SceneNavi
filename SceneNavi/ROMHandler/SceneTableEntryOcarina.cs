@@ -194,7 +194,7 @@ namespace SceneNavi.ROMHandler
                     if (dma != null)
                         Name = dmaFilename;
                     else
-                        Name = string.Format("S{0:X}_L{1:X}", sceneStartAddress, LabelStartAddress);
+                        Name = $"S{sceneStartAddress:X}_L{LabelStartAddress:X}";
                 }
                 else
                     isNameExternal = true;
@@ -230,7 +230,7 @@ namespace SceneNavi.ROMHandler
 
         public void ReadScene(HeaderCommands.Rooms forcerooms = null)
         {
-            Program.Status.Message = string.Format("Reading scene '{0}'...", this.Name);
+            Program.Status.Message = $"Reading scene '{this.Name}'...";
 
             _baseRom.SegmentMapping.Remove((byte)0x02);
             _baseRom.SegmentMapping.Add((byte)0x02, data);

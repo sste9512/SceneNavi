@@ -1,4 +1,9 @@
-﻿namespace SceneNavi
+﻿namespace SceneNavi.Forms
 {
-    public enum ToolModes { Camera, MoveableObjs, StaticObjs };
+    public enum ToolModes
+    {
+        Camera,
+        MoveableObjs,
+        StaticObjs
+    };
 }

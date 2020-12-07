@@ -131,7 +131,7 @@ namespace SceneNavi.HeaderCommands
 
             foreach (var wb in this.Waterboxes)
             {
-                /* Position */
+                /* RenderPosition */
                 var bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.X)));
                 Buffer.BlockCopy(bytes, 0, dataBuffer, (int)(baseAddress + (wb.Address & 0xFFFFFF) + 0x0), bytes.Length);
                 bytes = BitConverter.GetBytes(Endian.SwapInt16(Convert.ToInt16(wb.Position.Y)));

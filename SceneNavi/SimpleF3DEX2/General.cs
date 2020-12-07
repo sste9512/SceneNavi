@@ -127,7 +127,7 @@ namespace SceneNavi.SimpleF3DEX2
             FORCE_BL = 0x4000
         }
 
-        internal static void PerformModeChanges(F3DEX2Interpreter f3dex2)
+        internal static void PerformModeChanges(F3Dex2Interpreter f3dex2)
         {
             /* Textures */
             if (Configuration.RenderTextures)
@@ -253,7 +253,7 @@ namespace SceneNavi.SimpleF3DEX2
             }
         }
 
-        internal static void RenderTriangles(F3DEX2Interpreter f3dex2, int[] idx)
+        internal static void RenderTriangles(F3Dex2Interpreter f3dex2, int[] idx)
         {
             GL.Begin(PrimitiveType.Triangles);
 
