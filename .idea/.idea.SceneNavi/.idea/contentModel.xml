@@ -4,7 +4,53 @@
     <e p="C:\Users\steve\.Rider2019.2\system\extResources" t="IncludeRecursive" />
     <e p="C:\Users\steve\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_SceneNavi.-803873150.00" t="ExcludeRecursive" />
     <e p="C:\Users\steve\source\repos\SceneNavi" t="IncludeFlat">
+      <e p="CameraTest" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="CameraTest.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="Tests.cs" t="Include" />
+      </e>
+      <e p="FpsMonitorTests" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="FpsMonitorTests.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="Tests.cs" t="Include" />
+      </e>
       <e p="packages" t="ExcludeRecursive" />
+      <e p="ReactiveProgramming" t="IncludeRecursive">
+        <e p="app.config" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="ReactiveProgramming.csproj" t="IncludeRecursive" />
+      </e>
+      <e p="RendererTest" t="IncludeRecursive">
+        <e p="app.config" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Form1.cs" t="Include" />
+        <e p="Form1.Designer.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+          <e p="Resources.Designer.cs" t="Include" />
+          <e p="Resources.resx" t="Include" />
+          <e p="Settings.Designer.cs" t="Include" />
+          <e p="Settings.settings" t="Include" />
+        </e>
+        <e p="RendererTest.csproj" t="IncludeRecursive" />
+      </e>
       <e p="SceneNavi" t="IncludeRecursive">
         <e p="ActorRendering" t="Include">
           <e p="GameActor.cs" t="Include" />
@@ -17,10 +63,14 @@
         <e p="Bottled Fairy.ico" t="Include" />
         <e p="Configuration.cs" t="Include" />
         <e p="Configurations" t="Include">
-          <e p="BaseConfig.cs" t="Include" />
+          <e p="IBaseConfig.cs" t="Include" />
+          <e p="IGraphicsRenderingSettings.cs" t="Include" />
+          <e p="ILoggingConfig.cs" t="Include" />
+          <e p="IMainFormConfig.cs" t="Include" />
+          <e p="IViewPortRenderSettings.cs" t="Include" />
         </e>
         <e p="Controls" t="Include">
-          <e p="CustomGLControl.cs" t="Include" />
+          <e p="GlRendererControl.cs" t="Include" />
           <e p="HScrollBarEx.cs" t="Include" />
           <e p="ListViewEx.cs" t="Include" />
           <e p="RichLabel.cs" t="Include" />
@@ -29,7 +79,19 @@
           <e p="ToolStripRadioButtonMenuItem.cs" t="Include" />
           <e p="TreeViewEx.cs" t="Include" />
         </e>
-        <e p="Endian.cs" t="Include" />
+        <e p="Dependencies" t="Include">
+          <e p="Implementations" t="Include">
+            <e p="Camera.cs" t="Include" />
+            <e p="FPSMonitor.cs" t="Include" />
+            <e p="TextPrinter.cs" t="Include" />
+          </e>
+          <e p="Interfaces" t="Include">
+            <e p="ICamera.cs" t="Include" />
+            <e p="IFpsMonitor.cs" t="Include" />
+            <e p="IMemento.cs" t="Include" />
+            <e p="ITextPrinter.cs" t="Include" />
+          </e>
+        </e>
         <e p="Forms" t="Include">
           <e p="ColorPickerDialog.cs" t="Include" />
           <e p="ColorPickerDialog.Designer.cs" t="Include" />
@@ -67,6 +129,7 @@
           <e p="Waypoint.cs" t="Include" />
           <e p="Waypoints.cs" t="Include" />
         </e>
+        <e p="INavigation.cs" t="Include" />
         <e p="Models" t="Include">
           <e p="DefaultTypes.cs" t="Include" />
           <e p="Definition.cs" t="Include" />
@@ -75,6 +138,7 @@
           <e p="Option.cs" t="Include" />
           <e p="Usages.cs" t="Include" />
         </e>
+        <e p="Navigation.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
         <e p="packages.config" t="Include" />
         <e p="Program.cs" t="Include" />
@@ -85,9 +149,14 @@
           <e p="Settings.Designer.cs" t="Include" />
           <e p="Settings.settings" t="Include" />
         </e>
+        <e p="Repository" t="Include">
+          <e p="DataLoader.cs" t="Include" />
+          <e p="RomActorDbContext.cs" t="Include" />
+        </e>
         <e p="Resources" t="Include">
           <e p="bg_empty_2.png" t="Include" />
           <e p="bg_empty_3.png" t="Include" />
+          <e p="Bottled Fairy.ico" t="Include" />
         </e>
         <e p="ROMHandler" t="Include">
           <e p="ActorTableEntry.cs" t="Include" />
@@ -117,7 +186,11 @@
         </e>
         <e p="SceneNavi.csproj" t="IncludeRecursive" />
         <e p="Services" t="Include">
-          <e p="Commands" t="Include" />
+          <e p="Commands" t="Include">
+            <e p="MenuItemCommand.cs" t="Include" />
+            <e p="MessageboxHandler.cs" t="Include" />
+            <e p="MessageBoxQueryHandler.cs" t="Include" />
+          </e>
           <e p="Queries" t="Include" />
         </e>
         <e p="SimpleF3DEX2" t="Include">
@@ -138,9 +211,8 @@
           <e p="UnpackedCombinerMux.cs" t="Include" />
           <e p="Vertex.cs" t="Include" />
         </e>
-        <e p="Startup" t="Include">
-          <e p="Startup.cs" t="Include" />
-        </e>
+        <e p="Startup" t="Include" />
+        <e p="Startup.cs" t="Include" />
         <e p="StatusMessageHandler.cs" t="Include" />
         <e p="UpdateData" t="Include">
           <e p="SceneNavi.txt" t="Include" />
@@ -151,21 +223,19 @@
           <e p="ExtensionMethods.cs" t="Include" />
           <e p="GUIHelpers.cs" t="Include" />
           <e p="OpenGLHelpers" t="Include">
-            <e p="Camera.cs" t="Include" />
             <e p="DisplayList.cs" t="Include" />
             <e p="DisplayListEx.cs" t="Include" />
-            <e p="FPSMonitor.cs" t="Include" />
             <e p="Initialization.cs" t="Include" />
             <e p="MiscDrawingHelpers.cs" t="Include" />
             <e p="ScreenWorldConversion.cs" t="Include" />
             <e p="StockObjects.cs" t="Include" />
-            <e p="TextPrinter.cs" t="Include" />
           </e>
         </e>
         <e p="VersionManagement.cs" t="Include" />
         <e p="XML" t="Include">
           <e p="ActorDefinitions" t="Include">
             <e p="DL" t="Include">
+              <e p="Database.json" t="Include" />
               <e p="Database.xml" t="Include" />
             </e>
             <e p="ZL" t="Include">
@@ -210,6 +280,7 @@
       </e>
       <e p="SceneNavi.Domain" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="Endian.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
         <e p="Properties" t="Include">
           <e p="AssemblyInfo.cs" t="Include" />
@@ -224,7 +295,45 @@
         </e>
         <e p="SceneNavi.Entities.csproj" t="IncludeRecursive" />
       </e>
+      <e p="SceneNavi.Framework.Client" t="IncludeRecursive">
+        <e p="Attributes" t="Include">
+          <e p="WriteToConsole.cs" t="Include" />
+        </e>
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Dependencies" t="Include">
+          <e p="GlViewPortInitialiser.cs" t="Include" />
+          <e p="Implementations" t="Include">
+            <e p="Camera.cs" t="Include" />
+            <e p="FPSMonitor.cs" t="Include" />
+            <e p="TextPrinter.cs" t="Include" />
+          </e>
+          <e p="Interfaces" t="Include">
+            <e p="ICamera.cs" t="Include" />
+            <e p="IFpsMonitor.cs" t="Include" />
+            <e p="IMemento.cs" t="Include" />
+            <e p="ITextPrinter.cs" t="Include" />
+          </e>
+        </e>
+        <e p="ExtensionMethods.cs" t="Include" />
+        <e p="FodyWeavers.xml" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="SceneNavi.Framework.Client.csproj" t="IncludeRecursive" />
+      </e>
       <e p="SceneNavi.sln" t="IncludeFlat" />
+      <e p="Tests" t="Include" />
+      <e p="TextPrinterTests" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="Tests.cs" t="Include" />
+        <e p="TextPrinterTests.csproj" t="IncludeRecursive" />
+      </e>
     </e>
   </component>
 </project>

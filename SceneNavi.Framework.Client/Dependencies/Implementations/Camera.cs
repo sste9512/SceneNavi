@@ -214,11 +214,23 @@ namespace SceneNavi.Framework.Client.Dependencies.Implementations
             return _positionState.Rotation;
         }
 
+        public void TransformPosition(Vector3d position)
+        {
+           //  _positionState.Position = 
+        }
+
+        public void TransformRotation(Vector3d rotation)
+        {
+            throw new NotImplementedException();
+        }
+
+        [WriteToConsole]
         public void TransformPosition(Action<double,double,double> action)
         {
             action.Invoke(_positionState.Position.X, _positionState.Position.Y, _positionState.Position.Z);
         }
 
+        [WriteToConsole]
         public void TransformRotation(Action<double, double, double> action)
         {
             action.Invoke(_positionState.Rotation.X, _positionState.Rotation.Y, _positionState.Rotation.Z);

@@ -11,6 +11,9 @@ namespace SceneNavi.Framework.Client.Dependencies.Interfaces
         void KeyUpdate(bool[] keysDown);
         Vector3d GetCurrentPosition();
         Vector3d GetCurrentRotation();
+        
+        void TransformPosition(Vector3d position);
+        void TransformRotation(Vector3d rotation);
         void TransformPosition(Action<double,double,double> action);
         void TransformRotation(Action<double, double, double> action);
         void RenderPosition();
