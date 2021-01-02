@@ -7,6 +7,7 @@ using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -34,11 +35,11 @@ namespace SceneNavi.HeaderCommands
             public ushort DrawDistance { get; set; }
             public ushort FogStart { get; set; }
 
-            ROMHandler.BaseRomHandler _baseRom;
+            BaseRomHandler _baseRom;
 
             public Entry() { }
 
-            public Entry(ROMHandler.BaseRomHandler baseRom, uint adr)
+            public Entry(BaseRomHandler baseRom, uint adr)
             {
                 _baseRom = baseRom;
                 Address = adr;

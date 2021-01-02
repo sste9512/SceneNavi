@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.Dependencies.Interfaces;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.Dependencies.Implementations

@@ -2,7 +2,7 @@
 using System.Drawing;
 using OpenTK;
 
-namespace SceneNavi.Utilities.OpenGLHelpers
+namespace SceneNavi.Dependencies.Interfaces
 {
     public interface ITextPrinter : IDisposable
     {

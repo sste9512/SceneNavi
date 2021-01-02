@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using SceneNavi.HeaderCommands;
 using SceneNavi.ROMHandler.Interfaces;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.ROMHandler
 {
@@ -108,37 +110,37 @@ namespace SceneNavi.ROMHandler
 
         public HeaderCommands.Actors GetActiveTransitionData()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Transitions) as HeaderCommands.Actors);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Transitions) as Actors;
         }
 
         public HeaderCommands.Actors GetActiveSpawnPointData()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Spawns) as HeaderCommands.Actors);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Spawns) as Actors;
         }
 
         public HeaderCommands.SpecialObjects GetActiveSpecialObjs()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.SpecialObjects) as HeaderCommands.SpecialObjects);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.SpecialObjects) as SpecialObjects;
         }
 
         public HeaderCommands.Waypoints GetActiveWaypoints()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Waypoints) as HeaderCommands.Waypoints);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Waypoints) as Waypoints;
         }
 
         public HeaderCommands.Collision GetActiveCollision()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Collision) as HeaderCommands.Collision);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Collision) as Collision;
         }
 
         public HeaderCommands.SettingsSoundScene GetActiveSettingsSoundScene()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.SettingsSoundScene) as HeaderCommands.SettingsSoundScene);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.SettingsSoundScene) as SettingsSoundScene;
         }
 
         public HeaderCommands.EnvironmentSettings GetActiveEnvSettings()
         {
-            return (currentSceneHeader == null ? null : currentSceneHeader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.EnvironmentSettings) as HeaderCommands.EnvironmentSettings);
+            return currentSceneHeader?.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.EnvironmentSettings) as EnvironmentSettings;
         }
 
         BaseRomHandler _baseRom;
@@ -230,7 +232,7 @@ namespace SceneNavi.ROMHandler
 
         public void ReadScene(HeaderCommands.Rooms forcerooms = null)
         {
-            Program.Status.Message = $"Reading scene '{this.Name}'...";
+            //Program.Status.Message = $"Reading scene '{this.Name}'...";
 
             _baseRom.SegmentMapping.Remove((byte)0x02);
             _baseRom.SegmentMapping.Add((byte)0x02, data);

@@ -8,6 +8,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using SceneNavi.Forms;
 using SceneNavi.ROMHandler;
+using SceneNavi.RomHandlers;
 using SceneNavi.SimpleF3DEX2.CombinerEmulation;
 using SceneNavi.Utilities.OpenGLHelpers;
 
@@ -58,10 +59,10 @@ namespace SceneNavi.SimpleF3DEX2
         ArbCombineManager _arbCombiner;
         GlslCombineManager _glslCombiner;
 
-        ROMHandler.BaseRomHandler _baseRom;
+        BaseRomHandler _baseRom;
         Stack<DisplayListEx> _activeGldl;
 
-        public F3Dex2Interpreter(ROMHandler.BaseRomHandler baseRom)
+        public F3Dex2Interpreter(BaseRomHandler baseRom)
         {
             _baseRom = baseRom;
             _activeGldl = new Stack<DisplayListEx>();
@@ -94,12 +95,12 @@ namespace SceneNavi.SimpleF3DEX2
         {
             if (Configuration.CombinerType == CombinerTypes.ArbCombiner && _arbCombiner == null)
             {
-                Program.Status.Message = "Initializing ARB combiner...";
+               // Program.Status.Message = "Initializing ARB combiner...";
                 _arbCombiner = new ArbCombineManager();
             }
             else if (Configuration.CombinerType == CombinerTypes.GlslCombiner && _glslCombiner == null)
             {
-                Program.Status.Message = "Initializing GLSL combiner...";
+               // Program.Status.Message = "Initializing GLSL combiner...";
                 _glslCombiner = new GlslCombineManager(this);
             }
         }

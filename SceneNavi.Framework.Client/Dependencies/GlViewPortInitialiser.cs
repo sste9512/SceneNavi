@@ -15,7 +15,7 @@ namespace SceneNavi.Framework.Client.Dependencies
 
         public static string RendererString => GL.GetString(StringName.Renderer) ?? "[null]";
 
-        public static string VendorString => GL.GetString(StringName.Vendor) ?? "[null]";
+        private static string VendorString => GL.GetString(StringName.Vendor) ?? "[null]";
 
         public static string VersionString => GL.GetString(StringName.Version) ?? "[null]";
 
@@ -34,8 +34,8 @@ namespace SceneNavi.Framework.Client.Dependencies
         }
 
         public static bool VendorIsIntel => VendorString.Contains("Intel");
-        
-        public static bool SupportsFunction(string function)
+
+        private static bool SupportsFunction(string function)
         {
             return (((IGraphicsContextInternal) GraphicsContext.CurrentContext).GetAddress(function) != IntPtr.Zero);
         }
@@ -76,8 +76,7 @@ namespace SceneNavi.Framework.Client.Dependencies
         }
 
 
-       
-        public static bool CheckForExtension(string neededExt)
+        private static bool CheckForExtension(string neededExt)
         {
             return SupportedExtensions.Contains(neededExt);
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using SceneNavi.HeaderCommands;
 using SceneNavi.ROMHandler.Interfaces;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.ROMHandler
 {
@@ -200,7 +201,7 @@ namespace SceneNavi.ROMHandler
 
         public void ReadScene(Rooms forcerooms = null)
         {
-            Program.Status.Message = string.Format("Reading scene '{0}'...", Name);
+            //Program.Status.Message = string.Format("Reading scene '{0}'...", Name);
 
             _baseRom.SegmentMapping.Remove((byte)0x02);
             _baseRom.SegmentMapping.Add((byte)0x02, data);

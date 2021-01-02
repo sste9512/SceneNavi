@@ -10,8 +10,10 @@ using MediatR;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SceneNavi.Forms;
+using SceneNavi.Forms.MainForm;
 using SceneNavi.HeaderCommands;
 using SceneNavi.ROMHandler;
+using SceneNavi.RomHandlers;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.Services.Commands
@@ -32,9 +34,9 @@ namespace SceneNavi.Services.Commands
                 $"(Build: {linkerTimestamp.ToString("MM/dd/yyyy HH:mm:ss UTCzzz", System.Globalization.CultureInfo.InvariantCulture)})";
             var yearString = (linkerTimestamp.Year == 2013 ? "2013" : $"2013-{linkerTimestamp:yyyy}");
 
-            MessageBox.Show(
-                $"{Program.AppNameVer} {buildString}\n\nScene/room actor editor for The Legend of Zelda: Ocarina of Time\n\nWritten {yearString} by xdaniel / http://magicstone.de/dzd/",
-                $"About {Application.ProductName}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+//            MessageBox.Show(
+//                $"{Program.AppNameVer} {buildString}\n\nScene/room actor editor for The Legend of Zelda: Ocarina of Time\n\nWritten {yearString} by xdaniel / http://magicstone.de/dzd/",
+//                $"About {Application.ProductName}", MessageBoxButtons.OK, MessageBoxIcon.Information);
            
             return Task.CompletedTask;
         }
@@ -151,6 +153,12 @@ namespace SceneNavi.Services.Commands
 
     public class RomInformationCommandHandler : INotificationHandler<RomInformationCommand>
     {
+
+        public RomInformationCommandHandler()
+        {
+            
+        }
+        
         public Task Handle(RomInformationCommand notification, CancellationToken cancellationToken)
         {
             notification.BaseRom.TryGetTarget(out var target);

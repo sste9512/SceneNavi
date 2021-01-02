@@ -31,13 +31,14 @@ namespace SceneNavi.HeaderCommands
         public List<Vector3d> MinClipBounds { get; private set; }
 
         [Browsable(false)]
-        public System.Drawing.Color PickColor { get { return System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24)); } }
+        public System.Drawing.Color PickColor => System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
         [Browsable(false)]
-        public bool IsMoveable { get { return false; } }
+        public bool IsMoveable => false;
 
         [Browsable(false)]
-        public OpenTK.Vector3d Position { get { return Vector3d.Zero; } set { return; } }
+        public OpenTK.Vector3d Position { get => Vector3d.Zero;
+            set { return; } }
 
         public MeshHeader(Generic baseCommand)
             : base(baseCommand)
@@ -103,7 +104,7 @@ namespace SceneNavi.HeaderCommands
 
         public void CreateDisplayLists(bool texenabled, CombinerTypes combinertype)
         {
-            Program.Status.Message = string.Format("Rendering room '{0}'...", (this.Parent as RoomInfoClass).Description);
+            //Program.Status.Message = string.Format("Rendering room '{0}'...", (this.Parent as RoomInfoClass).Description);
 
             CachedWithTextures = texenabled;
             CachedWithCombinerType = combinertype;

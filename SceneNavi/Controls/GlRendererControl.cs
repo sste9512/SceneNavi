@@ -12,7 +12,17 @@ namespace SceneNavi.Controls
     class GlRendererControl : GLControl
     {
         public GlRendererControl()
-            : base(new GraphicsMode(GraphicsMode.Default.ColorFormat, GraphicsMode.Default.Depth, GraphicsMode.Default.Stencil, Configuration.AntiAliasingSamples))
-        { }
+            : base(new GraphicsMode(GraphicsMode.Default.ColorFormat, GraphicsMode.Default.Depth,
+                GraphicsMode.Default.Stencil, Configuration.AntiAliasingSamples))
+        {
+
+
+
+
+
+
+
+
+        }
     }
 }

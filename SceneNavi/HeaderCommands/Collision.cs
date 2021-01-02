@@ -7,6 +7,7 @@ using System.ComponentModel;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -314,14 +315,14 @@ namespace SceneNavi.HeaderCommands
 
             public bool IsDummy => (_baseRom == null);
 
-            ROMHandler.BaseRomHandler _baseRom;
+            BaseRomHandler _baseRom;
 
             public PolygonType()
             {
                 Number = -1;
             }
 
-            public PolygonType(ROMHandler.BaseRomHandler baseRom, uint adr, int number)
+            public PolygonType(BaseRomHandler baseRom, uint adr, int number)
             {
                 _baseRom = baseRom;
                 Address = adr;
@@ -361,12 +362,12 @@ namespace SceneNavi.HeaderCommands
 
             public bool IsDummy => (_baseRom == null);
 
-            readonly ROMHandler.BaseRomHandler _baseRom;
+            readonly BaseRomHandler _baseRom;
             readonly Collision _parentCollisionHeader;
 
             public Polygon() { }
 
-            public Polygon(ROMHandler.BaseRomHandler baseRom, uint adr, int number, Collision colheader)
+            public Polygon(BaseRomHandler baseRom, uint adr, int number, Collision colheader)
             {
                 _baseRom = baseRom;
                 Address = adr;
@@ -444,12 +445,12 @@ namespace SceneNavi.HeaderCommands
 
             public bool IsDummy => (_baseRom == null);
 
-            readonly ROMHandler.BaseRomHandler _baseRom;
+            readonly BaseRomHandler _baseRom;
             private Collision _parentCollisionHeader;
 
             public Waterbox() { }
 
-            public Waterbox(ROMHandler.BaseRomHandler baseRom, uint adr, int number, Collision colheader)
+            public Waterbox(BaseRomHandler baseRom, uint adr, int number, Collision colheader)
             {
                 _baseRom = baseRom;
                 Address = adr;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SceneNavi.Utilities.OpenGLHelpers
+namespace SceneNavi.Dependencies.Interfaces
 {
     public interface IFpsMonitor: IDisposable
     {

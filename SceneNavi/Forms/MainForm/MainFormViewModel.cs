@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace SceneNavi.Forms
+namespace SceneNavi.Forms.MainForm
 {
-    internal static class MainFormConstants
+    public class MainFormViewModel
     {
-        public static readonly Dictionary<ToolModes, string[]> ToolModeNametable = new Dictionary<ToolModes, string[]>()
+          public static readonly Dictionary<ToolModes, string[]> ToolModeNametable = new Dictionary<ToolModes, string[]>()
         {
             { ToolModes.Camera, new string[] { "Camera mode", "Mouse can only move around camera" } },
             { ToolModes.MoveableObjs, new string[] { "Moveable objects mode", "Mouse will select and modify moveable objects (ex. actors)" } },

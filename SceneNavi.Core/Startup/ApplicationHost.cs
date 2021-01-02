@@ -1,32 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
 using System.Threading;
-using Autofac;
-using SceneNavi.ROMHandler;
-using SceneNavi.ROMHandler.Interfaces;
-using SceneNavi.Startup;
+using System.Windows.Forms;
 
 namespace SceneNavi
 {
-    static class Program
+    // Logic for the application inner contents to be run, alot like an asp.net core project
+    public class ApplicationHost<T>
     {
+        private T Tenant { get; set; }
+
+        
         public static string AppNameVer = Application.ProductName + " " +
                                           VersionManagement.CreateVersionString(Application.ProductVersion);
 
         public static StatusMessageHandler Status = new StatusMessageHandler();
         public static bool IsHinting = false;
+        
 
 
         /* Mutex & general app restart stuff from http://stackoverflow.com/a/9056664 */
-
-        [STAThread]
-        static void Main()
+        
+        public ApplicationHost<T> Run()
         {
             Mutex runOnce = null;
-
-
+            
             Console.Write("Initialising");
 
             if (Configuration.IsRestarting)
@@ -39,11 +36,11 @@ namespace SceneNavi
             {
                 runOnce = new Mutex(true, "SOME_MUTEX_NAME");
 
-                if (!runOnce.WaitOne(TimeSpan.Zero)) return;
+                if (!runOnce.WaitOne(TimeSpan.Zero)) return this;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(Di.Resolve<Form>(nameof(MainForm)));
-               // Application.Idle += Application_Idle;
+                // Application.Idle += Application_Idle;
             }
             catch (Exception ex)
             {
@@ -55,6 +52,9 @@ namespace SceneNavi
             {
                 runOnce?.Close();
             }
+
+
+            return this;
         }
     }
 }

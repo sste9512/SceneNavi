@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SceneNavi.ROMHandler;
 using SceneNavi.ROMHandler.Interfaces;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -18,10 +19,10 @@ namespace SceneNavi.HeaderCommands
 
         public string ByteString => $"0x{(Data >> 32):X8} 0x{(Data & 0xFFFFFFFF):X8}";
 
-        protected ROMHandler.BaseRomHandler BaseRom { get; private set; }
+        protected BaseRomHandler BaseRom { get; private set; }
         private bool InRom { get; set; }
 
-        protected Generic(ROMHandler.BaseRomHandler baseRom, IHeaderParent parent, CommandTypeIDs commandTypeIds)
+        protected Generic(BaseRomHandler baseRom, IHeaderParent parent, CommandTypeIDs commandTypeIds)
         {
             BaseRom = baseRom;
             InRom = false;
@@ -41,7 +42,7 @@ namespace SceneNavi.HeaderCommands
             Parent = baseCommand.Parent;
         }
 
-        public Generic(ROMHandler.BaseRomHandler baseRom, IHeaderParent parent, byte seg, ref int ofs)
+        public Generic(BaseRomHandler baseRom, IHeaderParent parent, byte seg, ref int ofs)
         {
             BaseRom = baseRom;
             Command = (CommandTypeIDs) ((byte[]) baseRom.SegmentMapping[seg])[ofs];

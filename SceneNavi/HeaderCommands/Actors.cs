@@ -8,6 +8,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using SceneNavi.Models;
 using SceneNavi.ROMHandler;
+using SceneNavi.RomHandlers;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.HeaderCommands
@@ -20,15 +21,17 @@ namespace SceneNavi.HeaderCommands
             : base(baseCommand)
         {
             ActorList = new List<Entry>();
-            for (var i = 0; i < GetCountGeneric(); i++) ActorList.Add(new Entry(BaseRom, (uint)(GetAddressGeneric() + i * 16), (i + 1),
-                (Command == CommandTypeIDs.Spawns), (Command == CommandTypeIDs.Transitions)));
+            for (var i = 0; i < GetCountGeneric(); i++)
+                ActorList.Add(new Entry(BaseRom, (uint) (GetAddressGeneric() + i * 16), (i + 1),
+                    (Command == CommandTypeIDs.Spawns), (Command == CommandTypeIDs.Transitions)));
         }
 
         public void Store(byte[] dataBuffer, int baseAddress)
         {
             foreach (var actorEntry in ActorList)
             {
-                Buffer.BlockCopy(actorEntry.RawData, 0, dataBuffer, (int)(baseAddress + (actorEntry.Address & 0xFFFFFF)), actorEntry.RawData.Length);
+                Buffer.BlockCopy(actorEntry.RawData, 0, dataBuffer,
+                    (int) (baseAddress + (actorEntry.Address & 0xFFFFFF)), actorEntry.RawData.Length);
             }
         }
 
@@ -51,9 +54,11 @@ namespace SceneNavi.HeaderCommands
                 {
                     if (Definition != null)
                     {
-                        var num = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.ActorNumber), this);
+                        var num = XmlActorDefinitionReader.GetValueFromActor(
+                            Definition.Items.Find(x => x.Usage == Usages.ActorNumber), this);
                         if (num != null) return Convert.ToUInt16(num);
                     }
+
                     return ushort.MaxValue;
                 }
             }
@@ -64,7 +69,7 @@ namespace SceneNavi.HeaderCommands
                 {
                     if (_baseRom == null) return "(None)";
 
-                    var name = (string)_baseRom.XmlActorNames.Names[GetActorNumber];
+                    var name = (string) _baseRom.XmlActorNames.Names[GetActorNumber];
                     return name ?? "Unknown actor";
                 }
             }
@@ -77,9 +82,12 @@ namespace SceneNavi.HeaderCommands
                 {
                     if (Definition == null) return Vector3d.Zero;
                     var p = new Vector3d();
-                    var px = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionX), this);
-                    var py = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionY), this);
-                    var pz = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.PositionZ), this);
+                    var px = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.PositionX), this);
+                    var py = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.PositionY), this);
+                    var pz = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.PositionZ), this);
                     if (px != null) p.X = Convert.ToDouble(px);
                     if (py != null) p.Y = Convert.ToDouble(py);
                     if (pz != null) p.Z = Convert.ToDouble(pz);
@@ -89,9 +97,12 @@ namespace SceneNavi.HeaderCommands
                 set
                 {
                     if (Definition == null) return;
-                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionX), this, Convert.ToInt16(value.X));
-                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionY), this, Convert.ToInt16(value.Y));
-                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionZ), this, Convert.ToInt16(value.Z));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionX),
+                        this, Convert.ToInt16(value.X));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionY),
+                        this, Convert.ToInt16(value.Y));
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.PositionZ),
+                        this, Convert.ToInt16(value.Z));
                 }
             }
 
@@ -102,9 +113,12 @@ namespace SceneNavi.HeaderCommands
                     if (Definition == null) return Vector3d.Zero;
 
                     var r = new Vector3d();
-                    var rx = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationX), this);
-                    var ry = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationY), this);
-                    var rz = XmlActorDefinitionReader.GetValueFromActor(Definition.Items.Find(x => x.Usage == Usages.RotationZ), this);
+                    var rx = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.RotationX), this);
+                    var ry = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.RotationY), this);
+                    var rz = XmlActorDefinitionReader.GetValueFromActor(
+                        Definition.Items.Find(x => x.Usage == Usages.RotationZ), this);
                     if (rx != null) r.X = Convert.ToDouble(rx);
                     if (ry != null) r.Y = Convert.ToDouble(ry);
                     if (rz != null) r.Z = Convert.ToDouble(rz);
@@ -114,23 +128,26 @@ namespace SceneNavi.HeaderCommands
                 set
                 {
                     if (Definition == null) return;
-                   XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationX), this, (short)value.X);
-                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationY), this, (short)value.Y);
-                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationZ), this, (short)value.Z);
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationX),
+                        this, (short) value.X);
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationY),
+                        this, (short) value.Y);
+                    XmlActorDefinitionReader.SetValueInActor(Definition.Items.Find(x => x.Usage == Usages.RotationZ),
+                        this, (short) value.Z);
                 }
             }
 
-            [Browsable(false)]
-            public Color PickColor => Color.FromArgb(GetHashCode() & 0xFFFFFF | (0xFF << 24));
+            [Browsable(false)] public Color PickColor => Color.FromArgb(GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
-            [Browsable(false)]
-            public bool IsMoveable => true;
+            [Browsable(false)] public bool IsMoveable => true;
 
-            ROMHandler.BaseRomHandler _baseRom;
+            BaseRomHandler _baseRom;
 
-            public Entry() { }
+            public Entry()
+            {
+            }
 
-            public Entry(ROMHandler.BaseRomHandler baseRom, uint address, int no, bool isSpawn, bool isTrans)
+            public Entry(BaseRomHandler baseRom, uint address, int no, bool isSpawn, bool isTrans)
             {
                 _baseRom = baseRom;
                 Address = address;
@@ -140,9 +157,9 @@ namespace SceneNavi.HeaderCommands
 
                 /* Load raw data */
                 RawData = new byte[16];
-                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(address >> 24)];
+                var segdata = (byte[]) _baseRom.SegmentMapping[(byte) (address >> 24)];
                 if (segdata == null) return;
-                Buffer.BlockCopy(segdata, (int)(address & 0xFFFFFF), RawData, 0, RawData.Length);
+                Buffer.BlockCopy(segdata, (int) (address & 0xFFFFFF), RawData, 0, RawData.Length);
 
                 /* Find definition, internal name */
                 RefreshVariables();
@@ -159,7 +176,8 @@ namespace SceneNavi.HeaderCommands
                     var flagFind = DefaultTypes.RoomActor;
                     if (IsTransitionActor) flagFind = DefaultTypes.TransitionActor;
                     else if (IsSpawnPoint) flagFind = DefaultTypes.SpawnPoint;
-                    Definition = _baseRom.XmlActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagFind));
+                    Definition =
+                        _baseRom.XmlActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagFind));
                 }
 
                 InternalName = actnum < _baseRom.Actors.Count ? _baseRom.Actors[actnum].Name : string.Empty;

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
+    <e p="C:\Users\steve\.Rider2019.2\config\scratches" t="IncludeRecursive" />
     <e p="C:\Users\steve\.Rider2019.2\system\extResources" t="IncludeRecursive" />
     <e p="C:\Users\steve\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_SceneNavi.-803873150.00" t="ExcludeRecursive" />
     <e p="C:\Users\steve\source\repos\SceneNavi" t="IncludeFlat">
@@ -13,6 +14,39 @@
           <e p="AssemblyInfo.cs" t="Include" />
         </e>
         <e p="Tests.cs" t="Include" />
+      </e>
+      <e p="Client" t="Include" />
+      <e p="Domain" t="Include" />
+      <e p="EmitterTester" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="EmitterTester.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+      </e>
+      <e p="EventBus" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="EventBus.csproj" t="IncludeRecursive" />
+        <e p="Events" t="Include">
+          <e p="OnErfCompiledEvent.cs" t="Include" />
+          <e p="OnErfDecompiledEvent.cs" t="Include" />
+          <e p="OnErfSavedEvent.cs" t="Include" />
+        </e>
+        <e p="IRabbitMqConnection.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="EventBus.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Producer" t="Include">
+          <e p="EventBusRabbitMProducer.cs" t="Include" />
+        </e>
+        <e p="RabbitMqConnection.cs" t="Include" />
+        <e p="RabbitMqPublisher.cs" t="Include" />
       </e>
       <e p="FpsMonitorTests" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
@@ -101,6 +135,7 @@
           <e p="MainForm.Designer.cs" t="Include" />
           <e p="MainForm.resx" t="Include" />
           <e p="MainFormConstants.cs" t="Include" />
+          <e p="MainFormViewModel.cs" t="Include" />
           <e p="TableEditorForm.cs" t="Include" />
           <e p="TableEditorForm.Designer.cs" t="Include" />
           <e p="TableEditorForm.resx" t="Include" />
@@ -141,17 +176,12 @@
         <e p="Navigation.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
         <e p="packages.config" t="Include" />
-        <e p="Program.cs" t="Include" />
         <e p="Properties" t="Include">
           <e p="AssemblyInfo.cs" t="Include" />
           <e p="Resources.Designer.cs" t="Include" />
           <e p="Resources.resx" t="Include" />
           <e p="Settings.Designer.cs" t="Include" />
           <e p="Settings.settings" t="Include" />
-        </e>
-        <e p="Repository" t="Include">
-          <e p="DataLoader.cs" t="Include" />
-          <e p="RomActorDbContext.cs" t="Include" />
         </e>
         <e p="Resources" t="Include">
           <e p="bg_empty_2.png" t="Include" />
@@ -186,6 +216,7 @@
         </e>
         <e p="SceneNavi.csproj" t="IncludeRecursive" />
         <e p="Services" t="Include">
+          <e p="ClientPersistenceService.cs" t="Include" />
           <e p="Commands" t="Include">
             <e p="MenuItemCommand.cs" t="Include" />
             <e p="MessageboxHandler.cs" t="Include" />
@@ -211,8 +242,11 @@
           <e p="UnpackedCombinerMux.cs" t="Include" />
           <e p="Vertex.cs" t="Include" />
         </e>
-        <e p="Startup" t="Include" />
-        <e p="Startup.cs" t="Include" />
+        <e p="Startup" t="Include">
+          <e p="ApplicationHost.cs" t="Include" />
+          <e p="Program.cs" t="Include" />
+          <e p="Startup.cs" t="Include" />
+        </e>
         <e p="StatusMessageHandler.cs" t="Include" />
         <e p="UpdateData" t="Include">
           <e p="SceneNavi.txt" t="Include" />
@@ -278,10 +312,56 @@
         <e p="XMLActorDefinitionReader.cs" t="Include" />
         <e p="XMLHashTableReader.cs" t="Include" />
       </e>
+      <e p="SceneNavi.Api" t="IncludeRecursive">
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Controllers" t="Include">
+          <e p="PersistenceController.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SceneNavi.Api.AssemblyInfo.cs" t="Include" />
+              <e p="SceneNavi.Api.MvcApplicationPartsAssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="SceneNavi.Api.csproj" t="IncludeRecursive" />
+        <e p="Startup.cs" t="Include" />
+      </e>
+      <e p="SceneNavi.AuthenticationApi" t="IncludeRecursive">
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Controllers" t="Include">
+          <e p="AuthenticationController.cs" t="Include" />
+        </e>
+        <e p="IdentityContext.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SceneNavi.AuthenticationApi.AssemblyInfo.cs" t="Include" />
+              <e p="SceneNavi.AuthenticationApi.MvcApplicationPartsAssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="SceneNavi.AuthenticationApi.csproj" t="IncludeRecursive" />
+        <e p="Startup.cs" t="Include" />
+      </e>
       <e p="SceneNavi.Domain" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="Endian.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
+        <e p="ProjectManagement" t="Include" />
         <e p="Properties" t="Include">
           <e p="AssemblyInfo.cs" t="Include" />
         </e>
@@ -301,6 +381,7 @@
         </e>
         <e p="bin" t="ExcludeRecursive" />
         <e p="Dependencies" t="Include">
+          <e p="ClientController.cs" t="Include" />
           <e p="GlViewPortInitialiser.cs" t="Include" />
           <e p="Implementations" t="Include">
             <e p="Camera.cs" t="Include" />
@@ -313,9 +394,15 @@
             <e p="IMemento.cs" t="Include" />
             <e p="ITextPrinter.cs" t="Include" />
           </e>
+          <e p="Providers" t="Include">
+            <e p="ReactiveStopwatch.cs" t="Include" />
+          </e>
         </e>
         <e p="ExtensionMethods.cs" t="Include" />
         <e p="FodyWeavers.xml" t="Include" />
+        <e p="Hardware" t="Include">
+          <e p="IKeyboardContext.cs" t="Include" />
+        </e>
         <e p="obj" t="ExcludeRecursive" />
         <e p="packages.config" t="Include" />
         <e p="Properties" t="Include">
@@ -323,7 +410,42 @@
         </e>
         <e p="SceneNavi.Framework.Client.csproj" t="IncludeRecursive" />
       </e>
+      <e p="SceneNavi.Repository" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="CacheContext.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SceneNavi.Repository.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="SceneNavi.Repository.csproj" t="IncludeRecursive" />
+      </e>
       <e p="SceneNavi.sln" t="IncludeFlat" />
+      <e p="SceneNavi.UserApi" t="IncludeRecursive">
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Controllers" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SceneNavi.UserApi.AssemblyInfo.cs" t="Include" />
+              <e p="SceneNavi.UserApi.MvcApplicationPartsAssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="SceneNavi.UserApi.csproj" t="IncludeRecursive" />
+        <e p="Startup.cs" t="Include" />
+      </e>
+      <e p="Server" t="Include">
+        <e p="Messaging" t="Include" />
+      </e>
       <e p="Tests" t="Include" />
       <e p="TextPrinterTests" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />

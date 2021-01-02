@@ -14,12 +14,13 @@ namespace SceneNavi.Framework.Client.Attributes
         private MethodBase _methodBase;
         private object _instance;
         private object[] _args;
-       
+
         public void Init(object instance, MethodBase method, object[] args)
         {
             _methodBase = method;
             _instance = instance;
             _args = args;
+            
             Console.WriteLine(instance.GetType());
             Console.WriteLine(method.GetType());
         }

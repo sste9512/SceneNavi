@@ -7,13 +7,14 @@ using System.ComponentModel;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using SceneNavi.RomHandlers;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.SimpleF3DEX2
 {
     internal class Vertex : HeaderCommands.IPickableObject, HeaderCommands.IStoreable
     {
-        ROMHandler.BaseRomHandler _baseRom;
+        BaseRomHandler _baseRom;
 
         [Browsable(false)]
         public System.Drawing.Color PickColor => System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24));
@@ -28,7 +29,7 @@ namespace SceneNavi.SimpleF3DEX2
 
         public uint Address { get; set; }
 
-        public Vertex(ROMHandler.BaseRomHandler baseRom, byte[] raw, uint adr, Matrix4d mtx)
+        public Vertex(BaseRomHandler baseRom, byte[] raw, uint adr, Matrix4d mtx)
         {
             _baseRom = baseRom;
 

@@ -17,48 +17,28 @@ namespace SceneNavi.Framework.Client.Dependencies.Implementations
     public class FpsMonitor : IFpsMonitor
     {
         private Subject<float> _emitter;
-
-        private Timer _timer;
         public float Value { get; private set; }
         public TimeSpan Sample { get; set; }
-
+      
         readonly Stopwatch _stopwatch;
 
-        int _frames;
+        private int _frames;
 
         public FpsMonitor()
         {
             Sample = TimeSpan.FromSeconds(1);
             Value = 0;
-            _frames = 0;
-            _stopwatch = Stopwatch.StartNew();
+            _frames = 0; 
+            _stopwatch = new Stopwatch();
             _emitter = new Subject<float>();
-            _timer = new Timer();
-            _timer.Elapsed += TimerOnElapsed;
         }
 
-        private void TimerOnElapsed(object sender, ElapsedEventArgs e)
-        {
-          
-            _frames++;
 
-            if (_stopwatch.Elapsed <= Sample) return;
-
-            Value = (float) (_frames / _stopwatch.Elapsed.TotalSeconds);
-
-            if (_emitter.HasObservers)
-            {
-                _emitter.OnNext(e.SignalTime.Millisecond);
-            }
-
-            _stopwatch.Reset();
-            _stopwatch.Start();
-            _frames = 0;
-        }
+        
 
         public void BeginMonitoring()
         {
-            _timer.Start();
+            _stopwatch.Start();
         }
 
 

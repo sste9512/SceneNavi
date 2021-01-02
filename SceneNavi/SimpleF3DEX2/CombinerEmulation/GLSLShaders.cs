@@ -84,13 +84,13 @@ namespace SceneNavi.SimpleF3DEX2.CombinerEmulation
             Textured = tex;
 
             StringBuilder vs = new StringBuilder(), fs = new StringBuilder();
-            vs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Vertex", m0, m1, HasLightingEnabled);
+          //  vs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Vertex", m0, m1, HasLightingEnabled);
             vs.AppendLine(ShaderVersion);
             vs.AppendLine(VertexShaderVariables);
             vs.AppendLine(ShaderMainPrefix);
             vs.AppendLine(VertexShaderCommon);
 
-            fs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Fragment", m0, m1, HasLightingEnabled);
+           // fs.AppendFormat(ShaderPrefix, Program.AppNameVer, "Fragment", m0, m1, HasLightingEnabled);
             fs.AppendLine(ShaderVersion);
             fs.AppendLine(FragmentShaderVariables);
             fs.AppendLine(ShaderMainPrefix);

@@ -146,6 +146,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
@@ -216,10 +217,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Forms\ColorPickerDialog.resx">
+    <EmbeddedResource Include="Forms\ColorPickerDialog\ColorPickerDialog.resx">
       <DependentUpon>ColorPickerDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\TableEditorForm.resx">
@@ -228,12 +229,12 @@
     <EmbeddedResource Include="Forms\TitleCardForm.resx">
       <DependentUpon>TitleCardForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="ActorRendering\GameActor.cs" />
-    <Compile Include="ActorRendering\MIPS.cs" />
-    <Compile Include="ActorRendering\MIPSEvaluator.cs" />
+    <None Include="HeaderCommands\GameActor.cs" />
+    <Compile Include="HardwareMapping\MIPS.cs" />
+    <Compile Include="HardwareMapping\MIPSEvaluator.cs" />
     <Compile Include="AssemblyHelpers.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Configurations\IBaseConfig.cs" />
+    <Compile Include="Forms\MainForm\IBaseConfig.cs" />
     <Compile Include="Configurations\IGraphicsRenderingSettings.cs" />
     <Compile Include="Configurations\IViewPortRenderSettings.cs" />
     <Compile Include="Configurations\ILoggingConfig.cs" />
@@ -259,19 +260,20 @@
     <Compile Include="Dependencies\Interfaces\IMemento.cs" />
     <Compile Include="Dependencies\Interfaces\ITextPrinter.cs" />
     <Compile Include="Dependencies\Implementations\TextPrinter.cs" />
-    <Compile Include="Forms\ColorPickerDialog.cs">
+    <Compile Include="Forms\ColorPickerDialog\ColorPickerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ColorPickerDialog.Designer.cs">
+    <Compile Include="Forms\ColorPickerDialog\ColorPickerDialog.Designer.cs">
       <DependentUpon>ColorPickerDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\CombinerTypes.cs" />
-    <Compile Include="Configurations\IMainFormConfig.cs" />
-    <Compile Include="Forms\MainForm.cs" />
-    <Compile Include="Forms\MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm\IMainFormConfig.cs" />
+    <Compile Include="Forms\MainForm\MainForm.cs" />
+    <Compile Include="Forms\MainForm\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MainFormConstants.cs" />
+    <Compile Include="Forms\MainForm\MainFormConstants.cs" />
+    <Compile Include="Forms\MainForm\MainFormViewModel.cs" />
     <Compile Include="Forms\TableEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -309,8 +311,6 @@
     <Compile Include="Models\Option.cs" />
     <Compile Include="Models\Usages.cs" />
     <Compile Include="Navigation.cs" />
-    <Compile Include="Repository\DataLoader.cs" />
-    <Compile Include="Repository\RomActorDbContext.cs" />
     <Compile Include="RomHandlers\MajorasMaskRomHandler.cs" />
     <Compile Include="ROMHandler\ByteOrder.cs" />
     <Compile Include="ROMHandler\ByteOrderException.cs" />
@@ -324,6 +324,7 @@
     <Compile Include="ROMHandler\SceneTableEntryMajora.cs" />
     <Compile Include="ROMHandler\StageKey.cs" />
     <Compile Include="ROMHandler\StageKeyConverter.cs" />
+    <Compile Include="Services\ClientPersistenceService.cs" />
     <Compile Include="Services\Commands\MenuItemCommand.cs" />
     <Compile Include="Services\Commands\MessageboxHandler.cs" />
     <Compile Include="Services\Commands\MessageBoxQueryHandler.cs" />
@@ -344,7 +345,6 @@
     <Compile Include="HeaderCommands\Objects.cs" />
     <Compile Include="HeaderCommands\Rooms.cs" />
     <Compile Include="ROMHandler\HeaderLoader.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ROMHandler\DMATableEntry.cs" />
     <Compile Include="ROMHandler\EntranceTableEntry.cs" />
@@ -356,7 +356,7 @@
     <Compile Include="SimpleF3DEX2\CombinerEmulation\GLSLShaders.cs" />
     <Compile Include="SimpleF3DEX2\CombinerEmulation\KnownCombinerMuxes.cs" />
     <Compile Include="SimpleF3DEX2\F3DEX2Interpreter.cs" />
-    <Compile Include="ROMHandler\BaseRomHandler.cs" />
+    <Compile Include="RomHandlers\BaseRomHandler.cs" />
     <Compile Include="SimpleF3DEX2\General.cs" />
     <Compile Include="SimpleF3DEX2\OtherModeL.cs" />
     <Compile Include="SimpleF3DEX2\SimpleTriangle.cs" />
@@ -364,7 +364,9 @@
     <Compile Include="SimpleF3DEX2\TextureCache.cs" />
     <Compile Include="SimpleF3DEX2\UnpackedCombinerMux.cs" />
     <Compile Include="SimpleF3DEX2\Vertex.cs" />
-    <Compile Include="Startup.cs" />
+    <Compile Include="Startup\ApplicationHost.cs" />
+    <Compile Include="Startup\Program.cs" />
+    <Compile Include="Startup\Startup.cs" />
     <Compile Include="StatusMessageHandler.cs" />
     <Compile Include="Utilities\ExtensionMethods.cs" />
     <Compile Include="Utilities\GUIHelpers.cs" />
@@ -470,7 +472,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\Queries\" />
-    <Folder Include="Startup\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">

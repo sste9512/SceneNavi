@@ -22,7 +22,7 @@ namespace SceneNavi.Controls
         public ListViewEx()
             : base()
         {
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
         }
 
@@ -34,7 +34,7 @@ namespace SceneNavi.Controls
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6)
             {
-                SetWindowTheme(this.Handle, "explorer", null);
+                SetWindowTheme(Handle, "explorer", null);
             }
         }
 
@@ -42,7 +42,7 @@ namespace SceneNavi.Controls
         {
             if (m.Msg == 0x204E)
             {
-                NMHDR hdr = (NMHDR)m.GetLParam(typeof(NMHDR));
+                var hdr = (NMHDR)m.GetLParam(typeof(NMHDR));
                 if (hdr.code == NM_CUSTOMDRAW)
                 {
                     m.Result = (IntPtr)0;

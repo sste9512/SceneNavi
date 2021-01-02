@@ -18,7 +18,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using MyNamespace;
 using SceneNavi.Dependencies.Interfaces;
+using SceneNavi.Forms.MainForm;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi
 {
@@ -168,6 +171,14 @@ namespace SceneNavi
             set => RefreshPathWaypoints();
         }
 
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x312) // this is WM_HOTKEY
+            {
+                Console.WriteLine(m.Msg);
+            }
+            base.WndProc(ref m);
+        }
 
         //  Dependency?
         BindingSource _roomActorComboBinding,
@@ -195,6 +206,8 @@ namespace SceneNavi
         private readonly IRomHandler _romHandler;
         private readonly IGraphicsRenderingSettings _graphicsRenderingSettings;
         private readonly IViewPortRenderSettings _viewPortRenderSettings;
+        private readonly ClientPersistenceService _clientPersistenceService;
+        private readonly MainFormState _mainFormState;
 
 
         public MainForm(IMediator mediator,
@@ -207,7 +220,8 @@ namespace SceneNavi
             IFpsMonitor fpsMonitor,
             IRomHandler romHandler,
             IGraphicsRenderingSettings graphicsRenderingSettings,
-            IViewPortRenderSettings viewPortRenderSettings)
+            IViewPortRenderSettings viewPortRenderSettings, 
+            ClientPersistenceService clientPersistenceService, MainFormState mainFormState)
         {
             InitializeComponent();
 
@@ -222,16 +236,15 @@ namespace SceneNavi
             _romHandler = romHandler;
             _graphicsRenderingSettings = graphicsRenderingSettings;
             _viewPortRenderSettings = viewPortRenderSettings;
+            _clientPersistenceService = clientPersistenceService;
+            _mainFormState = mainFormState;
         }
 
-        protected override void OnLoad(EventArgs e)
+        protected override async void OnLoad(EventArgs e)
         {
             Application.Idle += Application_Idle;
             Application.ApplicationExit += Application_ApplicationExit;
-            Program.Status.MessageChanged += StatusMsg_OnStatusMessageChanged;
-
-            
-
+           // Program.Status.MessageChanged += StatusMsg_OnStatusMessageChanged;
 
             dgvObjects.DoubleBuffered(_mainFormConfig.ObjectsDoubleBuffered);
             dgvPathWaypoints.DoubleBuffered(_mainFormConfig.PathWayPointsDoubleBuffered);
@@ -255,7 +268,7 @@ namespace SceneNavi
                 (_mainFormConfig.IndividualFileMode
                     ? $" ({Path.GetFileName(Configuration.LastSceneFile)})"
                     : string.Empty);
-            Text = string.Concat(Program.AppNameVer, filenamePart, scenePart);
+           // Text = string.Concat(Program.AppNameVer, filenamePart, scenePart);
         }
 
         private void Application_Idle(object sender, EventArgs e)
@@ -387,14 +400,14 @@ namespace SceneNavi
 
                 menuItem.Hint += ((s, e) =>
                 {
-                    if (Program.IsHinting) return;
-                    Program.IsHinting = true;
-                    Program.Status.Message = (s as Controls.ToolStripHintMenuItem).HelpText;
+//                    if (Program.IsHinting) return;
+//                    Program.IsHinting = true;
+//                    Program.Status.Message = (s as Controls.ToolStripHintMenuItem).HelpText;
                 });
                 menuItem.Unhint += ((s, e) =>
                 {
-                    if (!Program.IsHinting) return;
-                    Program.IsHinting = false;
+//                    if (!Program.IsHinting) return;
+//                    Program.IsHinting = false;
                     CreateStatusString();
                 });
             }
@@ -519,7 +532,7 @@ namespace SceneNavi
 
             if (ofdOpenROM.ShowDialog() == DialogResult.OK)
             {
-                Program.Status.Message = "Loading; please wait...";
+               // Program.Status.Message = "Loading; please wait...";
                 Cursor.Current = Cursors.WaitCursor;
 
                 _mainFormConfig.IndividualFileMode = false;
@@ -584,7 +597,7 @@ namespace SceneNavi
                 }
                 else
                 {
-                    Program.Status.Message = "Error loading ROM";
+                   // Program.Status.Message = "Error loading ROM";
                 }
 
                 Cursor.Current = DefaultCursor;
@@ -639,7 +652,7 @@ namespace SceneNavi
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Program.Status.Message = "Saving; please wait...";
+           // Program.Status.Message = "Saving; please wait...";
 
             Cursor.Current = Cursors.WaitCursor;
             SaveAllData();
@@ -726,8 +739,11 @@ namespace SceneNavi
                 }
 
                 /* Now store all storeable commands */
-                foreach (IStoreable hc in hl.Commands.Where(x => x is IStoreable))
+                foreach (var generic in hl.Commands.Where(x => x is IStoreable))
+                {
+                    var hc = (IStoreable) generic;
                     hc.Store(databuf, baseadr);
+                }
             }
         }
 
@@ -802,7 +818,7 @@ namespace SceneNavi
                     $"{_currentScene.GetActiveWaypoints().Paths.Count} path{(_currentScene.GetActiveWaypoints().Paths.Count != 1 ? "s" : "")}");
             }
 
-            Program.Status.Message = string.Join("; ", infostrs);
+          //  Program.Status.Message = string.Join("; ", infostrs);
         }
 
         private void RefreshCurrentData()
@@ -1345,6 +1361,8 @@ namespace SceneNavi
             {
                 _fpsMonitor.Update();
 
+
+                // Configs can be made from this method
                 RenderInit(((GLControl) sender).ClientRectangle, Color.LightBlue);
 
                 if (_baseRom != null && _baseRom.Loaded)
@@ -1547,9 +1565,10 @@ namespace SceneNavi
 
                 ((GLControl) sender).SwapBuffers();
             }
-            catch (EntryPointNotFoundException)
+            catch (EntryPointNotFoundException exception)
             {
                 //
+                Console.WriteLine(exception.InnerException);
             }
         }
 

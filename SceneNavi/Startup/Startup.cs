@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Config.Net;
 using MediatR;
 using MediatR.Pipeline;
+using MyNamespace;
 using Ninject;
 using Ninject.Modules;
 using NLog;
@@ -20,9 +22,10 @@ using SceneNavi.Configurations;
 using SceneNavi.Dependencies.Implementations;
 using SceneNavi.Dependencies.Interfaces;
 using SceneNavi.HeaderCommands;
-using SceneNavi.Repository;
+
 using SceneNavi.ROMHandler;
 using SceneNavi.ROMHandler.Interfaces;
+using SceneNavi.RomHandlers;
 using SceneNavi.Services.Commands;
 using SceneNavi.Utilities.OpenGLHelpers;
 using Unity;
@@ -67,9 +70,6 @@ public static class Di
 
         Container.RegisterConfigurations();
 
-        Container.RegisterType<DbContext, RomActorDbContext>();
-   
-
         Container.RegisterType<ICamera, Camera>();
         Container.RegisterType<ITextPrinter, TextPrinter>();
         Container.RegisterType<IFpsMonitor, FpsMonitor>();
@@ -83,7 +83,7 @@ public static class Di
 
         Container.RegisterType<Form, MainForm>(nameof(MainForm));
         Container.RegisterType<Form, TitleCardForm>(nameof(TitleCardForm));
-
+        Container.RegisterInstance(new ClientPersistenceService("https://localhost:5001/", new HttpClient()));
         Container.RegisterType<PositionState>();
         Container.RegisterType<Generic>();
         Container.RegisterType<Actors>();

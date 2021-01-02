@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi.HeaderCommands
 {
@@ -47,11 +48,11 @@ namespace SceneNavi.HeaderCommands
                 }
             }
 
-            ROMHandler.BaseRomHandler _baseRom;
+            BaseRomHandler _baseRom;
 
             public Entry() { }
 
-            public Entry(ROMHandler.BaseRomHandler baseRom, uint adr)
+            public Entry(BaseRomHandler baseRom, uint adr)
             {
                 _baseRom = baseRom;
                 Address = adr;

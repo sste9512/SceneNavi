@@ -13,24 +13,22 @@ namespace SceneNavi
 {
     public partial class UpdateCheckDialog : Form
     {
-        enum updateTxtLines : int { NewVersionNumber = 0, UpdatePageUrl = 1, ReleaseNotesUrl = 2 };
+        enum UpdateTxtLines : int { NewVersionNumber = 0, UpdatePageUrl = 1, ReleaseNotesUrl = 2 };
 
-        Version localVersion, remoteVersion;
-        string updatePageUrl, releaseNotesUrl;
+        readonly Version _localVersion;
+        Version _remoteVersion;
+        string _updatePageUrl, _releaseNotesUrl;
 
-        bool IsRemoteVersionNewer
-        {
-            get { return (remoteVersion > localVersion); }
-        }
+        private bool IsRemoteVersionNewer => (_remoteVersion > _localVersion);
 
         public UpdateCheckDialog()
         {
             InitializeComponent();
 
-            localVersion = new Version(Application.ProductVersion);
+            _localVersion = new Version(Application.ProductVersion);
             //localVersion = new Version(1, 0, 1, 6); //fake beta6
 
-            System.Timers.Timer tmr = new System.Timers.Timer();
+            var tmr = new System.Timers.Timer();
             tmr.Elapsed += new System.Timers.ElapsedEventHandler(tmr_Elapsed);
             tmr.Interval = 2.0;
             tmr.Start();
@@ -38,34 +36,36 @@ namespace SceneNavi
 
         private void tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            (sender as System.Timers.Timer).Stop();
+            (sender as System.Timers.Timer)?.Stop();
 
             Cursor.Current = Cursors.WaitCursor;
             this.UiThread(() => lblStatus.Text = "Checking for version information...");
 
-            string finalStatusMsg = string.Empty;
+            var finalStatusMsg = string.Empty;
             try
             {
                 if (VersionManagement.RemoteFileExists(Configuration.UpdateServer))
                 {
                     this.UiThread(() => lblStatus.Text = "Version information found; downloading...");
 
-                    string[] updateInformation = VersionManagement.DownloadTextFile(Configuration.UpdateServer);
+                    var updateInformation = VersionManagement.DownloadTextFile(Configuration.UpdateServer);
 
-                    remoteVersion = new Version(updateInformation[(int)updateTxtLines.NewVersionNumber]);
-                    updatePageUrl = updateInformation[(int)updateTxtLines.UpdatePageUrl];
-                    if (updateInformation.Length >= 2) releaseNotesUrl = updateInformation[(int)updateTxtLines.ReleaseNotesUrl];
+                    _remoteVersion = new Version(updateInformation[(int)UpdateTxtLines.NewVersionNumber]);
+                    _updatePageUrl = updateInformation[(int)UpdateTxtLines.UpdatePageUrl];
+                    if (updateInformation.Length >= 2) _releaseNotesUrl = updateInformation[(int)UpdateTxtLines.ReleaseNotesUrl];
 
-                    this.UiThread(() => VersionManagement.DownloadRtfFile(releaseNotesUrl, rlblChangelog));
+                    this.UiThread(() => VersionManagement.DownloadRtfFile(_releaseNotesUrl, rlblChangelog));
 
                     if (IsRemoteVersionNewer)
                     {
                         this.UiThread(() => btnDownload.Enabled = true);
-                        finalStatusMsg = string.Format("New version {0} is available!", VersionManagement.CreateVersionString(remoteVersion));
+                        finalStatusMsg =
+                            $"New version {VersionManagement.CreateVersionString(_remoteVersion)} is available!";
                     }
                     else
                     {
-                        finalStatusMsg = string.Format("You are already using the most recent version {0}.\n", VersionManagement.CreateVersionString(localVersion));
+                        finalStatusMsg =
+                            $"You are already using the most recent version {VersionManagement.CreateVersionString(_localVersion)}.\n";
                     }
                 }
                 else
@@ -76,10 +76,10 @@ namespace SceneNavi
                 /* Web access failed */
                 MessageBox.Show(wex.ToString(), "Web Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
-            catch (System.ComponentModel.Win32Exception w32ex)
+            catch (Win32Exception w32Ex)
             {
                 /* Win32 exception, ex. no browser found */
-                if (w32ex.ErrorCode == -2147467259) MessageBox.Show(w32ex.Message, "Process Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                if (w32Ex.ErrorCode == -2147467259) MessageBox.Show(w32Ex.Message, "Process Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
             catch (Exception ex)
             {
@@ -94,8 +94,8 @@ namespace SceneNavi
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(updatePageUrl);
-            this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            System.Diagnostics.Process.Start(_updatePageUrl);
+            DialogResult = DialogResult.Cancel;
         }
     }
 }

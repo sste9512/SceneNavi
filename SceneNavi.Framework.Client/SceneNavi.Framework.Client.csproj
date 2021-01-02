@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\WriteToConsole.cs" />
+    <Compile Include="Dependencies\ClientController.cs" />
     <Compile Include="Dependencies\Implementations\Camera.cs" />
     <Compile Include="Dependencies\Implementations\FpsMonitor.cs" />
     <Compile Include="Dependencies\Implementations\TextPrinter.cs" />
@@ -87,7 +88,9 @@
     <Compile Include="Dependencies\Interfaces\IFpsMonitor.cs" />
     <Compile Include="Dependencies\Interfaces\IMemento.cs" />
     <Compile Include="Dependencies\Interfaces\ITextPrinter.cs" />
+    <Compile Include="Dependencies\Providers\ReactiveStopwatch.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Hardware\IKeyboardContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -96,7 +99,6 @@
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.3.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.3.0\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

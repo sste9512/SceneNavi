@@ -6,14 +6,15 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using SceneNavi.RomHandlers;
 
 namespace SceneNavi
 {
     public partial class TableEditorForm : Form
     {
-        ROMHandler.BaseRomHandler _baseRom;
+        BaseRomHandler _baseRom;
 
-        public TableEditorForm(ROMHandler.BaseRomHandler baseRom)
+        public TableEditorForm(BaseRomHandler baseRom)
         {
             InitializeComponent();
 

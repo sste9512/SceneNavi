@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using NLog;
+using SceneNavi.Dependencies.Interfaces;
 using SceneNavi.Utilities.OpenGLHelpers;
 
 namespace SceneNavi.Dependencies.Implementations

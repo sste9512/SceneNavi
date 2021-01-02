@@ -11,13 +11,14 @@ namespace SceneNavi.Utilities.OpenGLHelpers
         internal class Triangle : HeaderCommands.IPickableObject
         {
             [Browsable(false)]
-            public Vector3d Position { get { return Vector3d.Zero; } set { } }
+            public Vector3d Position { get => Vector3d.Zero;
+                set { } }
 
             [Browsable(false)]
-            public System.Drawing.Color PickColor { get { return System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24)); } }
+            public System.Drawing.Color PickColor => System.Drawing.Color.FromArgb(this.GetHashCode() & 0xFFFFFF | (0xFF << 24));
 
             [Browsable(false)]
-            public bool IsMoveable { get { return false; } }
+            public bool IsMoveable => false;
 
             public List<SimpleF3DEX2.Vertex> Vertices { get; private set; }
             public SimpleF3DEX2.Vertex SelectedVertex { get; set; }
