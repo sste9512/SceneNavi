@@ -92,7 +92,7 @@ namespace SceneNavi
                 Configuration.CombinerType = _internalCombinerType = (Enum.IsDefined(typeof(CombinerTypes), value)
                     ? _internalCombinerType = value
                     : _internalCombinerType = CombinerTypes.None);
-                _baseRom?.Renderer.InitCombiner();
+                _baseRom.Renderer.InitCombiner();
                 _displayListsDirty = true;
             }
         }
@@ -262,7 +262,7 @@ namespace SceneNavi
         private void SetFormTitle()
         {
             var filenamePart = ((_baseRom != null && _baseRom.Loaded)
-                ? $" - [{Path.GetFileName(_baseRom.Filename)}]"
+                ? $" - [{Path.GetFileName(_baseRom.Rom.Filename)}]"
                 : string.Empty);
             var scenePart =
                 (_mainFormConfig.IndividualFileMode
@@ -420,8 +420,8 @@ namespace SceneNavi
 
             if (!_mainFormConfig.IndividualFileMode)
             {
-                root = new TreeNode($"{_baseRom.Title} ({_baseRom.GameId}, v1.{_baseRom.Version}; {_baseRom.Scenes.Count} scenes)") {Tag = _baseRom};
-                foreach (var ste in _baseRom.Scenes)
+                root = new TreeNode($"{_baseRom.Rom.Title} ({_baseRom.Rom.GameId}, v1.{_baseRom.Rom.Version}; {_baseRom.Rom.Scenes.Count} scenes)") {Tag = _baseRom};
+                foreach (var ste in _baseRom.Rom.Scenes)
                 {
                     var scene = new TreeNode($"{ste.GetName()} (0x{ste.GetSceneStartAddress():X})") {Tag = ste};
 
@@ -441,7 +441,7 @@ namespace SceneNavi
                             var hp = new HeaderPair(shead, rhs);
 
                             var de = new System.Collections.DictionaryEntry();
-                            foreach (System.Collections.DictionaryEntry d in _baseRom.XmlStageDescriptions.Names)
+                            foreach (System.Collections.DictionaryEntry d in _baseRom.Rom.XmlStageDescriptions.Names)
                             {
                                 var sk = d.Key as StageKey;
                                 if (sk.SceneAddress == ste.GetSceneStartAddress() &&
@@ -517,7 +517,7 @@ namespace SceneNavi
             if (_baseRom == null) return;
 
             _bgms = new Dictionary<byte, string>();
-            foreach (System.Collections.DictionaryEntry de in _baseRom.XmlSongNames.Names)
+            foreach (System.Collections.DictionaryEntry de in _baseRom.Rom.XmlSongNames.Names)
                 _bgms.Add((byte) de.Key, (string) de.Value);
         }
 
@@ -627,7 +627,7 @@ namespace SceneNavi
             {
                 Configuration.LastSceneFile = ofdOpenScene.FileName;
 
-                if ((_tempScene = (!_baseRom.IsMajora
+                if ((_tempScene = (!_baseRom.Rom.IsMajora
                         ? new SceneTableEntryOcarina(_baseRom, ofdOpenScene.FileName)
                         : (ISceneTableEntry) new SceneTableEntryMajora(_baseRom, ofdOpenScene.FileName))) != null)
                 {
@@ -702,23 +702,23 @@ namespace SceneNavi
             else
             {
                 /* Store scene table entries & scenes */
-                foreach (var ste in _baseRom.Scenes)
+                foreach (var ste in _baseRom.Rom.Scenes)
                 {
                     ste.SaveTableEntry();
-                    ParseStoreHeaders(ste.GetSceneHeaders(), _baseRom.Data, (int) ste.GetSceneStartAddress());
+                    ParseStoreHeaders(ste.GetSceneHeaders(), _baseRom.Rom.Data, (int) ste.GetSceneStartAddress());
                 }
 
                 /* Store entrance table entries */
-                foreach (var ete in _baseRom.Entrances) ete.SaveTableEntry();
+                foreach (var ete in _baseRom.Rom.Entrances) ete.SaveTableEntry();
 
                 /* Copy code data */
-                Buffer.BlockCopy(_baseRom.CodeData, 0, _baseRom.Data, (int) _baseRom.Code.PStart,
-                    _baseRom.CodeData.Length);
+                Buffer.BlockCopy(_baseRom.Rom.CodeData, 0, _baseRom.Rom.Data, (int) _baseRom.Rom.Code.PStart,
+                    _baseRom.Rom.CodeData.Length);
 
                 /* Write to file */
-                var bw = new BinaryWriter(File.Open(_baseRom.Filename, FileMode.Open, FileAccess.ReadWrite,
+                var bw = new BinaryWriter(File.Open(_baseRom.Rom.Filename, FileMode.Open, FileAccess.ReadWrite,
                     FileShare.ReadWrite));
-                bw.Write(_baseRom.Data);
+                bw.Write(_baseRom.Rom.Data);
                 bw.Close();
             }
         }
@@ -783,9 +783,9 @@ namespace SceneNavi
             {
                 infostrs.Add(
                     $"Ready{((Configuration.ShownIntelWarning || Configuration.ShownExtensionWarning) ? " (limited combiner)" : string.Empty)}");
-                if (_baseRom != null && _baseRom.Scenes != null)
+                if (_baseRom != null && _baseRom.Rom.Scenes != null)
                     infostrs.Add(
-                        $"{_baseRom.Title} ({_baseRom.GameId}, v1.{_baseRom.Version}; {_baseRom.Scenes.Count} scenes)");
+                        $"{_baseRom.Rom.Title} ({_baseRom.Rom.GameId}, v1.{_baseRom.Rom.Version}; {_baseRom.Rom.Scenes.Count} scenes)");
             }
 
             if (_currentRoom != null && _currentRoom.ActiveRoomActorData != null)
@@ -827,11 +827,11 @@ namespace SceneNavi
 
             if (_currentScene != null)
             {
-                if (!_baseRom.IsMajora)
+                if (!_baseRom.Rom.IsMajora)
                 {
                     var steOcarina = (_currentScene as SceneTableEntryOcarina);
                     editAreaTitleCardToolStripMenuItem.Enabled =
-                        (!_baseRom.IsMajora && steOcarina.LabelStartAddress != 0 && steOcarina.LabelEndAddress != 0);
+                        (!_baseRom.Rom.IsMajora && steOcarina.LabelStartAddress != 0 && steOcarina.LabelEndAddress != 0);
                 }
 
                 var rooms = (_currentScene.GetCurrentSceneHeader().Commands
@@ -847,8 +847,8 @@ namespace SceneNavi
 
                 if (_currentRoom == null)
                 {
-                    _baseRom.SegmentMapping.Remove((byte) 0x02);
-                    _baseRom.SegmentMapping.Add((byte) 0x02, _currentScene.GetData());
+                    _baseRom.Rom.SegmentMapping.Remove((byte) 0x02);
+                    _baseRom.Rom.SegmentMapping.Add((byte) 0x02, _currentScene.GetData());
 
                     _allMeshHeaders = new List<MeshHeader>();
 
@@ -863,10 +863,10 @@ namespace SceneNavi
                 }
                 else if (_currentRoom != null)
                 {
-                    _baseRom.SegmentMapping.Remove((byte) 0x02);
-                    _baseRom.SegmentMapping.Remove((byte) 0x03);
-                    _baseRom.SegmentMapping.Add((byte) 0x02, _currentScene.GetData());
-                    _baseRom.SegmentMapping.Add((byte) 0x03, _currentRoom.Data);
+                    _baseRom.Rom.SegmentMapping.Remove((byte) 0x02);
+                    _baseRom.Rom.SegmentMapping.Remove((byte) 0x03);
+                    _baseRom.Rom.SegmentMapping.Add((byte) 0x02, _currentScene.GetData());
+                    _baseRom.Rom.SegmentMapping.Add((byte) 0x03, _currentRoom.Data);
                 }
             }
             else
@@ -1096,7 +1096,7 @@ namespace SceneNavi
             {
                 var tb = e.Control as TextBox;
                 tb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                tb.AutoCompleteCustomSource = _baseRom.ObjectNameAcStrings;
+                tb.AutoCompleteCustomSource = _baseRom.Rom.ObjectNameAcStrings;
                 tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
             }
         }
@@ -1601,10 +1601,10 @@ namespace SceneNavi
                     (_currentScene.GetCurrentSceneHeader().Commands
                         .FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms) as Rooms).RoomInformation)
                 {
-                    _baseRom.SegmentMapping.Remove((byte) 0x02);
-                    _baseRom.SegmentMapping.Remove((byte) 0x03);
-                    _baseRom.SegmentMapping.Add((byte) 0x02, (ric.Parent as ISceneTableEntry).GetData());
-                    _baseRom.SegmentMapping.Add((byte) 0x03, ric.Data);
+                    _baseRom.Rom.SegmentMapping.Remove((byte) 0x02);
+                    _baseRom.Rom.SegmentMapping.Remove((byte) 0x03);
+                    _baseRom.Rom.SegmentMapping.Add((byte) 0x02, (ric.Parent as ISceneTableEntry).GetData());
+                    _baseRom.Rom.SegmentMapping.Add((byte) 0x03, ric.Data);
 
                     if (ric.Headers.Count == 0) continue;
 
@@ -2095,7 +2095,7 @@ namespace SceneNavi
                 _currentRoom.Data[(vertex.Address & 0xFFFFFF) + 14] = vertex.Colors[2];
                 _currentRoom.Data[(vertex.Address & 0xFFFFFF) + 15] = vertex.Colors[3];
 
-                vertex.Store(_mainFormConfig.IndividualFileMode ? null : _baseRom.Data, (int) _currentRoom.Start);
+                vertex.Store(_mainFormConfig.IndividualFileMode ? null : _baseRom.Rom.Data, (int) _currentRoom.Start);
 
                 _displayListsDirty = true;
             }

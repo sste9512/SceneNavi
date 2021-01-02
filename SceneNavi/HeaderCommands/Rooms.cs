@@ -30,9 +30,9 @@ namespace SceneNavi.HeaderCommands
             for (var i = 0; i < GetCountGeneric(); i++)
             {
                 var roomAddress = new RoomInfoClass(BaseRom, baseCommand.Parent, i,
-                    Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) BaseRom.SegmentMapping[seg]),
+                    Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) BaseRom.Rom.SegmentMapping[seg]),
                         (int) ((GetAddressGeneric() & 0xFFFFFF) + i * 8))),
-                    Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) BaseRom.SegmentMapping[seg]),
+                    Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) BaseRom.Rom.SegmentMapping[seg]),
                         (int) ((GetAddressGeneric() & 0xFFFFFF) + i * 8) + 4)));
                 RoomInformation.Add(roomAddress);
             }

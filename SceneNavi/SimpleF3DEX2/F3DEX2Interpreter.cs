@@ -203,7 +203,7 @@ namespace SceneNavi.SimpleF3DEX2
                 var seg = (byte)(adr >> 24);
                 adr &= 0xFFFFFF;
 
-                var segdata = (byte[])_baseRom.SegmentMapping[seg];
+                var segdata = (byte[])_baseRom.Rom.SegmentMapping[seg];
 
                 while (adr < segdata.Length)
                 {
@@ -289,7 +289,7 @@ namespace SceneNavi.SimpleF3DEX2
 
             var psize = ((w1[4] & 0x00FFF000) >> 14) + 1;
 
-            var segdata = (byte[])_baseRom.SegmentMapping[seg];
+            var segdata = (byte[])_baseRom.Rom.SegmentMapping[seg];
             if (segdata == null) return;
 
             for (var i = 0; i < psize; i++)
@@ -315,7 +315,7 @@ namespace SceneNavi.SimpleF3DEX2
             var v0 = (byte)(((w0 >> 1) & 0x7F) - n);
             if (n > VertexBuffer.Length || v0 > VertexBuffer.Length) return;
 
-            for (var i = 0; i < n; i++) VertexBuffer[v0 + i] = new Vertex(_baseRom, (byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), _mtxstack.Peek());
+            for (var i = 0; i < n; i++) VertexBuffer[v0 + i] = new Vertex(_baseRom, (byte[])_baseRom.Rom.SegmentMapping[(byte)(w1 >> 24)], (uint)(w1 + i * 16), _mtxstack.Peek());
         }
 
         private void CommandTri1(uint w0, uint w1)
@@ -356,7 +356,7 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandDl(uint w0, uint w1)
         {
             /* DL */
-            if ((byte[])_baseRom.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, _activeGldl.Peek());
+            if ((byte[])_baseRom.Rom.SegmentMapping[(byte)(w1 >> 24)] != null) Render(w1, true, _activeGldl.Peek());
         }
 
         private void CommandRdpHalf1(uint w0, uint w1)
@@ -368,7 +368,7 @@ namespace SceneNavi.SimpleF3DEX2
         private void CommandBranchZ(uint w0, uint w1)
         {
             /* Branch_Z */
-            if ((byte[])_baseRom.SegmentMapping[(byte)(_rdphalf1 >> 24)] != null) Render(_rdphalf1, true, _activeGldl.Peek());
+            if ((byte[])_baseRom.Rom.SegmentMapping[(byte)(_rdphalf1 >> 24)] != null) Render(_rdphalf1, true, _activeGldl.Peek());
         }
 
         private void CommandGeometryMode(uint w0, uint w1)
@@ -386,7 +386,7 @@ namespace SceneNavi.SimpleF3DEX2
             /* Mtx */
             var mseg = (byte)(w1 >> 24);
             var madr = (w1 & 0xFFFFFF);
-            var msegdata = (byte[])_baseRom.SegmentMapping[mseg];
+            var msegdata = (byte[])_baseRom.Rom.SegmentMapping[mseg];
 
             if (mseg == 0x80) _mtxstack.Pop();
             if (msegdata == null) return;
@@ -658,7 +658,7 @@ namespace SceneNavi.SimpleF3DEX2
 
         private int CheckTextureCache(int tx)
         {
-            var tag = _baseRom.SegmentMapping[(byte)(Textures[tx].Address >> 24)];
+            var tag = _baseRom.Rom.SegmentMapping[(byte)(Textures[tx].Address >> 24)];
 
             foreach (var cached in _texcache)
             {
@@ -679,7 +679,7 @@ namespace SceneNavi.SimpleF3DEX2
             adr &= 0xFFFFFF;
 
             var texbuf = new byte[Textures[tx].RealWidth * Textures[tx].RealHeight * 4];
-            var segdata = (byte[])_baseRom.SegmentMapping[seg];
+            var segdata = (byte[])_baseRom.Rom.SegmentMapping[seg];
 
             if (segdata == null)
                 texbuf.Fill(new byte[] { 0xFF, 0xFF, 0x00, 0xFF });

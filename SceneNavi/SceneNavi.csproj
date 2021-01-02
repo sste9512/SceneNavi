@@ -312,6 +312,7 @@
     <Compile Include="Models\Usages.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="RomHandlers\MajorasMaskRomHandler.cs" />
+    <Compile Include="RomHandlers\StringExtensions.cs" />
     <Compile Include="ROMHandler\ByteOrder.cs" />
     <Compile Include="ROMHandler\ByteOrderException.cs" />
     <Compile Include="ROMHandler\CommandTypeIDs.cs" />

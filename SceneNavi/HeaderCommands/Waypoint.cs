@@ -38,7 +38,7 @@ namespace SceneNavi.HeaderCommands
             _baseRom = baseRom;
             Address = adr;
 
-            var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+            var segdata = (byte[])_baseRom.Rom.SegmentMapping[(byte)(adr >> 24)];
             if (segdata == null) return;
 
             X = Endian.SwapInt16(BitConverter.ToInt16(segdata, (int)(adr & 0xFFFFFF)));

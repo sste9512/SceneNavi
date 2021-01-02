@@ -69,7 +69,7 @@ namespace SceneNavi.HeaderCommands
                 {
                     if (_baseRom == null) return "(None)";
 
-                    var name = (string) _baseRom.XmlActorNames.Names[GetActorNumber];
+                    var name = (string) _baseRom.Rom.XmlActorNames.Names[GetActorNumber];
                     return name ?? "Unknown actor";
                 }
             }
@@ -157,7 +157,7 @@ namespace SceneNavi.HeaderCommands
 
                 /* Load raw data */
                 RawData = new byte[16];
-                var segdata = (byte[]) _baseRom.SegmentMapping[(byte) (address >> 24)];
+                var segdata = (byte[]) _baseRom.Rom.SegmentMapping[(byte) (address >> 24)];
                 if (segdata == null) return;
                 Buffer.BlockCopy(segdata, (int) (address & 0xFFFFFF), RawData, 0, RawData.Length);
 
@@ -170,17 +170,17 @@ namespace SceneNavi.HeaderCommands
                 var numofs = (IsTransitionActor ? 4 : 0);
                 var actnum = Endian.SwapUInt16(BitConverter.ToUInt16(RawData, numofs));
 
-                Definition = _baseRom.XmlActorDefReader.Definitions.Find(x => x.Number == actnum);
+                Definition = _baseRom.Rom.XmlActorDefReader.Definitions.Find(x => x.Number == actnum);
                 if (Definition == null)
                 {
                     var flagFind = DefaultTypes.RoomActor;
                     if (IsTransitionActor) flagFind = DefaultTypes.TransitionActor;
                     else if (IsSpawnPoint) flagFind = DefaultTypes.SpawnPoint;
                     Definition =
-                        _baseRom.XmlActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagFind));
+                        _baseRom.Rom.XmlActorDefReader.Definitions.FirstOrDefault(x => x.IsDefault.HasFlag(flagFind));
                 }
 
-                InternalName = actnum < _baseRom.Actors.Count ? _baseRom.Actors[actnum].Name : string.Empty;
+                InternalName = actnum < _baseRom.Rom.Actors.Count ? _baseRom.Rom.Actors[actnum].Name : string.Empty;
             }
 
             public void Render(PickableObjectRenderType renderType)

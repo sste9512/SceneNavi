@@ -86,21 +86,14 @@
         <e p="RendererTest.csproj" t="IncludeRecursive" />
       </e>
       <e p="SceneNavi" t="IncludeRecursive">
-        <e p="ActorRendering" t="Include">
-          <e p="GameActor.cs" t="Include" />
-          <e p="MIPS.cs" t="Include" />
-          <e p="MIPSEvaluator.cs" t="Include" />
-        </e>
         <e p="app.config" t="Include" />
         <e p="AssemblyHelpers.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="Bottled Fairy.ico" t="Include" />
         <e p="Configuration.cs" t="Include" />
         <e p="Configurations" t="Include">
-          <e p="IBaseConfig.cs" t="Include" />
           <e p="IGraphicsRenderingSettings.cs" t="Include" />
           <e p="ILoggingConfig.cs" t="Include" />
-          <e p="IMainFormConfig.cs" t="Include" />
           <e p="IViewPortRenderSettings.cs" t="Include" />
         </e>
         <e p="Controls" t="Include">
@@ -127,15 +120,21 @@
           </e>
         </e>
         <e p="Forms" t="Include">
-          <e p="ColorPickerDialog.cs" t="Include" />
-          <e p="ColorPickerDialog.Designer.cs" t="Include" />
-          <e p="ColorPickerDialog.resx" t="Include" />
+          <e p="ColorPickerDialog" t="Include">
+            <e p="ColorPickerDialog.cs" t="Include" />
+            <e p="ColorPickerDialog.Designer.cs" t="Include" />
+            <e p="ColorPickerDialog.resx" t="Include" />
+          </e>
           <e p="CombinerTypes.cs" t="Include" />
-          <e p="MainForm.cs" t="Include" />
-          <e p="MainForm.Designer.cs" t="Include" />
-          <e p="MainForm.resx" t="Include" />
-          <e p="MainFormConstants.cs" t="Include" />
-          <e p="MainFormViewModel.cs" t="Include" />
+          <e p="MainForm" t="Include">
+            <e p="IBaseConfig.cs" t="Include" />
+            <e p="IMainFormConfig.cs" t="Include" />
+            <e p="MainForm.cs" t="Include" />
+            <e p="MainForm.Designer.cs" t="Include" />
+            <e p="MainForm.resx" t="Include" />
+            <e p="MainFormConstants.cs" t="Include" />
+            <e p="MainFormViewModel.cs" t="Include" />
+          </e>
           <e p="TableEditorForm.cs" t="Include" />
           <e p="TableEditorForm.Designer.cs" t="Include" />
           <e p="TableEditorForm.resx" t="Include" />
@@ -147,10 +146,15 @@
           <e p="UpdateCheckDialog.Designer.cs" t="Include" />
           <e p="UpdateCheckDialog.resx" t="Include" />
         </e>
+        <e p="HardwareMapping" t="Include">
+          <e p="MIPS.cs" t="Include" />
+          <e p="MIPSEvaluator.cs" t="Include" />
+        </e>
         <e p="HeaderCommands" t="Include">
           <e p="Actors.cs" t="Include" />
           <e p="Collision.cs" t="Include" />
           <e p="EnvironmentSettings.cs" t="Include" />
+          <e p="GameActor.cs" t="Include" />
           <e p="Generic.cs" t="Include" />
           <e p="IPickableObject.cs" t="Include" />
           <e p="IStoreable.cs" t="Include" />
@@ -190,7 +194,6 @@
         </e>
         <e p="ROMHandler" t="Include">
           <e p="ActorTableEntry.cs" t="Include" />
-          <e p="BaseRomHandler.cs" t="Include" />
           <e p="ByteOrder.cs" t="Include" />
           <e p="ByteOrderException.cs" t="Include" />
           <e p="CommandTypeIDs.cs" t="Include" />
@@ -212,6 +215,7 @@
           <e p="StageKeyConverter.cs" t="Include" />
         </e>
         <e p="RomHandlers" t="Include">
+          <e p="BaseRomHandler.cs" t="Include" />
           <e p="MajorasMaskRomHandler.cs" t="Include" />
         </e>
         <e p="SceneNavi.csproj" t="IncludeRecursive" />
@@ -356,6 +360,26 @@
         </e>
         <e p="SceneNavi.AuthenticationApi.csproj" t="IncludeRecursive" />
         <e p="Startup.cs" t="Include" />
+      </e>
+      <e p="SceneNavi.Core" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="FodyWeavers.xml" t="Include" />
+        <e p="Form1.cs" t="Include" />
+        <e p="Form1.Designer.cs" t="Include" />
+        <e p="Form1.resx" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SceneNavi.Core.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="SceneNavi.Core.csproj" t="IncludeRecursive" />
+        <e p="Startup" t="Include">
+          <e p="ApplicationHost.cs" t="Include" />
+          <e p="Startup.cs" t="Include" />
+        </e>
       </e>
       <e p="SceneNavi.Domain" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />

@@ -46,10 +46,10 @@ namespace SceneNavi.HeaderCommands
             var seg = (byte)(GetAddressGeneric() >> 24);
             var adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
 
-            Type = ((byte[])BaseRom.SegmentMapping[seg])[adr];
-            Count = ((byte[])BaseRom.SegmentMapping[seg])[adr + 1];
-            DLTablePointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[seg]), (int)(adr + 4)));
-            OtherDataPointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[seg]), (int)(adr + 8)));
+            Type = ((byte[])BaseRom.Rom.SegmentMapping[seg])[adr];
+            Count = ((byte[])BaseRom.Rom.SegmentMapping[seg])[adr + 1];
+            DLTablePointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[seg]), (int)(adr + 4)));
+            OtherDataPointer = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[seg]), (int)(adr + 8)));
 
             DLAddresses = new List<uint>();
 
@@ -65,31 +65,31 @@ namespace SceneNavi.HeaderCommands
                     {
                         for (var i = 0; i < Count; i++)
                         {
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8)))));
-                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8) + 4))));
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8)))));
+                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 8) + 4))));
                         }
                         break;
                     }
                 case 0x01:
                     {
                         for (var i = 0; i < Count; i++)
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 4)))));
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 4)))));
                         break;
                     }
                 case 0x02:
                     {
                         for (var i = 0; i < Count; i++)
                         {
-                            var s1 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16))));
-                            var s2 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 2)));
-                            var s3 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 4)));
-                            var s4 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 6)));
+                            var s1 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16))));
+                            var s2 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 2)));
+                            var s3 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 4)));
+                            var s4 = Endian.SwapInt16(BitConverter.ToInt16(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 6)));
 
                             MaxClipBounds.Add(new Vector3d(s1, 0.0, s2));
                             MinClipBounds.Add(new Vector3d(s3, 0.0, s4));
 
-                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 8))));
-                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 12))));
+                            opaqueDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 8))));
+                            transparentDLs.Add(Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])BaseRom.Rom.SegmentMapping[(byte)(DLTablePointer >> 24)]), (int)((DLTablePointer & 0xFFFFFF) + (i * 16) + 12))));
                         }
                         break;
                     }
@@ -110,24 +110,24 @@ namespace SceneNavi.HeaderCommands
             CachedWithCombinerType = combinertype;
 
             /* Execute DLs once before creating GL lists, to cache textures & fragment programs beforehand */
-            foreach (var dl in DLAddresses) this.BaseRom.Renderer.Render(dl);
+            foreach (var dl in DLAddresses) this.BaseRom.Rom.Renderer.Render(dl);
 
             /* Copy most recently rendered triangles - this mesh header's DL's - to triangle list */
             TriangleList = new List<SimpleF3DEX2.SimpleTriangle>();
-            foreach (var st in this.BaseRom.Renderer.LastTriList) TriangleList.Add(st);
+            foreach (var st in this.BaseRom.Rom.Renderer.LastTriList) TriangleList.Add(st);
 
             /* Now execute DLs again, with stuff already cached, which speeds everything up! */
             DLs = new List<DisplayListEx>();
             foreach (var dl in DLAddresses)
             {
                 var newdlex = new DisplayListEx(ListMode.Compile);
-                this.BaseRom.Renderer.Render(dl, gldl: newdlex);
+                this.BaseRom.Rom.Renderer.Render(dl, gldl: newdlex);
                 newdlex.End();
                 DLs.Add(newdlex);
             }
 
             /* Clear the renderer's triangle list */
-            this.BaseRom.Renderer.LastTriList.Clear();
+            this.BaseRom.Rom.Renderer.LastTriList.Clear();
 
             /* Finally, from the triangle list compiled before, create a simple display list for picking purposes */
             PickGLID = GL.GenLists(1);

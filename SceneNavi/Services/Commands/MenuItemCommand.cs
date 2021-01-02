@@ -98,10 +98,10 @@ namespace SceneNavi.Services.Commands
 
             Configuration.EnableMipmaps = ((ToolStripMenuItem) senderTarget).Checked;
 
-            if (baseRomReference == null || baseRomReference.Scenes == null) return Task.CompletedTask;
+            if (baseRomReference == null || baseRomReference.Rom.Scenes == null) return Task.CompletedTask;
 
             /* Destroy, destroy! Kill all the display lists! ...or should I say "Exterminate!"? Then again, I'm not a Doctor Who fan... */
-            foreach (var sh in baseRomReference.Scenes.SelectMany(x => x.GetSceneHeaders()))
+            foreach (var sh in baseRomReference.Rom.Scenes.SelectMany(x => x.GetSceneHeaders()))
             {
                 var rooms = (sh.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Rooms)) as Rooms;
                 if (rooms == null) continue;
@@ -113,7 +113,7 @@ namespace SceneNavi.Services.Commands
                 }
             }
 
-            baseRomReference.Renderer.ResetTextureCache();
+            baseRomReference.Rom.Renderer.ResetTextureCache();
 
             _mainFormConfig.DisplayListsDirty = true;
 
@@ -166,24 +166,24 @@ namespace SceneNavi.Services.Commands
             var info = string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 "{0} ({1}, v1.{2}), {3} MB ({4} Mbit)\n{5}\nCreated by {6}, built on {7:F}\n\nCode file at 0x{8:X} - 0x{9:X} ({10})\n- DMA table address: 0x{11:X}\n- File name table address: {12}\n" +
                 "- Scene table address: {13}\n- Actor table address: {14}\n- Object table address: {15}\n- Entrance table address: {16}",
-                target.Title, target.GameId, target.Version, (target.Size / 0x100000),
-                (target.Size / 0x20000), (target.HasZ64TablesHack ? "(uses 'z64tables' extended tables)\n" : ""),
-                target.Creator, target.BuildDate, target.Code.PStart,
-                (target.Code.IsCompressed ? target.Code.PEnd : target.Code.VEnd),
-                (target.Code.IsCompressed ? "compressed" : "uncompressed"), target.DmaTableAddress,
-                (target.HasFileNameTable ? ("0x" + target.FileNameTableAddress.ToString("X")) : "none"),
-                (target.HasZ64TablesHack
-                    ? ("0x" + target.SceneTableAddress.ToString("X") + " (in ROM)")
-                    : ("0x" + target.SceneTableAddress.ToString("X"))),
-                (target.HasZ64TablesHack
-                    ? ("0x" + target.ActorTableAddress.ToString("X") + " (in ROM)")
-                    : ("0x" + target.ActorTableAddress.ToString("X"))),
-                (target.HasZ64TablesHack
-                    ? ("0x" + target.ObjectTableAddress.ToString("X") + " (in ROM)")
-                    : ("0x" + target.ObjectTableAddress.ToString("X"))),
-                (target.HasZ64TablesHack
-                    ? ("0x" + target.EntranceTableAddress.ToString("X") + " (in ROM)")
-                    : ("0x" + target.EntranceTableAddress.ToString("X"))));
+                target.Rom.Title, target.Rom.GameId, target.Rom.Version, (target.Rom.Size / 0x100000),
+                (target.Rom.Size / 0x20000), (target.Rom.HasZ64TablesHack ? "(uses 'z64tables' extended tables)\n" : ""),
+                target.Rom.Creator, target.Rom.BuildDate, target.Rom.Code.PStart,
+                (target.Rom.Code.IsCompressed ? target.Rom.Code.PEnd : target.Rom.Code.VEnd),
+                (target.Rom.Code.IsCompressed ? "compressed" : "uncompressed"), target.Rom.DmaTableAddress,
+                (target.Rom.HasFileNameTable ? ("0x" + target.Rom.FileNameTableAddress.ToString("X")) : "none"),
+                (target.Rom.HasZ64TablesHack
+                    ? ("0x" + target.Rom.SceneTableAddress.ToString("X") + " (in ROM)")
+                    : ("0x" + target.Rom.SceneTableAddress.ToString("X"))),
+                (target.Rom.HasZ64TablesHack
+                    ? ("0x" + target.Rom.ActorTableAddress.ToString("X") + " (in ROM)")
+                    : ("0x" + target.Rom.ActorTableAddress.ToString("X"))),
+                (target.Rom.HasZ64TablesHack
+                    ? ("0x" + target.Rom.ObjectTableAddress.ToString("X") + " (in ROM)")
+                    : ("0x" + target.Rom.ObjectTableAddress.ToString("X"))),
+                (target.Rom.HasZ64TablesHack
+                    ? ("0x" + target.Rom.EntranceTableAddress.ToString("X") + " (in ROM)")
+                    : ("0x" + target.Rom.EntranceTableAddress.ToString("X"))));
 
             MessageBox.Show(info, "ROM Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
            

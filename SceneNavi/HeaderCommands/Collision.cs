@@ -34,7 +34,7 @@ namespace SceneNavi.HeaderCommands
         {
             var adr = (uint)(GetAddressGeneric() & 0xFFFFFF);
 
-            var segmentData = (byte[])BaseRom.SegmentMapping[(byte)(GetAddressGeneric() >> 24)];
+            var segmentData = (byte[])BaseRom.Rom.SegmentMapping[(byte)(GetAddressGeneric() >> 24)];
             if (segmentData == null) return;
 
             /* Read header */
@@ -57,7 +57,7 @@ namespace SceneNavi.HeaderCommands
             WaterboxOffset = Endian.SwapUInt32(BitConverter.ToUInt32(segmentData, (int)adr + 0x28));
 
             /* Read vertices */
-            var vertsegdata = (byte[])BaseRom.SegmentMapping[(byte)(VertexArrayOffset >> 24)];
+            var vertsegdata = (byte[])BaseRom.Rom.SegmentMapping[(byte)(VertexArrayOffset >> 24)];
             if (vertsegdata != null)
             {
                 Vertices = new List<Vector3d>();
@@ -328,7 +328,7 @@ namespace SceneNavi.HeaderCommands
                 Address = adr;
                 Number = number;
 
-                var segmentData = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                var segmentData = (byte[])_baseRom.Rom.SegmentMapping[(byte)(adr >> 24)];
                 if (segmentData == null) return;
 
                 Raw = Endian.SwapUInt64(BitConverter.ToUInt64(segmentData, (int)(adr & 0xFFFFFF)));
@@ -374,7 +374,7 @@ namespace SceneNavi.HeaderCommands
                 Number = number;
                 _parentCollisionHeader = colheader;
 
-                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.Rom.SegmentMapping[(byte)(adr >> 24)];
                 if (segdata == null) return;
 
                 PolygonType = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF)));
@@ -457,7 +457,7 @@ namespace SceneNavi.HeaderCommands
                 Number = number;
                 _parentCollisionHeader = colheader;
 
-                var segmentData = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                var segmentData = (byte[])_baseRom.Rom.SegmentMapping[(byte)(adr >> 24)];
                 if (segmentData == null) return;
 
                 Position = new Vector3d(

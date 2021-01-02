@@ -12,102 +12,103 @@ using SceneNavi.Utilities;
 
 namespace SceneNavi.RomHandlers
 {
- 
+    
+
+    public class RomContext
+    {
+        public RomContext()
+        {
+        }
+
+        public RomContext(int dmaTableAddress, string filename, int dataSize)
+        {
+            DmaTableAddress = dmaTableAddress;
+            FileNameTableAddress = dmaTableAddress;
+            SceneTableAddress = dmaTableAddress;
+            Filename = filename;
+            SegmentMapping = new Hashtable();
+            Data = new byte[dataSize];
+        }
+
+        public ByteOrder DetectedByteOrder { get;  set; }
+
+        // Material dimensions
+        public string Filename { get;  set; }
+        
+        
+        
+        
+        public byte[] Data { get;  set; }
+        public string Title { get;  set; }
+        public string GameId { get;  set; }
+        public byte Version { get;  set; }
+        public int Size => Data.Length;
+        public bool HasZ64TablesHack { get; set; }
+        public bool IsMajora { get;  set; }
+        public string Creator { get;  set; }
+        public string BuildDateString { get;  set; }
+        public DateTime BuildDate => DateTime.ParseExact(BuildDateString, "yy-MM-dd HH:mm:ss", null);
+        public int DmaTableAddress { get;  set; }
+        public List<DmaTableEntry> Files { get; set; }
+        public int FileNameTableAddress { get; set; }
+        public bool HasFileNameTable => FileNameTableAddress != -1;
+        public DmaTableEntry Code { get;set; }
+        public byte[] CodeData { get; set; }
+        public List<ISceneTableEntry> Scenes { get; set; }
+        public int SceneTableAddress { get; set; }
+        public AutoCompleteStringCollection SceneNameAcStrings { get; set; }
+        public List<ActorTableEntry> Actors { get; set; }
+        public int ActorTableAddress { get; set; }
+        public List<ObjectTableEntry> Objects { get; set; }
+        public int ObjectTableAddress { get; set; }
+        public ushort ObjectCount { get; set; }
+        public AutoCompleteStringCollection ObjectNameAcStrings { get;set; }
+        public List<EntranceTableEntry> Entrances { get; set; }
+        public int EntranceTableAddress { get; set; }
+        public Hashtable SegmentMapping { get; set; }
+        
+
+        // these can be removed after proper setup in the architecture
+        public XmlActorDefinitionReader XmlActorDefReader { get;  set; }
+        public XmlHashTableReader XmlActorNames { get;  set; }
+        public XmlHashTableReader XmlObjectNames { get; set; }
+        public XmlHashTableReader XmlSongNames { get; set; }
+        public XmlHashTableReader XmlSceneNames { get;  set; }
+        public XmlHashTableReader XmlRoomNames { get;  set; }
+        public XmlHashTableReader XmlStageDescriptions { get; set; }
+    }
 
     public class BaseRomHandler : IRomHandler
     {
-        public ByteOrder DetectedByteOrder { get; private set; }
-
-        public string Filename { get; private set; }
-        public byte[] Data { get; private set; }
-
-        public string Title { get; private set; }
-        public string GameId { get; private set; }
-        public byte Version { get; private set; }
-        public int Size => Data.Length;
-
-        public bool HasZ64TablesHack { get; private set; }
-        public bool IsMajora { get; private set; }
-
-        public string Creator { get; private set; }
-        public string BuildDateString { get; private set; }
-        public DateTime BuildDate => DateTime.ParseExact(BuildDateString, "yy-MM-dd HH:mm:ss", null);
-
-        public int DmaTableAddress { get; private set; }
-        public List<DmaTableEntry> Files { get; private set; }
-
-        public int FileNameTableAddress { get; private set; }
-        public bool HasFileNameTable => FileNameTableAddress != -1;
-
-        public DmaTableEntry Code { get; private set; }
-        public byte[] CodeData { get; private set; }
-
-        public List<ISceneTableEntry> Scenes { get; private set; }
-        public int SceneTableAddress { get; private set; }
-        public AutoCompleteStringCollection SceneNameAcStrings { get; private set; }
-
-        public List<ActorTableEntry> Actors { get; private set; }
-        public int ActorTableAddress { get; private set; }
-
-        public List<ObjectTableEntry> Objects { get; private set; }
-        public int ObjectTableAddress { get; private set; }
-        public ushort ObjectCount { get; private set; } 
-        public AutoCompleteStringCollection ObjectNameAcStrings { get; private set; }
-
-        public List<EntranceTableEntry> Entrances { get; private set; }
-        public int EntranceTableAddress { get; private set; }
-
-        public Hashtable SegmentMapping { get; set; }
-
-        public F3Dex2Interpreter Renderer { get; private set; }
 
 
-        // This seems to be a basic xml reader, not for game files but for project xml objects
-        public XmlActorDefinitionReader XmlActorDefReader { get; private set; }
 
 
-        public XmlHashTableReader XmlActorNames { get; private set; }
-        public XmlHashTableReader XmlObjectNames { get; private set; }
-        public XmlHashTableReader XmlSongNames { get; private set; }
 
-        public XmlHashTableReader XmlSceneNames { get; private set; }
-        public XmlHashTableReader XmlRoomNames { get; private set; }
-        public XmlHashTableReader XmlStageDescriptions { get; private set; }
-
+        public F3Dex2Interpreter Renderer { get; set; }
         public bool Loaded { get; private set; }
 
-        public static int GetTerminatedString(byte[] bytes, int index, out string str)
-        {
-            var nullidx = Array.FindIndex(bytes, index, (x) => x == 0);
+        public RomContext Rom { get; set; }
 
-            if (nullidx >= 0) str = Encoding.ASCII.GetString(bytes, index, nullidx - index);
-            else
-                str = Encoding.ASCII.GetString(bytes, index, bytes.Length - index);
-
-            var nextidx = Array.FindIndex(bytes, nullidx, (x) => x != 0);
-
-            return nextidx;
-        }
 
         public BaseRomHandler()
         {
-            
+            Rom = new RomContext();
+            Renderer = new F3Dex2Interpreter(this);
+
         }
-        
+
         public BaseRomHandler(string fileName)
         {
+
 #if !DEBUG
             try
 #endif
             {
                 reload:
-                DmaTableAddress = FileNameTableAddress = SceneTableAddress = -1;
-
-                Filename = fileName;
+                Renderer = new F3Dex2Interpreter(this);
 
                 /* Initialize segment and rendering systems */
-                SegmentMapping = new Hashtable();
-                Renderer = new F3Dex2Interpreter(this);
 
                 /* Read ROM */
                 var binaryReader =
@@ -115,14 +116,14 @@ namespace SceneNavi.RomHandlers
                 if (binaryReader.BaseStream.Length < RomConstants.MinRomSize)
                     throw new RomHandlerException(
                         $"File size is less than {(RomConstants.MinRomSize / 0x100000)}MB; ROM appears to be invalid.");
-                Data = new byte[binaryReader.BaseStream.Length];
-                binaryReader.Read(Data, 0, (int) binaryReader.BaseStream.Length);
+                Rom = new RomContext(-1, fileName, (int)binaryReader.BaseStream.Length);
+                binaryReader.Read(Rom.Data, 0, (int) binaryReader.BaseStream.Length);
                 binaryReader.Close();
 
                 /* Detect byte order */
                 DetectByteOrder();
 
-                if (DetectedByteOrder != ByteOrder.BigEndian)
+                if (Rom.DetectedByteOrder != ByteOrder.BigEndian)
                 {
                     if (MessageBox.Show(
                             "The ROM file you have selected uses an incompatible byte order, and needs to be converted to Big Endian format to be used." +
@@ -138,14 +139,14 @@ namespace SceneNavi.RomHandlers
                             fileName = fnnew;
 
                             /* Perform byte order conversion */
-                            var datanew = new byte[Data.Length];
+                            var datanew = new byte[Rom.Data.Length];
                             byte[] conv = null;
-                            for (int i = 0, j = 0; i < Data.Length; i += 4, j += 4)
+                            for (int i = 0, j = 0; i < Rom.Data.Length; i += 4, j += 4)
                             {
-                                if (DetectedByteOrder == ByteOrder.MiddleEndian)
-                                    conv = new byte[4] {Data[i + 1], Data[i], Data[i + 3], Data[i + 2]};
-                                else if (DetectedByteOrder == ByteOrder.LittleEndian)
-                                    conv = new byte[4] {Data[i + 3], Data[i + 2], Data[i + 1], Data[i]};
+                                if (Rom.DetectedByteOrder == ByteOrder.MiddleEndian)
+                                    conv = new byte[4] {Rom.Data[i + 1], Rom.Data[i], Rom.Data[i + 3], Rom.Data[i + 2]};
+                                else if (Rom.DetectedByteOrder == ByteOrder.LittleEndian)
+                                    conv = new byte[4] {Rom.Data[i + 3], Rom.Data[i + 2], Rom.Data[i + 1], Rom.Data[i]};
                                 Buffer.BlockCopy(conv, 0, datanew, j, conv.Length);
                             }
 
@@ -161,7 +162,7 @@ namespace SceneNavi.RomHandlers
                     {
                         /* Wrong byte order, no conversion performed */
                         throw new ByteOrderException(
-                            $"Incompatible byte order {DetectedByteOrder} detected; ROM cannot be used.");
+                            $"Incompatible byte order {Rom.DetectedByteOrder} detected; ROM cannot be used.");
                     }
                 }
                 else
@@ -170,32 +171,39 @@ namespace SceneNavi.RomHandlers
                     ReadRomHeader();
 
                     /* Create XML actor definition reader */
-                    XmlActorDefReader =
-                        new XmlActorDefinitionReader(Path.Combine("XML", "ActorDefinitions", GameId.Substring(1, 2)));
 
-                    if (XmlActorDefReader.Definitions.Count > 0)
+                    /*
+                     *
+                     *   this will dissappear once the xml files have been converted to json or ini
+                     *   most of this is just xml reading and producing hardcoded values from the xmls, which can be done via dependency injection in config.net
+                     *
+                     */
+                    Rom.XmlActorDefReader =
+                        new XmlActorDefinitionReader(Path.Combine("XML", "ActorDefinitions", Rom.GameId.Substring(1, 2)));
+
+                    if (Rom.XmlActorDefReader.Definitions.Count > 0)
                     {
                         /* Create remaining XML-related objects */
-                        XmlActorNames =
-                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                        Rom.XmlActorNames =
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", Rom.GameId.Substring(1, 2)),
                                 "ActorNames.xml");
-                        XmlObjectNames =
-                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                        Rom.XmlObjectNames =
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", Rom.GameId.Substring(1, 2)),
                                 "ObjectNames.xml");
-                        XmlSongNames =
-                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", GameId.Substring(1, 2)),
+                        Rom.XmlSongNames =
+                            new XmlHashTableReader(Path.Combine("XML", "GameDataGeneric", Rom.GameId.Substring(1, 2)),
                                 "SongNames.xml");
 
-                        XmlSceneNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
-                            $"{GameId}{Version:X1}"), "SceneNames.xml");
-                        XmlRoomNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
-                            $"{GameId}{Version:X1}"), "RoomNames.xml");
-                        XmlStageDescriptions = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
-                            $"{GameId}{Version:X1}"), "StageDescriptions.xml");
+                        Rom.XmlSceneNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                            $"{Rom.GameId}{Rom.Version:X1}"), "SceneNames.xml");
+                        Rom.XmlRoomNames = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                            $"{Rom.GameId}{Rom.Version:X1}"), "RoomNames.xml");
+                        Rom.XmlStageDescriptions = new XmlHashTableReader(Path.Combine("XML", "GameDataSpecific",
+                            $"{Rom.GameId}{Rom.Version:X1}"), "StageDescriptions.xml");
 
                         /* Determine if ROM uses z64tables hack */
-                        HasZ64TablesHack = (Version == 15 &&
-                                            Endian.SwapUInt32(BitConverter.ToUInt32(Data, 0x1238)) != 0x0C00084C);
+                        Rom.HasZ64TablesHack = (Rom.Version == 15 &&
+                                            Endian.SwapUInt32(BitConverter.ToUInt32(Rom.Data, 0x1238)) != 0x0C00084C);
 
                         /* Find and read build information, DMA table, etc. */
                         FindBuildInfo();
@@ -204,7 +212,7 @@ namespace SceneNavi.RomHandlers
                         ReadFileNameTable();
 
                         /* Try to identify files */
-                        foreach (var dmaTableEntry in Files) dmaTableEntry.Identify(this);
+                        foreach (var dmaTableEntry in Rom.Files) dmaTableEntry.Identify(this);
 
                         /* Find the code file */
                         FindCodeFile();
@@ -216,7 +224,7 @@ namespace SceneNavi.RomHandlers
                         ReadEntranceTable();
 
                         /* Some sanity checking & exception handling*/
-                        if (Scenes == null || Scenes.Count == 0)
+                        if (Rom.Scenes == null || Rom.Scenes.Count == 0)
                             throw new RomHandlerException("No valid scenes could be recognized in the ROM.");
 
                         /* Done */
@@ -240,9 +248,9 @@ namespace SceneNavi.RomHandlers
         {
             if (address >> 24 != 0x80)
             {
-                if ((address >> 24) > 0x0F || SegmentMapping[(byte) (address >> 24)] == null) return false;
-                if ((address & 0xFFFFFF) > ((byte[]) SegmentMapping[(byte) (address >> 24)]).Length &&
-                    ((byte[]) SegmentMapping[(byte) (address >> 24)]).Length != 0) return false;
+                if ((address >> 24) > 0x0F || Rom.SegmentMapping[(byte) (address >> 24)] == null) return false;
+                if ((address & 0xFFFFFF) > ((byte[]) Rom.SegmentMapping[(byte) (address >> 24)]).Length &&
+                    ((byte[]) Rom.SegmentMapping[(byte) (address >> 24)]).Length != 0) return false;
             }
             else
                 return false;
@@ -252,97 +260,99 @@ namespace SceneNavi.RomHandlers
 
         public void DetectByteOrder()
         {
-            if (Data[0x0] == 0x80 && Data[0x8] == 0x80) DetectedByteOrder = ByteOrder.BigEndian;
-            else if (Data[0x1] == 0x80 && Data[0x9] == 0x80) DetectedByteOrder = ByteOrder.MiddleEndian;
-            else if (Data[0x3] == 0x80 && Data[0xB] == 0x80) DetectedByteOrder = ByteOrder.LittleEndian;
+            if (Rom.Data[0x0] == 0x80 && Rom.Data[0x8] == 0x80)
+                Rom.DetectedByteOrder = ByteOrder.BigEndian;
+            else if (Rom.Data[0x1] == 0x80 && Rom.Data[0x9] == 0x80)
+                Rom.DetectedByteOrder = ByteOrder.MiddleEndian;
+            else if (Rom.Data[0x3] == 0x80 && Rom.Data[0xB] == 0x80) Rom.DetectedByteOrder = ByteOrder.LittleEndian;
         }
 
         public void ReadRomHeader()
         {
-            Title = Encoding.ASCII.GetString(Data, 0x20, 0x14).TrimEnd(new char[] {'\0', ' '});
-            GameId = Encoding.ASCII.GetString(Data, 0x3B, 0x4).TrimEnd(new char[] {'\0'});
-            Version = Data[0x3F];
+            Rom.Title = Encoding.ASCII.GetString(Rom.Data, 0x20, 0x14).TrimEnd(new char[] {'\0', ' '});
+            Rom.GameId = Encoding.ASCII.GetString(Rom.Data, 0x3B, 0x4).TrimEnd(new char[] {'\0'});
+            Rom.Version = Rom.Data[0x3F];
 
             //TODO : Move to majora rom handler
-            IsMajora = (Title.Contains("MAJORA") || Title.Contains("MUJURA"));
+            Rom.IsMajora = (Rom.Title.Contains("MAJORA") || Rom.Title.Contains("MUJURA"));
         }
 
         public void FindBuildInfo()
         {
             for (var i = 0; i < RomConstants.MinRomSize; i++)
             {
-                if (Encoding.ASCII.GetString(Data, i, 4) != "@srd") continue;
+                if (Encoding.ASCII.GetString(Rom.Data, i, 4) != "@srd") continue;
 
 
                 i -= (i % 8);
                 var tmp = string.Empty;
 
-                var next = GetTerminatedString(Data, i, out tmp);
-                Creator = tmp;
-                var next2 = GetTerminatedString(Data, next, out tmp);
-                BuildDateString = tmp;
+                var next = StringExtensions.GetTerminatedString(Rom.Data, i, out tmp);
+                Rom.Creator = tmp;
+                var next2 = StringExtensions.GetTerminatedString(Rom.Data, next, out tmp);
+                Rom.BuildDateString = tmp;
 
                 next2 -= (next2 % 8);
-                DmaTableAddress = next2;
+                Rom.DmaTableAddress = next2;
                 return;
             }
 
-            if (DmaTableAddress == -1) throw new RomHandlerException("Could not find DMA table.");
+            if (Rom.DmaTableAddress == -1) throw new RomHandlerException("Could not find DMA table.");
         }
 
         public void FindFileNameTable()
         {
             for (var i = 0; i < RomConstants.MinRomSize; i += 4)
             {
-                if (Encoding.ASCII.GetString(Data, i, 7) != "makerom") continue;
+                if (Encoding.ASCII.GetString(Rom.Data, i, 7) != "makerom") continue;
 
-                FileNameTableAddress = i;
+                Rom.FileNameTableAddress = i;
                 return;
             }
         }
 
         public void ReadDmaTable()
         {
-            Files = new List<DmaTableEntry>();
+            Rom.Files = new List<DmaTableEntry>();
 
             var idx = 0;
             while (true)
             {
-                if (DmaTableAddress + (idx * 0x10) > Data.Length)
+                if (Rom.DmaTableAddress + (idx * 0x10) > Rom.Data.Length)
                     throw new RomHandlerException("Went out of range while reading DMA table.");
                 var ndma = new DmaTableEntry(this, idx);
                 if (ndma.VStart == 0 && ndma.VEnd == 0 && ndma.PStart == 0) break;
-                Files.Add(ndma);
+                Rom.Files.Add(ndma);
                 idx++;
             }
         }
 
         public void ReadFileNameTable()
         {
-            if (FileNameTableAddress == -1) return;
+            if (Rom.FileNameTableAddress == -1) return;
 
-            var nofs = FileNameTableAddress;
-            foreach (var file in Files)
+            var nofs = Rom.FileNameTableAddress;
+            foreach (var file in Rom.Files)
             {
-                file.Name = Encoding.ASCII.GetString(Data, nofs, 50).TrimEnd('\0');
+                file.Name = Encoding.ASCII.GetString(Rom.Data, nofs, 50).TrimEnd('\0');
                 var index = file.Name.IndexOf('\0');
                 if (index >= 0) file.Name = file.Name.Remove(index);
                 nofs += file.Name.Length;
-                while (Data[nofs] == 0) nofs++;
+                while (Rom.Data[nofs] == 0) nofs++;
             }
         }
 
         public void FindCodeFile()
         {
-            Code = null;
+            Rom.Code = null;
 
-            foreach (var dma in Files)
+            foreach (var dma in Rom.Files)
             {
                 if (dma.IsValid == false) continue;
 
                 var fdata = new byte[dma.VEnd - dma.VStart];
                 if (dma.IsCompressed == true) throw new RomHandlerException("Compressed ROMs are not supported.");
-                Array.Copy(Data, dma.PStart, fdata, 0, dma.VEnd - dma.VStart);
+                Array.Copy(Rom.Data, dma.PStart, fdata, 0, dma.VEnd - dma.VStart);
 
                 for (var i = (fdata.Length - 8);
                     i > Math.Min((uint) (fdata.Length - RomConstants.CodeUcodeThreshold), fdata.Length);
@@ -350,197 +360,197 @@ namespace SceneNavi.RomHandlers
                 {
                     if (Encoding.ASCII.GetString(fdata, i, 8) == "RSP Gfx ")
                     {
-                        Code = dma;
-                        CodeData = fdata;
+                        Rom.Code = dma;
+                        Rom.CodeData = fdata;
                         return;
                     }
                 }
             }
 
-            if (Code == null) throw new RomHandlerException("Could not find code file.");
+            if (Rom.Code == null) throw new RomHandlerException("Could not find code file.");
         }
 
         public void FindSceneTable()
         {
-            Scenes = new List<ISceneTableEntry>();
+            Rom.Scenes = new List<ISceneTableEntry>();
 
-            if (IsMajora || !HasZ64TablesHack)
+            if (Rom.IsMajora || !Rom.HasZ64TablesHack)
             {
                 //TODO : Move to majora rom handler
-                var increment = (IsMajora ? 16 : 20);
+                var increment = (Rom.IsMajora ? 16 : 20);
 
-                var dmaTableEntry = Files.OrderBy(x => x.VStart)
+                var dmaTableEntry = Rom.Files.OrderBy(x => x.VStart)
                     .FirstOrDefault(x => x.FileType == DmaTableEntry.FileTypes.Scene);
 
-                for (var i = CodeData.Length - (increment * 2); i > 0; i -= 4)
+                for (var i = Rom.CodeData.Length - (increment * 2); i > 0; i -= 4)
                 {
-                    var entry = (!IsMajora
+                    var entry = (!Rom.IsMajora
                         ? new SceneTableEntryOcarina(this, i, true)
                         : (ISceneTableEntry) new SceneTableEntryMajora(this, i, true));
                     if (entry.GetSceneStartAddress() == dmaTableEntry.VStart &&
                         entry.GetSceneEndAddress() == dmaTableEntry.VEnd)
                     {
-                        SceneTableAddress = i;
+                        Rom.SceneTableAddress = i;
                         break;
                     }
                 }
 
-                if (SceneTableAddress != -1)
+                if (Rom.SceneTableAddress != -1)
                 {
-                    for (int i = SceneTableAddress, j = 0; i < CodeData.Length - (16 * 16); i += increment)
+                    for (int i = Rom.SceneTableAddress, j = 0; i < Rom.CodeData.Length - (16 * 16); i += increment)
                     {
-                        var sceneTableEntry = (!IsMajora
+                        var sceneTableEntry = (!Rom.IsMajora
                             ? new SceneTableEntryOcarina(this, i, true)
                             : (ISceneTableEntry) new SceneTableEntryMajora(this, i, true));
 
                         if (!sceneTableEntry.IsValid() && !sceneTableEntry.IsAllZero()) break;
 
                         sceneTableEntry.SetNumber((ushort) j);
-                        if (!sceneTableEntry.IsAllZero()) Scenes.Add(sceneTableEntry);
+                        if (!sceneTableEntry.IsAllZero()) Rom.Scenes.Add(sceneTableEntry);
                         j++;
                     }
                 }
             }
             else
             {
-                SceneTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset));
-                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 4));
+                Rom.SceneTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset));
+                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 4));
                 for (var i = 0; i < cnt; i++)
                 {
-                    Scenes.Add(new SceneTableEntryOcarina(this, SceneTableAddress + (i * 20), false));
+                    Rom.Scenes.Add(new SceneTableEntryOcarina(this, Rom.SceneTableAddress + (i * 20), false));
                 }
             }
 
-            SceneNameAcStrings = new AutoCompleteStringCollection();
-            foreach (var sceneTableEntry in Scenes)
+            Rom.SceneNameAcStrings = new AutoCompleteStringCollection();
+            foreach (var sceneTableEntry in Rom.Scenes)
             {
                 sceneTableEntry.ReadScene();
-                SceneNameAcStrings.Add(sceneTableEntry.GetName());
+                Rom.SceneNameAcStrings.Add(sceneTableEntry.GetName());
             }
         }
 
         public void FindActorTable()
         {
-            Actors = new List<ActorTableEntry>();
+            Rom.Actors = new List<ActorTableEntry>();
 
-            if (!HasZ64TablesHack)
+            if (!Rom.HasZ64TablesHack)
             {
                 var increment = 16;
-                for (var i = 0; i < CodeData.Length - (16 * 16); i += increment)
+                for (var i = 0; i < Rom.CodeData.Length - (16 * 16); i += increment)
                 {
                     var act1 = new ActorTableEntry(this, i, true);
                     var act2 = new ActorTableEntry(this, i + 32, true);
                     var act3 = new ActorTableEntry(this, i + 64, true);
                     if (act1.IsComplete == false && act1.IsEmpty == false && act2.IsComplete == false &&
-                        act2.IsEmpty == false && Actors.Count > 0) break;
+                        act2.IsEmpty == false && Rom.Actors.Count > 0) break;
                     if ((act1.IsValid != true || act1.IsIncomplete != true) ||
-                        (act2.IsComplete != true && act2.IsEmpty != true) || Actors.Count != 0) continue;
-                    ActorTableAddress = i;
+                        (act2.IsComplete != true && act2.IsEmpty != true) || Rom.Actors.Count != 0) continue;
+                    Rom.ActorTableAddress = i;
                     break;
                 }
 
-                for (var i = ActorTableAddress; i < CodeData.Length - 32; i += 32)
+                for (var i = Rom.ActorTableAddress; i < Rom.CodeData.Length - 32; i += 32)
                 {
                     var nact = new ActorTableEntry(this, i, true);
 
-                    if (nact.IsEmpty || nact.IsValid) Actors.Add(nact);
+                    if (nact.IsEmpty || nact.IsValid)
+                        Rom.Actors.Add(nact);
                     else break;
                 }
             }
             else
             {
-                ActorTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 24));
-                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 28));
+                Rom.ActorTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 24));
+                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 28));
                 for (var i = 0; i < cnt; i++)
                 {
-                    Actors.Add(new ActorTableEntry(this, ActorTableAddress + i * 32, false));
+                    Rom.Actors.Add(new ActorTableEntry(this, Rom.ActorTableAddress + i * 32, false));
                 }
             }
         }
 
         public void FindObjectTable()
         {
-            Objects = new List<ObjectTableEntry>();
-            ObjectTableAddress = 0;
-            ObjectCount = 0;
+            Rom.Objects = new List<ObjectTableEntry>();
+            Rom.ObjectTableAddress = 0;
+            Rom.ObjectCount = 0;
 
-            EntranceTableAddress = 0;
+            Rom.EntranceTableAddress = 0;
 
-            if (!HasZ64TablesHack)
+            if (!Rom.HasZ64TablesHack)
             {
                 var inc = 8;
-                for (var i = ActorTableAddress; i < CodeData.Length - (8 * 8); i += inc)
+                for (var i = Rom.ActorTableAddress; i < Rom.CodeData.Length - (8 * 8); i += inc)
                 {
-                    ObjectCount = Endian.SwapUInt16(BitConverter.ToUInt16(CodeData, i - 2));
-                    if (ObjectCount < 0x100 || ObjectCount > 0x300) continue;
+                    Rom.ObjectCount = Endian.SwapUInt16(BitConverter.ToUInt16(Rom.CodeData, i - 2));
+                    if (Rom.ObjectCount < 0x100 || Rom.ObjectCount > 0x300) continue;
 
                     var obj1 = new ObjectTableEntry(this, i, true);
                     var obj2 = new ObjectTableEntry(this, i + 8, true);
                     var obj3 = new ObjectTableEntry(this, i + 16, true);
 
-                    if (obj1.IsEmpty == true && obj2.IsValid == true && obj3.IsValid == true && Objects.Count == 0)
+                    if (obj1.IsEmpty == true && obj2.IsValid == true && obj3.IsValid == true && Rom.Objects.Count == 0)
                     {
-                        ObjectTableAddress = i;
+                        Rom.ObjectTableAddress = i;
                         break;
                     }
                 }
 
-                if (ObjectTableAddress != 0 && ObjectCount != 0)
+                if (Rom.ObjectTableAddress != 0 && Rom.ObjectCount != 0)
                 {
                     int i, j = 0;
-                    for (i = ObjectTableAddress; i < (ObjectTableAddress + (ObjectCount * 8)); i += 8)
+                    for (i = Rom.ObjectTableAddress; i < (Rom.ObjectTableAddress + (Rom.ObjectCount * 8)); i += 8)
                     {
-                        Objects.Add(new ObjectTableEntry(this, i, true, (ushort) j));
+                        Rom.Objects.Add(new ObjectTableEntry(this, i, true, (ushort) j));
                         j++;
                     }
 
                     //TODO : Move to majora rom handler
-                    if (!IsMajora)
-                        EntranceTableAddress = i + (i % 16);
+                    if (!Rom.IsMajora) Rom.EntranceTableAddress = i + (i % 16);
                 }
             }
             else
             {
-                ObjectTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 8));
-                ObjectCount =
-                    (ushort) Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 12));
-                for (var i = 0; i < ObjectCount; i++)
+                Rom.ObjectTableAddress = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 8));
+                Rom.ObjectCount =
+                    (ushort) Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 12));
+                for (var i = 0; i < Rom.ObjectCount; i++)
                 {
-                    Objects.Add(new ObjectTableEntry(this, ObjectTableAddress + i * 8, false, (ushort) i));
+                    Rom.Objects.Add(new ObjectTableEntry(this, Rom.ObjectTableAddress + i * 8, false, (ushort) i));
                 }
             }
 
             // TODO: this shouldnt be here, it is a completed action that should have no knowledge of the ui
-            ObjectNameAcStrings = new AutoCompleteStringCollection();
-            foreach (var obj in Objects)
+            Rom.ObjectNameAcStrings = new AutoCompleteStringCollection();
+            foreach (var obj in Rom.Objects)
             {
-                ObjectNameAcStrings.Add(obj.Name);
+                Rom.ObjectNameAcStrings.Add(obj.Name);
             }
         }
 
         public void ReadEntranceTable()
         {
-            Entrances = new List<EntranceTableEntry>();
+            Rom.Entrances = new List<EntranceTableEntry>();
 
-            if (!HasZ64TablesHack)
+            if (!Rom.HasZ64TablesHack)
             {
-                if (EntranceTableAddress == 0) return;
+                if (Rom.EntranceTableAddress == 0) return;
 
-                int i = EntranceTableAddress, cnt = 0;
-                while (i < SceneTableAddress)
+                int i = Rom.EntranceTableAddress, cnt = 0;
+                while (i < Rom.SceneTableAddress)
                 {
-                    Entrances.Add(new EntranceTableEntry(CodeData, Data, i, true) {Number = (ushort) cnt++});
+                    Rom.Entrances.Add(new EntranceTableEntry(Rom.CodeData, Rom.Data, i, true) {Number = (ushort) cnt++});
                     i += 4;
                 }
             }
             else
             {
-                EntranceTableAddress =
-                    Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 16));
-                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Data, RomConstants.Z64TablesAdrOffset + 20));
+                Rom.EntranceTableAddress =
+                    Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 16));
+                var cnt = Endian.SwapInt32(BitConverter.ToInt32(Rom.Data, RomConstants.Z64TablesAdrOffset + 20));
                 for (var i = 0; i < cnt; i++)
                 {
-                    Entrances.Add(new EntranceTableEntry(CodeData, Data, EntranceTableAddress + i * 4, false)
+                    Rom.Entrances.Add(new EntranceTableEntry(Rom.CodeData, Rom.Data, Rom.EntranceTableAddress + i * 4, false)
                         {Number = (ushort) i});
                 }
             }

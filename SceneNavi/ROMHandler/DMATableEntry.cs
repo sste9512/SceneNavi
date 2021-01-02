@@ -25,19 +25,19 @@ namespace SceneNavi.ROMHandler
 
         public DmaTableEntry(BaseRomHandler baseRom, int idx)
         {
-            var readOffset = (baseRom.DmaTableAddress + (idx * 0x10));
+            var readOffset = (baseRom.Rom.DmaTableAddress + (idx * 0x10));
 
-            VStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset));
-            VEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 4));
-            PStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 8));
-            PEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Data, readOffset + 12));
+            VStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Rom.Data, readOffset));
+            VEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Rom.Data, readOffset + 4));
+            PStart = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Rom.Data, readOffset + 8));
+            PEnd = Endian.SwapUInt32(BitConverter.ToUInt32(baseRom.Rom.Data, readOffset + 12));
 
             if (PStart == 0xFFFFFFFF || PEnd == 0xFFFFFFFF)
                 IsValid = false;
             else
             {
                 IsValid = true;
-                if (PEnd != 0 && Encoding.ASCII.GetString(baseRom.Data, (int)PStart, 4) == "Yaz0") IsCompressed = true;
+                if (PEnd != 0 && Encoding.ASCII.GetString(baseRom.Rom.Data, (int)PStart, 4) == "Yaz0") IsCompressed = true;
                 else IsCompressed = false;
             }
 
@@ -51,7 +51,7 @@ namespace SceneNavi.ROMHandler
         {
             var fileNameAssumed = FileTypes.General;
 
-            if (baseRom.FileNameTableAddress != -1)
+            if (baseRom.Rom.FileNameTableAddress != -1)
             {
                 if (Name.EndsWith("_scene") == true) fileNameAssumed = FileTypes.Scene;
                 else if (Name.Contains("_room_") == true) fileNameAssumed = FileTypes.Room;
@@ -69,7 +69,7 @@ namespace SceneNavi.ROMHandler
             if (!IsCompressed)
             {
                 var data = new byte[VEnd - VStart];
-                Buffer.BlockCopy(baseRom.Data, (int)PStart, data, 0, data.Length);
+                Buffer.BlockCopy(baseRom.Rom.Data, (int)PStart, data, 0, data.Length);
 
                 /* Room file? */
                 if (BitConverter.ToUInt32(data, (int)0) == 0x16 || ((BitConverter.ToUInt32(data, (int)0) == 0x18) && data[4] == 0x03 && BitConverter.ToUInt32(data, (int)8) == 0x16))

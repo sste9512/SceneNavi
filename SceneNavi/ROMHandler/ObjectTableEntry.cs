@@ -28,12 +28,12 @@ namespace SceneNavi.ROMHandler
             Offset = ofs;
             IsOffsetRelative = isrel;
 
-            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, ofs));
-            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, ofs + 4));
+            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, ofs));
+            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, ofs + 4));
 
             IsValid =
-                ((StartAddress > baseRom.Code.VStart) &&
-                (StartAddress < baseRom.Size) && (EndAddress < baseRom.Size) &&
+                ((StartAddress > baseRom.Rom.Code.VStart) &&
+                (StartAddress < baseRom.Rom.Size) && (EndAddress < baseRom.Rom.Size) &&
                 ((StartAddress & 0xF) == 0) && ((EndAddress & 0xF) == 0) &&
                 (EndAddress > StartAddress));
 
@@ -43,9 +43,9 @@ namespace SceneNavi.ROMHandler
 
             if (IsValid == true && IsEmpty == false)
             {
-                if ((Name = (_baseRom.XmlObjectNames.Names[number] as string)) == null)
+                if ((Name = (_baseRom.Rom.XmlObjectNames.Names[number] as string)) == null)
                 {
-                    DMA = baseRom.Files.Find(x => x.PStart == StartAddress);
+                    DMA = baseRom.Rom.Files.Find(x => x.PStart == StartAddress);
                     if (DMA != null)
                         Name = DMA.Name;
                     else

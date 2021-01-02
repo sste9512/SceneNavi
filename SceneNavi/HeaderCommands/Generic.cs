@@ -45,9 +45,9 @@ namespace SceneNavi.HeaderCommands
         public Generic(BaseRomHandler baseRom, IHeaderParent parent, byte seg, ref int ofs)
         {
             BaseRom = baseRom;
-            Command = (CommandTypeIDs) ((byte[]) baseRom.SegmentMapping[seg])[ofs];
+            Command = (CommandTypeIDs) ((byte[]) baseRom.Rom.SegmentMapping[seg])[ofs];
             Offset = ofs;
-            Data = Endian.SwapUInt64(BitConverter.ToUInt64(((byte[]) baseRom.SegmentMapping[seg]), ofs));
+            Data = Endian.SwapUInt64(BitConverter.ToUInt64(((byte[]) baseRom.Rom.SegmentMapping[seg]), ofs));
             Parent = parent;
             ofs += 8;
 

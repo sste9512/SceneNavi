@@ -16,28 +16,28 @@ namespace SceneNavi.ROMHandler
             Offset = offset;
             IsOffsetRelative = isRelativeOffset;
 
-            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset));
-            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 4));
-            RamStartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 8));
-            RamEndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 12));
-            Unknown1 = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 16));
-            ActorInfoRamAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 20));
-            ActorNameRamAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 24));
-            Unknown2 = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offset + 28));
+            StartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset));
+            EndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 4));
+            RamStartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 8));
+            RamEndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 12));
+            Unknown1 = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 16));
+            ActorInfoRamAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 20));
+            ActorNameRamAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 24));
+            Unknown2 = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offset + 28));
 
             IsValid =
                 (ActorInfoRamAddress >> 24 == 0x80) &&
-                (((ActorNameRamAddress >> 24 == 0x80) && (ActorNameRamAddress - RomConstants.CodeRamAddress) < baseRom.CodeData.Length) || (ActorNameRamAddress == 0));
+                (((ActorNameRamAddress >> 24 == 0x80) && (ActorNameRamAddress - RomConstants.CodeRamAddress) < baseRom.Rom.CodeData.Length) || (ActorNameRamAddress == 0));
 
             IsIncomplete = (StartAddress == 0 && EndAddress == 0 && RamStartAddress == 0 && RamEndAddress == 0);
 
             IsComplete =
-                (StartAddress > baseRom.Code.VStart && StartAddress < baseRom.Size) &&
-                (EndAddress > StartAddress && EndAddress > baseRom.Code.VStart && EndAddress < baseRom.Size) &&
+                (StartAddress > baseRom.Rom.Code.VStart && StartAddress < baseRom.Rom.Size) &&
+                (EndAddress > StartAddress && EndAddress > baseRom.Rom.Code.VStart && EndAddress < baseRom.Rom.Size) &&
                 (RamStartAddress >> 24 == 0x80) &&
                 (RamEndAddress > RamStartAddress && RamEndAddress >> 24 == 0x80) &&
                 (ActorInfoRamAddress >> 24 == 0x80) &&
-                (((ActorNameRamAddress >> 24 == 0x80) && (ActorNameRamAddress - RomConstants.CodeRamAddress) < baseRom.CodeData.Length) || (ActorNameRamAddress == 0));
+                (((ActorNameRamAddress >> 24 == 0x80) && (ActorNameRamAddress - RomConstants.CodeRamAddress) < baseRom.Rom.CodeData.Length) || (ActorNameRamAddress == 0));
 
             IsEmpty = (StartAddress == 0 && EndAddress == 0 && RamStartAddress == 0 && RamEndAddress == 0 && Unknown1 == 0 && ActorInfoRamAddress == 0 && ActorNameRamAddress == 0 && Unknown2 == 0);
 
@@ -48,7 +48,7 @@ namespace SceneNavi.ROMHandler
                 if (ActorNameRamAddress != 0)
                 {
                     var tmp = string.Empty;
-                    BaseRomHandler.GetTerminatedString(baseRom.CodeData, (int)(ActorNameRamAddress - RomConstants.CodeRamAddress), out tmp);
+                    StringExtensions.GetTerminatedString(baseRom.Rom.CodeData, (int)(ActorNameRamAddress - RomConstants.CodeRamAddress), out tmp);
                     Name = tmp;
                 }
                 else
@@ -56,13 +56,13 @@ namespace SceneNavi.ROMHandler
 
                 if (RamStartAddress != 0 && RamEndAddress != 0)
                 {
-                    var dma = baseRom.Files.Find(x => x.PStart == StartAddress);
+                    var dma = baseRom.Rom.Files.Find(x => x.PStart == StartAddress);
                     if (dma != null)
                     {
                         Filename = dma.Name;
 
                         var tmp = new byte[dma.VEnd - dma.VStart];
-                        Array.Copy(baseRom.Data, dma.PStart, tmp, 0, dma.VEnd - dma.VStart);
+                        Array.Copy(baseRom.Rom.Data, dma.PStart, tmp, 0, dma.VEnd - dma.VStart);
 
                         var infoAddress = (ActorInfoRamAddress - RamStartAddress);
                         if (infoAddress >= tmp.Length) return;

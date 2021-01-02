@@ -26,16 +26,16 @@ namespace SceneNavi.HeaderCommands
             Parent = parent;
             Number = (ulong) num;
 
-            if (Start == 0 || End == 0 || Start >= baseRom.Data.Length || End >= baseRom.Data.Length) return;
+            if (Start == 0 || End == 0 || Start >= baseRom.Rom.Data.Length || End >= baseRom.Rom.Data.Length) return;
            
             
-            var dma = _baseRom.Files.Find(x => x.PStart == Start);
+            var dma = _baseRom.Rom.Files.Find(x => x.PStart == Start);
             if (dma != null) DmaFilename = dma.Name;
 
             Data = new byte[End - Start];
-            Array.Copy(_baseRom.Data, Start, Data, 0, End - Start);
+            Array.Copy(_baseRom.Rom.Data, Start, Data, 0, End - Start);
 
-            if ((Description = (_baseRom.XmlRoomNames.Names[Start] as string)) == null)
+            if ((Description = (_baseRom.Rom.XmlRoomNames.Names[Start] as string)) == null)
             {
                 var parentTableEntry = (parent as ISceneTableEntry);
                 if (parentTableEntry != null && parentTableEntry.IsNameExternal())
@@ -69,8 +69,8 @@ namespace SceneNavi.HeaderCommands
 
         private void Load()
         {
-            _baseRom.SegmentMapping.Remove((byte) 0x03);
-            _baseRom.SegmentMapping.Add((byte) 0x03, Data);
+            _baseRom.Rom.SegmentMapping.Remove((byte) 0x03);
+            _baseRom.Rom.SegmentMapping.Add((byte) 0x03, Data);
 
             Headers = new List<HeaderLoader>();
 
@@ -79,18 +79,18 @@ namespace SceneNavi.HeaderCommands
             {
                 Headers.Add(new HeaderLoader(_baseRom, this, 0x03, 0, 0));
 
-                if (BitConverter.ToUInt32(((byte[]) _baseRom.SegmentMapping[(byte) 0x03]), 0) == 0x18)
+                if (BitConverter.ToUInt32(((byte[]) _baseRom.Rom.SegmentMapping[(byte) 0x03]), 0) == 0x18)
                 {
                     var hnum = 1;
-                    var aofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) _baseRom.SegmentMapping[(byte) 0x03]),
+                    var aofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[]) _baseRom.Rom.SegmentMapping[(byte) 0x03]),
                         4));
                     while (true)
                     {
                         var rofs = Endian.SwapUInt32(BitConverter.ToUInt32(
-                            ((byte[]) _baseRom.SegmentMapping[(byte) 0x03]), (int) (aofs & 0x00FFFFFF)));
+                            ((byte[]) _baseRom.Rom.SegmentMapping[(byte) 0x03]), (int) (aofs & 0x00FFFFFF)));
                         if (rofs != 0)
                         {
-                            if ((rofs & 0x00FFFFFF) > ((byte[]) _baseRom.SegmentMapping[(byte) 0x03]).Length ||
+                            if ((rofs & 0x00FFFFFF) > ((byte[]) _baseRom.Rom.SegmentMapping[(byte) 0x03]).Length ||
                                 (rofs >> 24) != 0x03) break;
                             Headers.Add(new HeaderLoader(_baseRom, this, 0x03, (int) (rofs & 0x00FFFFFF), hnum++));
                         }

@@ -47,7 +47,7 @@ namespace SceneNavi.ROMHandler
 
         public bool IsValid()
         {
-            return ((sceneStartAddress < _baseRom.Size) && (sceneEndAddress < _baseRom.Size) && ((sceneStartAddress & 0xF) == 0) && ((sceneEndAddress & 0xF) == 0) &&
+            return ((sceneStartAddress < _baseRom.Rom.Size) && (sceneEndAddress < _baseRom.Rom.Size) && ((sceneStartAddress & 0xF) == 0) && ((sceneEndAddress & 0xF) == 0) &&
                 (sceneEndAddress > sceneStartAddress) && (PresumedPadding == 0));
         }
 
@@ -147,21 +147,21 @@ namespace SceneNavi.ROMHandler
             Offset = offSet;
             IsOffsetRelative = isRelativeOffset;
 
-            sceneStartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offSet));
-            sceneEndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offSet + 4));
+            sceneStartAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offSet));
+            sceneEndAddress = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offSet + 4));
 
-            Unknown1 = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[offSet + 8];
-            Unknown2 = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[offSet + 9];
-            Unknown3 = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[offSet + 10];
-            Unknown4 = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[offSet + 11];
-            PresumedPadding = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.CodeData : baseRom.Data, offSet + 12));
+            Unknown1 = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[offSet + 8];
+            Unknown2 = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[offSet + 9];
+            Unknown3 = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[offSet + 10];
+            Unknown4 = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[offSet + 11];
+            PresumedPadding = Endian.SwapUInt32(BitConverter.ToUInt32(IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data, offSet + 12));
 
             if (IsValid() && !IsAllZero())
             {
-                var dma = baseRom.Files.Find(x => x.PStart == sceneStartAddress);
+                var dma = baseRom.Rom.Files.Find(x => x.PStart == sceneStartAddress);
                 if (dma != null) dmaFilename = dma.Name;
 
-                if ((Name = (_baseRom.XmlSceneNames.Names[sceneStartAddress] as string)) == null)
+                if ((Name = (_baseRom.Rom.XmlSceneNames.Names[sceneStartAddress] as string)) == null)
                 {
                     isNameExternal = false;
 
@@ -174,7 +174,7 @@ namespace SceneNavi.ROMHandler
                     isNameExternal = true;
 
                 data = new byte[sceneEndAddress - sceneStartAddress];
-                Array.Copy(_baseRom.Data, sceneStartAddress, data, 0, sceneEndAddress - sceneStartAddress);
+                Array.Copy(_baseRom.Rom.Data, sceneStartAddress, data, 0, sceneEndAddress - sceneStartAddress);
             }
         }
 
@@ -185,26 +185,26 @@ namespace SceneNavi.ROMHandler
             byte[] tmpbuf = null;
 
             tmpbuf = BitConverter.GetBytes(Endian.SwapUInt32(sceneStartAddress));
-            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data), Offset, tmpbuf.Length);
+            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data), Offset, tmpbuf.Length);
 
             tmpbuf = BitConverter.GetBytes(Endian.SwapUInt32(sceneEndAddress));
-            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data), Offset + 4, tmpbuf.Length);
+            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data), Offset + 4, tmpbuf.Length);
 
-            (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data)[Offset + 8] = Unknown1;
-            (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data)[Offset + 9] = Unknown2;
-            (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data)[Offset + 10] = Unknown3;
-            (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data)[Offset + 11] = Unknown4;
+            (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data)[Offset + 8] = Unknown1;
+            (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data)[Offset + 9] = Unknown2;
+            (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data)[Offset + 10] = Unknown3;
+            (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data)[Offset + 11] = Unknown4;
 
             tmpbuf = BitConverter.GetBytes(Endian.SwapUInt32(PresumedPadding));
-            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.CodeData : _baseRom.Data), Offset + 12, tmpbuf.Length);
+            Buffer.BlockCopy(tmpbuf, 0, (IsOffsetRelative ? _baseRom.Rom.CodeData : _baseRom.Rom.Data), Offset + 12, tmpbuf.Length);
         }
 
         public void ReadScene(Rooms forcerooms = null)
         {
             //Program.Status.Message = string.Format("Reading scene '{0}'...", Name);
 
-            _baseRom.SegmentMapping.Remove((byte)0x02);
-            _baseRom.SegmentMapping.Add((byte)0x02, data);
+            _baseRom.Rom.SegmentMapping.Remove((byte)0x02);
+            _baseRom.Rom.SegmentMapping.Add((byte)0x02, data);
 
             _sceneHeaders = new List<HeaderLoader>();
 
@@ -229,16 +229,16 @@ namespace SceneNavi.ROMHandler
                 coll = newheader.Commands.FirstOrDefault(x => x.Command == CommandTypeIDs.Collision) as Collision;
                 _sceneHeaders.Add(newheader);
 
-                if (BitConverter.ToUInt32(((byte[])_baseRom.SegmentMapping[(byte)0x02]), 0) == 0x18)
+                if (BitConverter.ToUInt32(((byte[])_baseRom.Rom.SegmentMapping[(byte)0x02]), 0) == 0x18)
                 {
                     var hnum = 1;
-                    var aofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])_baseRom.SegmentMapping[(byte)0x02]), 4));
+                    var aofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])_baseRom.Rom.SegmentMapping[(byte)0x02]), 4));
                     while (true)
                     {
-                        var rofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])_baseRom.SegmentMapping[(byte)0x02]), (int)(aofs & 0x00FFFFFF)));
+                        var rofs = Endian.SwapUInt32(BitConverter.ToUInt32(((byte[])_baseRom.Rom.SegmentMapping[(byte)0x02]), (int)(aofs & 0x00FFFFFF)));
                         if (rofs != 0)
                         {
-                            if ((rofs & 0x00FFFFFF) > ((byte[])_baseRom.SegmentMapping[(byte)0x02]).Length || (rofs >> 24) != 0x02) break;
+                            if ((rofs & 0x00FFFFFF) > ((byte[])_baseRom.Rom.SegmentMapping[(byte)0x02]).Length || (rofs >> 24) != 0x02) break;
                             newheader = new HeaderLoader(_baseRom, this, (byte)0x02, (int)(rofs & 0x00FFFFFF), hnum++);
 
                             /* Get room command index... */

@@ -41,11 +41,11 @@ namespace SceneNavi.ROMHandler
         [DisplayName("Scene Name")]
         public string SceneName
         {
-            get => (SceneNumber < _baseRom.Scenes.Count ? _baseRom.Scenes[SceneNumber].GetName() : "(invalid?)");
+            get => (SceneNumber < _baseRom.Rom.Scenes.Count ? _baseRom.Rom.Scenes[SceneNumber].GetName() : "(invalid?)");
 
             set
             {
-                var scnidx = _baseRom.Scenes.FindIndex(x => string.Equals(x.GetName(), value, StringComparison.InvariantCultureIgnoreCase));
+                var scnidx = _baseRom.Rom.Scenes.FindIndex(x => string.Equals(x.GetName(), value, StringComparison.InvariantCultureIgnoreCase));
                 if (scnidx != -1)
                     SceneNumber = (byte)scnidx;
                 else
@@ -65,10 +65,10 @@ namespace SceneNavi.ROMHandler
             Offset = ofs;
             IsOffsetRelative = isRelativeOffset;
 
-            SceneNumber = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs];
-            EntranceNumber = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 1];
-            Variable = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 2];
-            Fade = (IsOffsetRelative ? baseRom.CodeData : baseRom.Data)[ofs + 3];
+            SceneNumber = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[ofs];
+            EntranceNumber = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[ofs + 1];
+            Variable = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[ofs + 2];
+            Fade = (IsOffsetRelative ? baseRom.Rom.CodeData : baseRom.Rom.Data)[ofs + 3];
         }
         
         

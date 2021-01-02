@@ -34,13 +34,13 @@ namespace SceneNavi.HeaderCommands
             {
                 get
                 {
-                    return (Number < _baseRom.Objects.Count ? _baseRom.Objects[Number].Name : "(invalid?)");
+                    return (Number < _baseRom.Rom.Objects.Count ? _baseRom.Rom.Objects[Number].Name : "(invalid?)");
                 }
 
                 set
                 {
                     if (value == null) return;
-                    var objidx = _baseRom.Objects.FindIndex(x => x.Name.ToLowerInvariant() == value.ToLowerInvariant());
+                    var objidx = _baseRom.Rom.Objects.FindIndex(x => x.Name.ToLowerInvariant() == value.ToLowerInvariant());
                     if (objidx != -1)
                         Number = (ushort)objidx;
                     else
@@ -57,7 +57,7 @@ namespace SceneNavi.HeaderCommands
                 _baseRom = baseRom;
                 Address = adr;
 
-                var segdata = (byte[])_baseRom.SegmentMapping[(byte)(adr >> 24)];
+                var segdata = (byte[])_baseRom.Rom.SegmentMapping[(byte)(adr >> 24)];
                 if (segdata == null) return;
 
                 Number = Endian.SwapUInt16(BitConverter.ToUInt16(segdata, (int)(adr & 0xFFFFFF)));

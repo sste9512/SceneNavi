@@ -24,13 +24,13 @@ namespace SceneNavi.HeaderCommands
             _baseRom = baseRom;
             _pathNumber = number;
 
-            var segmentedData = (byte[])_baseRom.SegmentMapping[(byte)(address >> 24)];
+            var segmentedData = (byte[])_baseRom.Rom.SegmentMapping[(byte)(address >> 24)];
             if (segmentedData == null) return;
 
             WayPointCount = BitConverter.ToUInt32(segmentedData, (int)(address & 0xFFFFFF));
             WayPointAddress = Endian.SwapUInt32(BitConverter.ToUInt32(segmentedData, (int)(address & 0xFFFFFF) + 4));
 
-            var psegdata = (byte[])_baseRom.SegmentMapping[(byte)(WayPointAddress >> 24)];
+            var psegdata = (byte[])_baseRom.Rom.SegmentMapping[(byte)(WayPointAddress >> 24)];
             if (WayPointCount == 0 || WayPointCount > 0xFF || psegdata == null || (WayPointAddress & 0xFFFFFF) >= psegdata.Length) return;
 
             Points = new List<Waypoint>();

@@ -26,7 +26,7 @@ namespace SceneNavi.ActorRendering
             public OvlSections(BaseRomHandler baseRom, ROMHandler.DmaTableEntry dma, uint vstart)
             {
                 var ovl = new byte[dma.PEnd - dma.PStart];
-                Buffer.BlockCopy(baseRom.Data, (int)dma.PStart, ovl, 0, ovl.Length);
+                Buffer.BlockCopy(baseRom.Rom.Data, (int)dma.PStart, ovl, 0, ovl.Length);
 
                 int indent, secaddr;
                 indent = (int)Endian.SwapUInt32(BitConverter.ToUInt32(ovl, ovl.Length - 4));
