@@ -1,0 +1,3 @@
+@echo off
+echo Starting SceneNavi...
+start "" "SceneNavi\bin\Debug\SceneNavi.exe" 
