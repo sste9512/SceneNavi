@@ -2500,6 +2500,20 @@ namespace SceneNavi
 			MessageBox.Show(oglInfoString.ToString(), "OpenGL Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
+		private void convertROMEndianToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				SceneNavi.Services.EndianServiceTest serviceTest = new SceneNavi.Services.EndianServiceTest();
+				serviceTest.ConvertRomFile();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Error initializing Endian Conversion Service: {ex.Message}", 
+					"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
+		
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			DateTime linkerTimestamp = AssemblyHelpers.RetrieveLinkerTimestamp();

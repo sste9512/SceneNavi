@@ -38,6 +38,7 @@
 			this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripSeparator();
 			this.closeSceneToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
 			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+			this.convertROMEndianToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
 			this.rOMInformationToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.exitToolStripMenuItem = new SceneNavi.Controls.ToolStripHintMenuItem();
@@ -217,6 +218,7 @@
             this.toolStripMenuItem9,
             this.closeSceneToolStripMenuItem,
             this.toolStripMenuItem1,
+            this.convertROMEndianToolStripMenuItem,
             this.rOMInformationToolStripMenuItem,
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
@@ -271,6 +273,14 @@
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
 			this.toolStripMenuItem1.Size = new System.Drawing.Size(203, 6);
+			// 
+			// convertROMEndianToolStripMenuItem
+			// 
+			this.convertROMEndianToolStripMenuItem.HelpText = "Convert ROM endianness";
+			this.convertROMEndianToolStripMenuItem.Name = "convertROMEndianToolStripMenuItem";
+			this.convertROMEndianToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+			this.convertROMEndianToolStripMenuItem.Text = "Convert ROM &Endianness";
+			this.convertROMEndianToolStripMenuItem.Click += new System.EventHandler(this.convertROMEndianToolStripMenuItem_Click);
 			// 
 			// rOMInformationToolStripMenuItem
 			// 
@@ -1851,5 +1861,6 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
 		private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem1;
 		private Controls.ToolStripHintMenuItem emulateFogToolStripMenuItem;
+		private Controls.ToolStripHintMenuItem convertROMEndianToolStripMenuItem;
 	}
 }

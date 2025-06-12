@@ -19,7 +19,7 @@ namespace SceneNavi.ROMHandler
         public string Name { get; set; }
 
         public bool IsValid { get; private set; }
-        public bool IsCompressed { get; private set; }
+        public bool IsCompressed { get; set; }
 
         public FileTypes FileType { get; private set; }
         public byte AssumedSegment { get; private set; }
